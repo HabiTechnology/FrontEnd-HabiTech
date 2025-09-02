@@ -58,7 +58,7 @@ export default function DashboardStat({
   const { prefix, numericValue, suffix, isNumeric } = parseValue(value);
 
   return (
-    <Card className="relative overflow-hidden">
+    <Card className="stat-card-habitech relative overflow-hidden">
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="flex items-center gap-2.5">
           <Bullet />
@@ -67,9 +67,9 @@ export default function DashboardStat({
         <Icon className="size-4 text-muted-foreground" />
       </CardHeader>
 
-      <CardContent className="bg-accent flex-1 pt-2 md:pt-6 overflow-clip relative">
+      <CardContent className="bg-accent/50 backdrop-filter backdrop-blur-sm flex-1 pt-2 md:pt-6 overflow-clip relative border-t border-border/50">
         <div className="flex items-center">
-          <span className="text-4xl md:text-5xl font-display">
+          <span className="text-4xl md:text-5xl font-display text-card-foreground">
             {isNumeric ? (
               <NumberFlow
                 value={numericValue}
@@ -81,7 +81,7 @@ export default function DashboardStat({
             )}
           </span>
           {tag && (
-            <Badge variant="default" className="uppercase ml-3">
+            <Badge variant="default" className="uppercase ml-3 bg-habitech-pattern">
               {tag}
             </Badge>
           )}

@@ -34,13 +34,13 @@ export default function NotificationItem({
   const getTypeColor = (type: Notification["type"]) => {
     switch (type) {
       case "success":
-        return "bg-green-500";
+        return "status-success-habitech";
       case "warning":
-        return "bg-yellow-500";
+        return "status-warning-habitech";
       case "error":
-        return "bg-red-500";
+        return "status-error-habitech";
       default:
-        return "bg-blue-500";
+        return "accent-gradient-habitech";
     }
   };
 
@@ -77,10 +77,10 @@ export default function NotificationItem({
   return (
     <div
       className={cn(
-        "group p-3 rounded-lg border transition-all duration-200 hover:shadow-sm",
+        "notification-habitech group p-3 rounded-lg border transition-all duration-200 hover:shadow-sm hover-habitech",
         !notification.read && "cursor-pointer",
         notification.read
-          ? "bg-background/50 border-border/30"
+          ? "bg-background/50 border-border/30 opacity-75"
           : "bg-background border-border shadow-sm"
       )}
       onClick={handleNotificationClick}

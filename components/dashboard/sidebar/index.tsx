@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 
 import {
   Sidebar,
@@ -27,6 +28,10 @@ import MonkeyIcon from "@/components/icons/monkey"
 import DotsVerticalIcon from "@/components/icons/dots-vertical"
 import { Bullet } from "@/components/ui/bullet"
 import LockIcon from "@/components/icons/lock"
+import ShoppingCartIcon from "@/components/icons/shopping-cart"
+import HomeIcon from "@/components/icons/home"
+import DocumentIcon from "@/components/icons/document"
+import BellIcon from "@/components/icons/bell"
 import Image from "next/image"
 import { useIsV0 } from "@/lib/v0-context"
 import { Button } from "@/components/ui/button"
@@ -34,49 +39,39 @@ import { Moon, Sun } from "lucide-react"
 import UsersIcon from "@/components/icons/users"
 
 // This is sample data for the sidebar
+const navItems = [
+  {
+    title: "INICIO",
+    url: "/",
+    icon: HomeIcon,
+  },
+  {
+    title: "RESIDENTES",
+    url: "/residentes",
+    icon: UsersIcon,
+  },
+  {
+    title: "SOLICITUDES",
+    url: "/solicitudes",
+    icon: DocumentIcon,
+  },
+  {
+    title: "TIENDA",
+    url: "/tienda",
+    icon: ShoppingCartIcon,
+  },
+  {
+    title: "NOTIFICACIONES",
+    url: "/notificaciones",
+    icon: BellIcon,
+  },
+]
+
 const data = {
   navMain: [
     {
       title: "Tools",
-      items: [
-        {
-          title: "Overview",
-          url: "/",
-          icon: BracketsIcon,
-          isActive: true,
-        },
-        {
-          title: "USUARIOS",
-          url: "/usuarios",
-          icon: UsersIcon,
-          isActive: false,
-        },
-        {
-          title: "Devices",
-          url: "/devices",
-          icon: ProcessorIcon,
-          isActive: false,
-        },
-        {
-          title: "Security",
-          url: "/security",
-          icon: CuteRobotIcon,
-          isActive: false,
-        },
-        {
-          title: "Communication",
-          url: "/communication",
-          icon: EmailIcon,
-          isActive: false,
-        },
-        {
-          title: "Admin Settings",
-          url: "/admin",
-          icon: GearIcon,
-          isActive: false,
-          locked: true,
-        },
-      ],
+      items: navItems,
     },
   ],
   desktop: {
@@ -93,15 +88,23 @@ const data = {
 export function DashboardSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   const isV0 = useIsV0()
   const [isDark, setIsDark] = React.useState(true)
+  const pathname = usePathname()
 
   const toggleDarkMode = () => {
     setIsDark(!isDark)
     document.documentElement.classList.toggle("dark")
   }
 
+  const isActiveRoute = (url: string) => {
+    if (url === "/") {
+      return pathname === "/"
+    }
+    return pathname.startsWith(url)
+  }
+
   return (
-    <Sidebar {...props} className={cn("py-sides", className)}>
-      <SidebarHeader className="rounded-t-lg flex gap-3 flex-row rounded-b-none">
+    <Sidebar {...props} className={cn("sidebar-habitech py-sides", className)}>
+      <SidebarHeader className="glass-habitech rounded-t-lg flex gap-3 flex-row rounded-b-none backdrop-blur-sm">
         <div className="flex overflow-clip size-12 shrink-0 items-center justify-center rounded bg-sidebar-primary-foreground/10 transition-colors group-hover:bg-sidebar-primary text-sidebar-primary-foreground">
           <MonkeyIcon className="size-10 group-hover:scale-[1.7] origin-top-left transition-transform" />
         </div>
@@ -109,7 +112,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
           <span className="text-2xl font-display">HABITECH</span>
           <span className="text-xs uppercase">Gestión Inteligente, Convivencia Inteligente</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-8 w-8 shrink-0">
+        <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-8 w-8 shrink-0 hover-habitech">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
       </SidebarHeader>
@@ -126,32 +129,17 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
                 {group.items.map((item) => (
                   <SidebarMenuItem
                     key={item.title}
-                    className={cn(item.locked && "pointer-events-none opacity-50", isV0 && "pointer-events-none")}
-                    data-disabled={item.locked}
+                    className="sidebar-item"
                   >
                     <SidebarMenuButton
-                      asChild={!item.locked}
-                      isActive={item.isActive}
-                      disabled={item.locked}
-                      className={cn("disabled:cursor-not-allowed", item.locked && "pointer-events-none")}
+                      asChild
+                      isActive={isActiveRoute(item.url)}
                     >
-                      {item.locked ? (
-                        <div className="flex items-center gap-3 w-full">
-                          <item.icon className="size-5" />
-                          <span>{item.title}</span>
-                        </div>
-                      ) : (
-                        <a href={item.url}>
-                          <item.icon className="size-5" />
-                          <span>{item.title}</span>
-                        </a>
-                      )}
+                      <a href={item.url}>
+                        <item.icon className="size-5" />
+                        <span>{item.title}</span>
+                      </a>
                     </SidebarMenuButton>
-                    {item.locked && (
-                      <SidebarMenuBadge>
-                        <LockIcon className="size-5 block" />
-                      </SidebarMenuBadge>
-                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

@@ -57,7 +57,7 @@ export default function DashboardChart() {
 
   const renderChart = (data: ChartDataPoint[]) => {
     return (
-      <div className="bg-accent rounded-lg p-3">
+      <div className="chart-habitech p-3">
         <ChartContainer className="md:aspect-[3/1] w-full" config={chartConfig}>
           <AreaChart
             accessibilityLayer
@@ -71,15 +71,15 @@ export default function DashboardChart() {
           >
             <defs>
               <linearGradient id="fillResidentes" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-residentes)" stopOpacity={0.8} />
+                <stop offset="5%" stopColor="var(--color-residentes)" stopOpacity={0.9} />
                 <stop offset="95%" stopColor="var(--color-residentes)" stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="fillVisitantes" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-visitantes)" stopOpacity={0.8} />
+                <stop offset="5%" stopColor="var(--color-visitantes)" stopOpacity={0.9} />
                 <stop offset="95%" stopColor="var(--color-visitantes)" stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="fillIngresos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-ingresos)" stopOpacity={0.8} />
+                <stop offset="5%" stopColor="var(--color-ingresos)" stopOpacity={0.9} />
                 <stop offset="95%" stopColor="var(--color-ingresos)" stopOpacity={0.1} />
               </linearGradient>
             </defs>
@@ -147,29 +147,31 @@ export default function DashboardChart() {
   }
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="max-md:gap-4">
-      <div className="flex items-center justify-between mb-4 max-md:contents">
-        <TabsList className="max-md:w-full">
-          <TabsTrigger value="week">SEMANA</TabsTrigger>
-          <TabsTrigger value="month">MES</TabsTrigger>
-          <TabsTrigger value="year">AÑO</TabsTrigger>
-        </TabsList>
-        <div className="flex items-center gap-6 max-md:order-1">
-          {Object.entries(chartConfig).map(([key, value]) => (
-            <ChartLegend key={key} label={value.label} color={value.color} />
-          ))}
+    <div className="dashboard-section p-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="max-md:gap-4">
+        <div className="flex items-center justify-between mb-4 max-md:contents card-divider">
+          <TabsList className="max-md:w-full">
+            <TabsTrigger value="week">SEMANA</TabsTrigger>
+            <TabsTrigger value="month">MES</TabsTrigger>
+            <TabsTrigger value="year">AÑO</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-6 max-md:order-1">
+            {Object.entries(chartConfig).map(([key, value]) => (
+              <ChartLegend key={key} label={value.label} color={value.color} />
+            ))}
+          </div>
         </div>
-      </div>
-      <TabsContent value="week" className="space-y-4">
-        {renderChart(mockData.chartData.week)}
-      </TabsContent>
-      <TabsContent value="month" className="space-y-4">
-        {renderChart(mockData.chartData.month)}
-      </TabsContent>
-      <TabsContent value="year" className="space-y-4">
-        {renderChart(mockData.chartData.year)}
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="week" className="space-y-4">
+          {renderChart(mockData.chartData.week)}
+        </TabsContent>
+        <TabsContent value="month" className="space-y-4">
+          {renderChart(mockData.chartData.month)}
+        </TabsContent>
+        <TabsContent value="year" className="space-y-4">
+          {renderChart(mockData.chartData.year)}
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 

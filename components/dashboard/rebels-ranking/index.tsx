@@ -17,7 +17,7 @@ export default function RebelsRanking({ rebels }: RebelsRankingProps) {
     >
       <div className="space-y-4">
         {rebels.map((rebel) => (
-          <div key={rebel.id} className="flex items-center justify-between">
+          <div key={rebel.id} className="flex items-center justify-between message-divider first:border-t-0 first:pt-0 first:mt-0">
             <div className="flex items-center gap-1 w-full">
               <div
                 className={cn(
