@@ -1,0 +1,222 @@
+{
+  "dashboardStats": [
+    {
+      "label": "RESIDENTES ACTIVOS",
+      "value": "248",
+      "description": "PERSONAS EN EL EDIFICIO HOY",
+      "intent": "positive",
+      "icon": "gear",
+      "direction": "up"
+    },
+    {
+      "label": "INGRESOS MENSUALES",
+      "value": "$125,400",
+      "description": "PAGOS DE MANTENIMIENTO RECIBIDOS",
+      "intent": "positive",
+      "icon": "proccesor",
+      "direction": "up"
+    },
+    {
+      "label": "APARTAMENTOS OCUPADOS",
+      "value": "94%",
+      "description": "OCUPACIÓN ACTUAL DEL EDIFICIO",
+      "intent": "neutral",
+      "icon": "boom",
+      "tag": "156/166 🏠"
+    }
+  ],
+  "chartData": {
+    "week": [
+      {
+        "date": "06/01",
+        "residentes": 245,
+        "visitantes": 32,
+        "ingresos": 4200
+      },
+      {
+        "date": "07/01",
+        "residentes": 252,
+        "visitantes": 28,
+        "ingresos": 3800
+      },
+      {
+        "date": "08/01",
+        "residentes": 248,
+        "visitantes": 35,
+        "ingresos": 4500
+      },
+      {
+        "date": "09/01",
+        "residentes": 261,
+        "visitantes": 42,
+        "ingresos": 5200
+      },
+      {
+        "date": "10/01",
+        "residentes": 238,
+        "visitantes": 18,
+        "ingresos": 3200
+      },
+      {
+        "date": "11/01",
+        "residentes": 242,
+        "visitantes": 25,
+        "ingresos": 3900
+      },
+      {
+        "date": "12/01",
+        "residentes": 255,
+        "visitantes": 38,
+        "ingresos": 4800
+      },
+      {
+        "date": "13/01",
+        "residentes": 239,
+        "visitantes": 22,
+        "ingresos": 3600
+      }
+    ],
+    "month": [
+      { "date": "Ene", "residentes": 245, "visitantes": 680, "ingresos": 125400 },
+      { "date": "Feb", "residentes": 248, "visitantes": 720, "ingresos": 128600 },
+      { "date": "Mar", "residentes": 252, "visitantes": 850, "ingresos": 132200 },
+      { "date": "Abr", "residentes": 249, "visitantes": 640, "ingresos": 127800 },
+      { "date": "May", "residentes": 255, "visitantes": 590, "ingresos": 134500 },
+      { "date": "Jun", "residentes": 258, "visitantes": 780, "ingresos": 138200 },
+      { "date": "Jul", "residentes": 262, "visitantes": 920, "ingresos": 142800 },
+      { "date": "Ago", "residentes": 260, "visitantes": 880, "ingresos": 140500 },
+      { "date": "Sep", "residentes": 256, "visitantes": 760, "ingresos": 136200 },
+      { "date": "Oct", "residentes": 253, "visitantes": 690, "ingresos": 133800 },
+      { "date": "Nov", "residentes": 251, "visitantes": 650, "ingresos": 131900 },
+      { "date": "Dec", "residentes": 254, "visitantes": 720, "ingresos": 135200 }
+    ],
+    "year": [
+      {
+        "date": "2020",
+        "residentes": 235,
+        "visitantes": 6800,
+        "ingresos": 1420000
+      },
+      {
+        "date": "2021",
+        "residentes": 242,
+        "visitantes": 7200,
+        "ingresos": 1485000
+      },
+      {
+        "date": "2022",
+        "residentes": 248,
+        "visitantes": 8100,
+        "ingresos": 1562000
+      },
+      {
+        "date": "2023",
+        "residentes": 251,
+        "visitantes": 8600,
+        "ingresos": 1598000
+      },
+      { "date": "2024", "residentes": 254, "visitantes": 8900, "ingresos": 1634000 }
+    ]
+  },
+  "rebelsRanking": [
+    {
+      "id": 1,
+      "name": "FAMILIA GARCÍA",
+      "handle": "APT 12A - $1,850/mes",
+      "streak": "PAGO PUNTUAL",
+      "points": 95,
+      "avatar": "/avatars/user_krimson.png",
+      "featured": true,
+      "subtitle": "SIN RETRASOS 24 MESES 🏆"
+    },
+    {
+      "id": 2,
+      "name": "FAMILIA RODRÍGUEZ",
+      "handle": "APT 8B - $1,650/mes",
+      "streak": "",
+      "points": 87,
+      "avatar": "/avatars/user_mati.png"
+    },
+    {
+      "id": 3,
+      "name": "FAMILIA LÓPEZ",
+      "handle": "APT 15C - $2,100/mes",
+      "streak": "",
+      "points": 82,
+      "avatar": "/avatars/user_pek.png"
+    },
+    {
+      "id": 4,
+      "name": "FAMILIA MARTÍNEZ",
+      "handle": "APT 3A - $1,450/mes",
+      "streak": "",
+      "points": 76,
+      "avatar": "/avatars/user_joyboy.png"
+    }
+  ],
+  "securityStatus": [
+    {
+      "title": "CÁMARAS SEGURIDAD",
+      "value": "48/48",
+      "status": "[OPERATIVAS]",
+      "variant": "success"
+    },
+    {
+      "title": "CONTROL ACCESO",
+      "value": "100%",
+      "status": "[ACTIVO]",
+      "variant": "success"
+    },
+    {
+      "title": "SENSORES HUMO",
+      "value": "2",
+      "status": "[MANTENIMIENTO]",
+      "variant": "warning"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-1",
+      "title": "PAGO RECIBIDO",
+      "message": "Familia García - Apartamento 12A ha realizado el pago mensual de $1,850.",
+      "timestamp": "2024-07-10T13:39:00Z",
+      "type": "success",
+      "read": false,
+      "priority": "medium"
+    },
+    {
+      "id": "notif-2",
+      "title": "NUEVO RESIDENTE",
+      "message": "Familia Morales se mudó al apartamento 7C. Bienvenida programada para mañana.",
+      "timestamp": "2024-07-10T13:35:00Z",
+      "type": "info",
+      "read": false,
+      "priority": "high"
+    },
+    {
+      "id": "notif-3",
+      "title": "REUNIÓN CONDOMINIO",
+      "message": "Recordatorio: Reunión mensual de propietarios el viernes 15 a las 19:00.",
+      "timestamp": "2024-07-10T12:15:00Z",
+      "type": "info",
+      "read": true,
+      "priority": "low"
+    },
+    {
+      "id": "notif-4",
+      "title": "MANTENIMIENTO COMPLETADO",
+      "message": "Reparación del sistema de agua caliente en pisos 8-12 finalizada exitosamente.",
+      "timestamp": "2024-07-10T11:45:00Z",
+      "type": "success",
+      "read": true,
+      "priority": "medium"
+    }
+  ],
+  "widgetData": {
+    "location": "Edificio HABITECH",
+    "timezone": "UTC-3",
+    "temperature": "18°C",
+    "weather": "Parcialmente Nublado",
+    "date": "Miércoles, 10 de Enero, 2025"
+  }
+}
