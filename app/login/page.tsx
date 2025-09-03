@@ -89,17 +89,25 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#1A2E49] via-[#007BFF] to-[#1A2E49] dark:from-[#1A2E49] dark:via-[#007BFF]/80 dark:to-[#1A2E49]">
         {/* Stars */}
         <div className="absolute inset-0">
-          {[...Array(50)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full opacity-70 animate-pulse"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-              }}
-            />
-          ))}
+          {[...Array(50)].map((_, i) => {
+            // Generate deterministic positions using mathematical constants
+            const seed = (i + 1) * Math.PI;
+            const left = ((seed * 23.456) % 100);
+            const top = ((seed * 78.912) % 100);
+            const delay = ((seed * 0.95238) % 3);
+            
+            return (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-white rounded-full opacity-70 animate-pulse"
+                style={{
+                  left: `${left}%`,
+                  top: `${top}%`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
         </div>
       </div>
       

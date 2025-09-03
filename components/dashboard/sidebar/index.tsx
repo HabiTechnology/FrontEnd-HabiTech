@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import {
   Sidebar,
@@ -89,10 +89,20 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
   const isV0 = useIsV0()
   const [isDark, setIsDark] = React.useState(true)
   const pathname = usePathname()
+  const router = useRouter()
 
   const toggleDarkMode = () => {
     setIsDark(!isDark)
     document.documentElement.classList.toggle("dark")
+  }
+
+  const handleLogout = () => {
+    // Limpiar localStorage
+    localStorage.removeItem('habitech_authenticated')
+    localStorage.removeItem('habitech_user')
+    
+    // Redirigir a login
+    router.push('/login')
   }
 
   const isActiveRoute = (url: string) => {
@@ -186,6 +196,14 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
                       <button className="flex items-center px-4 py-2 text-sm hover:bg-accent">
                         <GearIcon className="mr-2 h-4 w-4" />
                         Settings
+                      </button>
+                      <div className="border-t border-border" />
+                      <button 
+                        onClick={handleLogout}
+                        className="flex items-center px-4 py-2 text-sm hover:bg-destructive hover:text-destructive-foreground text-destructive"
+                      >
+                        <LockIcon className="mr-2 h-4 w-4" />
+                        Cerrar Sesión
                       </button>
                     </div>
                   </PopoverContent>
