@@ -97,9 +97,10 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
   }
 
   const handleLogout = () => {
-    // Limpiar localStorage
+    // Limpiar localStorage y sessionStorage
     localStorage.removeItem('habitech_authenticated')
     localStorage.removeItem('habitech_user')
+    sessionStorage.removeItem('habitech_session_active')
     
     // Redirigir a login
     router.push('/login')

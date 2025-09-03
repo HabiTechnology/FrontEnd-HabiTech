@@ -34,13 +34,23 @@ export default function LoginPage() {
     const isValid = validCredentials.some(cred => cred.email === email && cred.password === password)
     
     if (isValid) {
+      const userRole = email.includes('admin') ? 'admin' : 
+                      email.includes('residente') ? 'resident' : 'security'
+      
+      // Solo permitir acceso al dashboard a administradores
+      if (userRole !== 'admin') {
+        setError("Acceso denegado. Solo los administradores pueden acceder al sistema.")
+        setIsLoading(false)
+        return
+      }
+
+      // Establecer autenticación y sesión activa
       localStorage.setItem('habitech_authenticated', 'true')
+      sessionStorage.setItem('habitech_session_active', 'true') // Para controlar recargas
       localStorage.setItem('habitech_user', JSON.stringify({
         email,
-        name: email.includes('admin') ? 'Administrador' : 
-              email.includes('residente') ? 'Residente' : 'Seguridad',
-        role: email.includes('admin') ? 'admin' : 
-              email.includes('residente') ? 'resident' : 'security'
+        name: 'Administrador',
+        role: userRole
       }))
       router.push("/")
     } else {
@@ -174,16 +184,15 @@ export default function LoginPage() {
             </div>
             
             <div className="mt-6 space-y-2">
-              <p className="text-sm text-[#A0AAB4] text-center">Credenciales de demostración:</p>
+              <p className="text-sm text-[#A0AAB4] text-center">Credenciales de administrador:</p>
               <div className="grid gap-2 text-xs">
-                <div className="p-2 bg-[#F5F7FA]/30 dark:bg-[#1A2E49]/30 rounded border border-[#A0AAB4]/20">
+                <div className="p-3 bg-[#F5F7FA]/30 dark:bg-[#1A2E49]/30 rounded border border-[#007BFF]/30">
                   <strong className="text-[#007BFF]">Administrador:</strong> <span className="text-[#A0AAB4]">admin@habitech.com / admin123</span>
                 </div>
-                <div className="p-2 bg-[#F5F7FA]/30 dark:bg-[#1A2E49]/30 rounded border border-[#A0AAB4]/20">
-                  <strong className="text-[#007BFF]">Residente:</strong> <span className="text-[#A0AAB4]">residente@habitech.com / residente123</span>
-                </div>
-                <div className="p-2 bg-[#F5F7FA]/30 dark:bg-[#1A2E49]/30 rounded border border-[#A0AAB4]/20">
-                  <strong className="text-[#007BFF]">Seguridad:</strong> <span className="text-[#A0AAB4]">seguridad@habitech.com / seguridad123</span>
+                <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    ⚠️ Solo los administradores pueden acceder al sistema
+                  </p>
                 </div>
               </div>
             </div>
