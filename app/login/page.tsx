@@ -16,12 +16,13 @@ declare global {
     ethereum?: {
       request: (args: { method: string; params?: any[] }) => Promise<any>
       isMetaMask?: boolean
+      selectedAddress?: string
+      disconnect?: () => Promise<void>
     }
   }
 }
 
 export default function LoginPage() {
-  const [walletAddress, setWalletAddress] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -31,100 +32,114 @@ export default function LoginPage() {
   // Solo tu wallet tiene acceso (desde .env)
   const authorizedWallet = process.env.NEXT_PUBLIC_ADMIN_WALLET?.toLowerCase()
 
-  const validateWalletAddress = (address: string) => {
-    return /^0x[a-fA-F0-9]{40}$/.test(address)
+  // Función para desconectar wallet
+  const disconnectWallet = async () => {
+    try {
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        // Intentar desconectar si la wallet lo soporta
+        if (window.ethereum.disconnect) {
+          await window.ethereum.disconnect()
+        }
+        
+        // Limpiar datos locales de sesión
+        sessionStorage.removeItem('habitech_session_active')
+        localStorage.removeItem('habitech_authenticated')
+        localStorage.removeItem('habitech_user')
+        
+        // Recargar la página para asegurar estado limpio
+        window.location.reload()
+      }
+    } catch (error) {
+      console.log("No se pudo desconectar automáticamente, pero se limpiaron los datos locales")
+      // Limpiar datos locales aunque no se pueda desconectar
+      sessionStorage.removeItem('habitech_session_active')
+      localStorage.removeItem('habitech_authenticated')
+      localStorage.removeItem('habitech_user')
+    }
   }
 
   // Función para conectar wallet automáticamente
   const connectWallet = async () => {
+    // Limpiar error y permitir reintentos
+    setError("")
+    setIsConnecting(true)
+    
     try {
-      setError("")
-      setIsConnecting(true)
-
       // Verificar si hay una wallet instalada
-      if (typeof window !== 'undefined' && window.ethereum) {
-        // Solicitar conexión a la wallet
+      if (typeof window === 'undefined') {
+        throw new Error("Window object not available")
+      }
+      
+      if (!window.ethereum) {
+        throw new Error("No wallet detected")
+      }
+
+      // Solicitar conexión a la wallet
+      try {
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts'
         })
 
-        if (accounts.length > 0) {
-          const address = accounts[0]
-          setWalletAddress(address)
-          
-          // Verificar automáticamente si es la wallet autorizada
-          if (address.toLowerCase() === authorizedWallet) {
-            setIsLoading(true)
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            
-            sessionStorage.setItem('habitech_session_active', 'true')
-            localStorage.setItem('habitech_authenticated', 'true')
-            localStorage.setItem('habitech_user', JSON.stringify({
-              wallet: address,
-              name: 'Administrador Principal',
-              role: 'admin',
-              loginMethod: 'wallet'
-            }))
-            router.push("/")
-          } else {
-            setError("Esta wallet no está autorizada para acceder al sistema.")
-          }
+        if (!accounts || accounts.length === 0) {
+          throw new Error("No accounts found")
         }
-      } else {
-        setError("No se detectó ninguna wallet. Por favor instala MetaMask o usa el ingreso manual.")
+
+        const address = accounts[0]
+        
+        // Verificar automáticamente si es la wallet autorizada
+        if (address.toLowerCase() === authorizedWallet) {
+          setIsLoading(true)
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          sessionStorage.setItem('habitech_session_active', 'true')
+          localStorage.setItem('habitech_authenticated', 'true')
+          localStorage.setItem('habitech_user', JSON.stringify({
+            wallet: address,
+            name: 'Administrador Principal',
+            role: 'admin',
+            loginMethod: 'wallet'
+          }))
+          router.push("/")
+        } else {
+          // Wallet no autorizada - desconectar y mostrar error
+          setError("Esta wallet no está autorizada para acceder al sistema. Se desconectará automáticamente. Intenta con otra wallet o cambia de cuenta en MetaMask.")
+          
+          // Desconectar la wallet no autorizada después de un breve delay
+          setTimeout(async () => {
+            await disconnectWallet()
+          }, 2000)
+        }
+        
+        setIsConnecting(false)
+        setIsLoading(false)
+      } catch (requestError: any) {
+        // Lanzar el error específico de la solicitud para el catch principal
+        if (requestError?.code === 4001 || requestError?.message?.includes("User rejected")) {
+          throw new Error("User cancelled")
+        }
+        throw requestError
       }
-      
-      setIsConnecting(false)
-      setIsLoading(false)
     } catch (error: any) {
       console.error("Error connecting wallet:", error)
-      if (error.code === 4001) {
+      
+      // Manejo específico de errores mejorado
+      if (error?.code === 4001 || 
+          error?.message?.includes("User rejected") || 
+          error?.message?.includes("denied") ||
+          error?.message === "User cancelled" ||
+          (!error || Object.keys(error).length === 0)) {
         setError("Conexión cancelada por el usuario.")
+      } else if (error?.message === "No wallet detected") {
+        setError("No se detectó ninguna wallet. Por favor instala MetaMask u otra wallet compatible.")
+      } else if (error?.code === -32002) {
+        setError("Ya hay una solicitud de conexión pendiente. Revisa tu wallet.")
+      } else if (error?.message === "No accounts found") {
+        setError("No se encontraron cuentas. Asegúrate de estar conectado a tu wallet.")
       } else {
-        setError("Error al conectar con la wallet. Inténtalo de nuevo.")
+        setError("Error al conectar con la wallet. Verifica que esté instalada y desbloqueada, luego inténtalo de nuevo.")
       }
+      
       setIsConnecting(false)
-      setIsLoading(false)
-    }
-  }
-
-  const handleWalletLogin = async () => {
-    try {
-      setError("")
-      setIsLoading(true)
-      
-      if (!walletAddress) {
-        setError("Por favor ingresa tu dirección de wallet")
-        setIsLoading(false)
-        return
-      }
-      
-      if (!validateWalletAddress(walletAddress)) {
-        setError("Por favor ingresa una dirección de wallet válida (formato: 0x...)")
-        setIsLoading(false)
-        return
-      }
-      
-      // Simular conexión con wallet
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      if (walletAddress.toLowerCase() === authorizedWallet) {
-        sessionStorage.setItem('habitech_session_active', 'true')
-        localStorage.setItem('habitech_authenticated', 'true')
-        localStorage.setItem('habitech_user', JSON.stringify({
-          wallet: walletAddress,
-          name: 'Administrador Principal',
-          role: 'admin',
-          loginMethod: 'wallet'
-        }))
-        router.push("/")
-      } else {
-        setError("Acceso denegado. Esta wallet no está autorizada para acceder al sistema.")
-      }
-      
-      setIsLoading(false)
-    } catch (error) {
-      setError("Error al verificar la wallet. Por favor, inténtalo de nuevo.")
       setIsLoading(false)
     }
   }
@@ -134,8 +149,11 @@ export default function LoginPage() {
       <div className="min-h-screen relative overflow-hidden">
         <ThemeToggle />
         
-        {/* Enhanced Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B2A] via-[#1B4D83] via-[#007BFF] to-[#0D1B2A]">
+        {/* Enhanced Background that adapts to theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary to-primary/80 dark:from-primary/60 dark:via-primary dark:to-primary/60">
+          {/* Light mode overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/40 to-background/80 dark:from-transparent dark:via-transparent dark:to-transparent" />
+          
           {/* Animated Stars */}
           <div className="absolute inset-0">
             {[...Array(75)].map((_, i) => {
@@ -148,7 +166,7 @@ export default function LoginPage() {
               return (
                 <div
                   key={i}
-                  className="absolute bg-white rounded-full opacity-80 animate-pulse"
+                  className="absolute bg-foreground/80 rounded-full opacity-80 animate-pulse"
                   style={{
                     left: `${left}%`,
                     top: `${top}%`,
@@ -172,7 +190,7 @@ export default function LoginPage() {
               return (
                 <div
                   key={i}
-                  className="absolute w-2 h-2 bg-blue-300/20 rounded-full animate-bounce"
+                  className="absolute w-2 h-2 bg-primary/20 rounded-full animate-bounce"
                   style={{
                     left: `${left}%`,
                     top: `${top}%`,
@@ -196,188 +214,199 @@ export default function LoginPage() {
     <div className="min-h-screen relative overflow-hidden">
       <ThemeToggle />
       
-      {/* Enhanced Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B2A] via-[#1B4D83] via-[#007BFF] to-[#0D1B2A]">
-        {/* Animated Stars */}
+      {/* Elegant Minimalist Background that adapts to theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary to-primary/80 dark:from-primary/60 dark:via-primary dark:to-primary/60">
+        {/* Light mode overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/40 to-background/80 dark:from-transparent dark:via-transparent dark:to-transparent" />
+        
+        {/* Subtle floating elements */}
         <div className="absolute inset-0">
-          {[...Array(75)].map((_, i) => {
+          {[...Array(6)].map((_, i) => {
             const seed = (i + 1) * Math.PI;
-            const left = ((seed * 23.456) % 100);
-            const top = ((seed * 78.912) % 100);
-            const delay = ((seed * 0.95238) % 4);
-            const size = ((seed * 1.234) % 3) + 1;
+            const left = ((seed * 23.456) % 70) + 15;
+            const top = ((seed * 78.912) % 70) + 15;
+            const delay = ((seed * 0.95238) % 8);
+            const size = ((seed * 30) % 80) + 60;
             
             return (
               <div
                 key={i}
-                className="absolute bg-white rounded-full opacity-80 animate-pulse"
+                className="absolute rounded-full opacity-10 dark:opacity-20"
                 style={{
                   left: `${left}%`,
                   top: `${top}%`,
+                  animationName: 'float',
+                  animationDuration: '8s',
+                  animationTimingFunction: 'ease-in-out',
+                  animationIterationCount: 'infinite',
                   animationDelay: `${delay}s`,
                   width: `${size}px`,
                   height: `${size}px`,
+                  background: `radial-gradient(circle, rgb(var(--color-primary) / 0.4), rgb(var(--color-primary) / 0.1))`,
                 }}
               />
             );
           })}
         </div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => {
-            const seed = (i + 1) * Math.PI * 2;
-            const left = ((seed * 15.789) % 100);
-            const top = ((seed * 42.156) % 100);
-            const delay = ((seed * 0.333) % 6);
-            
-            return (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-blue-300/20 rounded-full animate-bounce"
-                style={{
-                  left: `${left}%`,
-                  top: `${top}%`,
-                  animationDelay: `${delay}s`,
-                  animationDuration: '3s',
-                }}
-              />
-            );
-          })}
-        </div>
+
+        {/* Elegant grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-20 dark:opacity-5"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25px 25px, rgb(var(--color-foreground) / 0.3) 2px, transparent 0)`,
+            backgroundSize: '50px 50px',
+          }}
+        />
+
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/10 via-transparent to-background/10 dark:from-primary/20 dark:via-transparent dark:to-primary/20" />
       </div>
       
       {/* Main Login Form */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl">
-          <CardHeader className="space-y-4 text-center pb-8">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-[#007BFF] to-[#0056b3] rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-10 h-10 text-white" />
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+        <Card className="w-full max-w-md backdrop-blur-2xl bg-card/90 border border-border/40 shadow-2xl rounded-3xl animate-fadeIn hover:scale-[1.02] transition-all duration-700">
+          <CardHeader className="space-y-8 text-center pb-10 pt-12">
+            {/* Elegant Logo Circle adapts to theme */}
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary via-primary/80 to-primary/60 rounded-full flex items-center justify-center shadow-2xl animate-float relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-background/20 to-transparent rounded-full" />
+              <div className="w-8 h-8 bg-background/90 rounded-full animate-pulse-soft" />
             </div>
-            <CardTitle className="text-3xl font-bold text-white">
-              HABITECH
-            </CardTitle>
-            <CardDescription className="text-lg text-blue-100">
-              Gestión Inteligente, Convivencia Inteligente
-            </CardDescription>
+            
+            {/* Elegant Typography adapts to theme */}
+            <div className="space-y-4">
+              <CardTitle className="text-4xl font-light text-foreground tracking-wider animate-slideDown">
+                HABITECH
+              </CardTitle>
+              <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent animate-expand" />
+              <CardDescription className="text-lg text-muted-foreground font-light animate-slideUp tracking-wide">
+                Gestión Inteligente • Convivencia Inteligente
+              </CardDescription>
+            </div>
           </CardHeader>
           
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 px-6 pb-6">
+            {/* Error Message - Elegant adapts to theme */}
             {error && (
-              <div className="bg-red-500/20 border border-red-400/50 text-red-100 px-4 py-3 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  {error}
-                </div>
+              <div className="bg-destructive/10 border border-destructive/20 text-foreground px-6 py-4 rounded-2xl backdrop-blur-sm animate-shake">
+                <p className="text-center font-medium text-sm">{error}</p>
               </div>
             )}
             
             {/* Wallet Access Section */}
             <div className="space-y-6">
+              {/* Elegant Header adapts to theme */}
               <div className="text-center">
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full border border-blue-400/30 backdrop-blur-sm">
-                  <Wallet className="w-6 h-6 text-blue-300" />
-                  <span className="text-blue-100 font-semibold text-lg">Acceso Exclusivo por Wallet</span>
+                <div className="inline-block px-8 py-3 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 rounded-full border border-primary/40 backdrop-blur-sm animate-pulse-soft">
+                  <span className="text-foreground font-medium text-lg tracking-wide">Acceso Exclusivo por Wallet</span>
                 </div>
               </div>
 
-              {/* BOTÓN PRINCIPAL PARA CONECTAR WALLET - MUY VISIBLE */}
+              {/* Main Connect Button - Elegant adapts to theme */}
               <div className="space-y-4">
                 <Button 
-                  onClick={connectWallet}
-                  className="w-full h-20 bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 hover:from-green-500 hover:via-green-600 hover:to-emerald-700 text-white font-black text-2xl flex items-center justify-center gap-4 shadow-2xl hover:shadow-green-500/50 transition-all duration-300 border-2 border-green-300/50 rounded-xl"
-                  disabled={isConnecting || isLoading}
+                  onClick={() => {
+                    setError("");
+                    connectWallet();
+                  }}
+                  className="w-full h-16 bg-gradient-to-r from-primary via-primary/90 to-primary hover:from-primary/90 hover:via-primary/80 hover:to-primary/90 text-primary-foreground font-medium text-lg tracking-wide flex items-center justify-center gap-4 shadow-2xl hover:shadow-primary/25 transition-all duration-500 rounded-2xl relative overflow-hidden group border border-border/10"
+                  disabled={isConnecting}
                 >
+                  {/* Elegant shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  
                   {isConnecting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-white"></div>
-                      <span className="text-xl">CONECTANDO...</span>
-                    </>
+                    <div className="flex items-center gap-4">
+                      <div className="w-6 h-6 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      <span className="font-light tracking-wider">Conectando...</span>
+                    </div>
                   ) : (
-                    <>
-                      <Link className="w-8 h-8" />
-                      <span>🚀 CONECTAR WALLET 🚀</span>
-                    </>
+                    <span className="relative z-10 font-light tracking-wider">Conectar Wallet</span>
                   )}
                 </Button>
 
-                <div className="text-center py-2">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-green-400/50 to-green-400/50"></div>
-                    <span className="px-4 py-2 text-green-200 text-sm bg-green-900/30 rounded-full border border-green-400/30 font-semibold">
-                      ⬆️ RECOMENDADO ⬆️
-                    </span>
-                    <div className="flex-1 h-px bg-gradient-to-l from-transparent via-green-400/50 to-green-400/50"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-white/30"></div>
-                  <span className="px-4 py-2 text-blue-200 text-sm bg-[#0D1B2A]/80 rounded-full border border-white/20">
-                    o ingresa dirección manualmente
+                {/* Elegant divider adapts to theme */}
+                <div className="flex items-center gap-4 py-1">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/40 to-primary/40" />
+                  <span className="px-4 py-2 text-muted-foreground text-xs bg-muted/50 rounded-full border border-primary/20 font-light tracking-wide">
+                    Método Recomendado
                   </span>
-                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/30 to-white/30"></div>
+                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-primary/40 to-primary/40" />
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="wallet" className="text-white font-medium text-lg flex items-center gap-2">
-                    <Wallet className="w-5 h-5" />
-                    Dirección de Wallet Autorizada
-                  </Label>
-                  <Input
-                    id="wallet"
-                    type="text"
-                    placeholder="0x1234567890123456789012345678901234567890"
-                    value={walletAddress}
-                    onChange={(e) => setWalletAddress(e.target.value)}
-                    className="bg-white/10 border-white/30 text-white placeholder:text-blue-200 font-mono text-sm h-12 backdrop-blur-sm focus:border-blue-400 focus:ring-blue-400/50"
-                    required
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleWalletLogin}
-                  className="w-full h-14 bg-gradient-to-r from-[#007BFF] to-[#0056b3] hover:from-[#0056b3] hover:to-[#004494] text-white font-semibold text-lg flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={isLoading || isConnecting}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Verificando Acceso...
-                    </>
-                  ) : (
-                    <>
-                      <Wallet className="w-5 h-5" />
-                      Acceder con Dirección Manual
-                    </>
-                  )}
-                </Button>
-              </div>
-              
-              <div className="text-center space-y-3">
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-                <p className="text-blue-100/80 text-sm">
-                  Solo wallets autorizadas pueden acceder al sistema
+
+              {/* Bottom section - Elegant adapts to theme */}
+              <div className="text-center space-y-4">
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                <p className="text-muted-foreground text-sm font-light tracking-wide">
+                  Solo wallets autorizadas tienen acceso al sistema
                 </p>
+                
+                {/* Elegant dots indicator adapts to theme */}
+                <div className="flex justify-center gap-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 bg-primary/40 rounded-full animate-pulse"
+                      style={{ animationDelay: `${i * 0.3}s` }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             
-            <div className="text-center pt-4">
+            {/* Register Button - Elegant adapts to theme */}
+            <div className="text-center pt-4 px-4">
               <Button 
                 variant="ghost" 
                 onClick={() => setShowRegister(true)}
-                className="text-blue-200 hover:text-white hover:bg-white/10 text-base font-medium"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
               >
-                ¿Nuevo residente? Solicita tu departamento →
+                ¿Nuevo residente? Solicita departamento
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Elegant Custom CSS */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes expand {
+          from { width: 0; }
+          to { width: 6rem; }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-3px); }
+          75% { transform: translateX(3px); }
+        }
+        @keyframes pulse-soft {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .animate-fadeIn { animation: fadeIn 1s ease-out; }
+        .animate-slideDown { animation: slideDown 0.8s ease-out; }
+        .animate-slideUp { animation: slideUp 1s ease-out; }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-expand { animation: expand 1.2s ease-out; }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+      `}</style>
     </div>
   )
 }

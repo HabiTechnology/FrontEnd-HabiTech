@@ -3,6 +3,18 @@
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 
+// Declaración de tipos para window.ethereum
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>
+      isMetaMask?: boolean
+      selectedAddress?: string
+      disconnect?: () => Promise<void>
+    }
+  }
+}
+
 import {
   Sidebar,
   SidebarContent,
@@ -96,7 +108,19 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
     document.documentElement.classList.toggle("dark")
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Desconectar wallet si está disponible
+      if (typeof window !== 'undefined' && window.ethereum) {
+        // Intentar desconectar si la wallet lo soporta
+        if (window.ethereum.disconnect) {
+          await window.ethereum.disconnect()
+        }
+      }
+    } catch (error) {
+      console.log("No se pudo desconectar la wallet automáticamente")
+    }
+    
     // Limpiar localStorage y sessionStorage
     localStorage.removeItem('habitech_authenticated')
     localStorage.removeItem('habitech_user')
