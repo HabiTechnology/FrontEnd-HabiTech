@@ -1,146 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RegisterForm } from "@/components/register-form"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Wallet, Shield, Sparkles, Link } from "lucide-react"
-
-// Declaración de tipos para window.ethereum
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: { method: string; params?: any[] }) => Promise<any>
-      isMetaMask?: boolean
-      selectedAddress?: string
-      disconnect?: () => Promise<void>
-    }
-  }
-}
+import { Wallet, Shield, Sparkles, AlertCircle } from "lucide-react"
+import { useAuth } from "@/lib/auth-context-simple-fixed"
+import { PrivyLoginButton } from "@/components/privy-login-button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isConnecting, setIsConnecting] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+  const [error, setError] = useState("")
+  const { isAuthenticated, isAuthorized, login, isLoading } = useAuth()
   const router = useRouter()
 
-  // Solo tu wallet tiene acceso (desde .env)
-  const authorizedWallet = process.env.NEXT_PUBLIC_ADMIN_WALLET?.toLowerCase()
-
-  // Función para desconectar wallet
-  const disconnectWallet = async () => {
-    try {
-      if (window.ethereum && window.ethereum.selectedAddress) {
-        // Intentar desconectar si la wallet lo soporta
-        if (window.ethereum.disconnect) {
-          await window.ethereum.disconnect()
-        }
-        
-        // Limpiar datos locales de sesión
-        sessionStorage.removeItem('habitech_session_active')
-        localStorage.removeItem('habitech_authenticated')
-        localStorage.removeItem('habitech_user')
-        
-        // Recargar la página para asegurar estado limpio
-        window.location.reload()
-      }
-    } catch (error) {
-      console.log("No se pudo desconectar automáticamente, pero se limpiaron los datos locales")
-      // Limpiar datos locales aunque no se pueda desconectar
-      sessionStorage.removeItem('habitech_session_active')
-      localStorage.removeItem('habitech_authenticated')
-      localStorage.removeItem('habitech_user')
+  // Redirigir si ya está autenticado y autorizado
+  useEffect(() => {
+    if (isAuthenticated && isAuthorized) {
+      router.push("/")
     }
-  }
+  }, [isAuthenticated, isAuthorized, router])
 
-  // Función para conectar wallet automáticamente
-  const connectWallet = async () => {
-    // Limpiar error y permitir reintentos
+  const handleLogin = async () => {
     setError("")
-    setIsConnecting(true)
-    
     try {
-      // Verificar si hay una wallet instalada
-      if (typeof window === 'undefined') {
-        throw new Error("Window object not available")
-      }
-      
-      if (!window.ethereum) {
-        throw new Error("No wallet detected")
-      }
-
-      // Solicitar conexión a la wallet
-      try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        })
-
-        if (!accounts || accounts.length === 0) {
-          throw new Error("No accounts found")
-        }
-
-        const address = accounts[0]
-        
-        // Verificar automáticamente si es la wallet autorizada
-        if (address.toLowerCase() === authorizedWallet) {
-          setIsLoading(true)
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          
-          sessionStorage.setItem('habitech_session_active', 'true')
-          localStorage.setItem('habitech_authenticated', 'true')
-          localStorage.setItem('habitech_user', JSON.stringify({
-            wallet: address,
-            name: 'Administrador Principal',
-            role: 'admin',
-            loginMethod: 'wallet'
-          }))
-          router.push("/")
-        } else {
-          // Wallet no autorizada - desconectar y mostrar error
-          setError("Esta wallet no está autorizada para acceder al sistema. Se desconectará automáticamente. Intenta con otra wallet o cambia de cuenta en MetaMask.")
-          
-          // Desconectar la wallet no autorizada después de un breve delay
-          setTimeout(async () => {
-            await disconnectWallet()
-          }, 2000)
-        }
-        
-        setIsConnecting(false)
-        setIsLoading(false)
-      } catch (requestError: any) {
-        // Lanzar el error específico de la solicitud para el catch principal
-        if (requestError?.code === 4001 || requestError?.message?.includes("User rejected")) {
-          throw new Error("User cancelled")
-        }
-        throw requestError
-      }
+      await login()
     } catch (error: any) {
-      console.error("Error connecting wallet:", error)
-      
-      // Manejo específico de errores mejorado
-      if (error?.code === 4001 || 
-          error?.message?.includes("User rejected") || 
-          error?.message?.includes("denied") ||
-          error?.message === "User cancelled" ||
-          (!error || Object.keys(error).length === 0)) {
-        setError("Conexión cancelada por el usuario.")
-      } else if (error?.message === "No wallet detected") {
-        setError("No se detectó ninguna wallet. Por favor instala MetaMask u otra wallet compatible.")
-      } else if (error?.code === -32002) {
-        setError("Ya hay una solicitud de conexión pendiente. Revisa tu wallet.")
-      } else if (error?.message === "No accounts found") {
-        setError("No se encontraron cuentas. Asegúrate de estar conectado a tu wallet.")
-      } else {
-        setError("Error al conectar con la wallet. Verifica que esté instalada y desbloqueada, luego inténtalo de nuevo.")
-      }
-      
-      setIsConnecting(false)
-      setIsLoading(false)
+      console.error("Error during login:", error)
+      setError("Error al conectar con la wallet. Inténtalo de nuevo.")
     }
   }
 
@@ -287,9 +177,12 @@ export default function LoginPage() {
           <CardContent className="space-y-6 px-6 pb-6">
             {/* Error Message - Elegant adapts to theme */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-foreground px-6 py-4 rounded-2xl backdrop-blur-sm animate-shake">
-                <p className="text-center font-medium text-sm">{error}</p>
-              </div>
+              <Alert className="border-destructive/50 text-destructive bg-destructive/10 animate-shake">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  {error}
+                </AlertDescription>
+              </Alert>
             )}
             
             {/* Wallet Access Section */}
@@ -301,28 +194,9 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Main Connect Button - Elegant adapts to theme */}
+              {/* Main Connect Button - Privy Integration */}
               <div className="space-y-4">
-                <Button 
-                  onClick={() => {
-                    setError("");
-                    connectWallet();
-                  }}
-                  className="w-full h-16 bg-gradient-to-r from-primary via-primary/90 to-primary hover:from-primary/90 hover:via-primary/80 hover:to-primary/90 text-primary-foreground font-medium text-lg tracking-wide flex items-center justify-center gap-4 shadow-2xl hover:shadow-primary/25 transition-all duration-500 rounded-2xl relative overflow-hidden group border border-border/10"
-                  disabled={isConnecting}
-                >
-                  {/* Elegant shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  
-                  {isConnecting ? (
-                    <div className="flex items-center gap-4">
-                      <div className="w-6 h-6 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      <span className="font-light tracking-wider">Conectando...</span>
-                    </div>
-                  ) : (
-                    <span className="relative z-10 font-light tracking-wider">Conectar Wallet</span>
-                  )}
-                </Button>
+                <PrivyLoginButton />
 
                 {/* Elegant divider adapts to theme */}
                 <div className="flex items-center gap-4 py-1">
