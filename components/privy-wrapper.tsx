@@ -1,6 +1,7 @@
 "use client"
 
 import { PrivyProvider } from '@privy-io/react-auth'
+import { sepolia } from 'viem/chains'
 import { ReactNode } from 'react'
 
 interface PrivyWrapperProps {
@@ -21,7 +22,9 @@ export function PrivyWrapper({ children }: PrivyWrapperProps) {
         embeddedWallets: {
           createOnLogin: 'users-without-wallets'
         },
-        walletConnectCloudProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+        walletConnectCloudProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+        defaultChain: sepolia,
+        supportedChains: [sepolia]
       }}
     >
       {children}

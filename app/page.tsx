@@ -3,6 +3,7 @@ import DashboardStat from "@/components/dashboard/stat"
 import DashboardChart from "@/components/dashboard/chart"
 import RebelsRanking from "@/components/dashboard/rebels-ranking"
 import SecurityStatus from "@/components/dashboard/security-status"
+import { RoleGuard } from "@/components/role-guard"
 import BracketsIcon from "@/components/icons/brackets"
 import GearIcon from "@/components/icons/gear"
 import ProcessorIcon from "@/components/icons/proccesor"
@@ -21,13 +22,14 @@ const iconMap = {
 
 export default function DashboardOverview() {
   return (
-    <DashboardPageLayout
-      header={{
-        title: "Panel de Control - Edificio Inteligente",
-        description: "Última actualización 12:05",
-        icon: BracketsIcon,
-      }}
-    >
+    <RoleGuard allowedRoles={['admin', 'resident']}>
+      <DashboardPageLayout
+        header={{
+          title: "Panel de Control - Edificio Inteligente",
+          description: "Última actualización 12:05",
+          icon: BracketsIcon,
+        }}
+      >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-0">
         {mockData.dashboardStats.map((stat, index) => (
           <div key={index} className="grid-item">
@@ -58,5 +60,6 @@ export default function DashboardOverview() {
         </div>
       </div>
     </DashboardPageLayout>
+    </RoleGuard>
   )
 }

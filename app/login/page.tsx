@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RegisterForm } from "@/components/register-form"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Wallet, Shield, Sparkles, AlertCircle } from "lucide-react"
+import { Wallet, Shield, Sparkles, AlertCircle, CheckCircle, Users, UserCheck } from "lucide-react"
 import { useAuth } from "@/lib/auth-context-simple-fixed"
 import { PrivyLoginButton } from "@/components/privy-login-button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -14,15 +14,41 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 export default function LoginPage() {
   const [showRegister, setShowRegister] = useState(false)
   const [error, setError] = useState("")
-  const { isAuthenticated, isAuthorized, login, isLoading } = useAuth()
+  const { 
+    isAuthenticated, 
+    userRole, 
+    userInfo,
+    login, 
+    logout,
+    loading, 
+    error: authError,
+    isAdmin,
+    isResident,
+    isUnauthorized 
+  } = useAuth()
   const router = useRouter()
+
+  // Limpiar sesión si hay usuario no autorizado al cargar la página
+  useEffect(() => {
+    if (isUnauthorized || (isAuthenticated && userRole === 'unauthorized')) {
+      console.log('Limpiando sesión de usuario no autorizado en login')
+      logout()
+    }
+  }, [isUnauthorized, isAuthenticated, userRole, logout])
 
   // Redirigir si ya está autenticado y autorizado
   useEffect(() => {
-    if (isAuthenticated && isAuthorized) {
+    if (isAuthenticated && (userRole === 'admin' || userRole === 'resident')) {
       router.push("/")
     }
-  }, [isAuthenticated, isAuthorized, router])
+  }, [isAuthenticated, userRole, router])
+
+  // Mostrar errores de autenticación
+  useEffect(() => {
+    if (authError) {
+      setError(authError)
+    }
+  }, [authError])
 
   const handleLogin = async () => {
     setError("")
@@ -32,6 +58,57 @@ export default function LoginPage() {
       console.error("Error during login:", error)
       setError("Error al conectar con la wallet. Inténtalo de nuevo.")
     }
+  }
+
+  // Renderizar estado de rol cuando está autenticado pero no autorizado
+  const renderRoleStatus = () => {
+    if (!isAuthenticated) return null
+
+    if (loading) {
+      return (
+        <Alert className="mb-4">
+          <Sparkles className="h-4 w-4 animate-spin" />
+          <AlertDescription>
+            Verificando rol en blockchain...
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    if (isUnauthorized) {
+      return (
+        <Alert className="mb-4 border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+            Tu wallet no está registrada en el sistema. Contacta al administrador para obtener acceso.
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    if (isAdmin) {
+      return (
+        <Alert className="mb-4 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+          <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <AlertDescription className="text-green-800 dark:text-green-200">
+            ✅ Acceso de Administrador verificado. Redirigiendo...
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    if (isResident) {
+      return (
+        <Alert className="mb-4 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+          <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <AlertDescription className="text-blue-800 dark:text-blue-200">
+            ✅ Acceso de Residente verificado. Redirigiendo...
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    return null
   }
 
   if (showRegister) {
@@ -184,6 +261,9 @@ export default function LoginPage() {
                 </AlertDescription>
               </Alert>
             )}
+
+            {/* Role Status */}
+            {renderRoleStatus()}
             
             {/* Wallet Access Section */}
             <div className="space-y-6">
