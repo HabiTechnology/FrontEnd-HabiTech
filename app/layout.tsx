@@ -28,7 +28,12 @@ export const metadata: Metadata = {
     default: "HABITECH",
   },
   description: "Gestión Inteligente, Convivencia Inteligente - Sistema de administración residencial.",
-    generator: 'v0.app'
+  generator: 'v0.app',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

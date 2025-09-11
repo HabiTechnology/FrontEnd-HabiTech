@@ -25,7 +25,6 @@ import ProcessorIcon from "@/components/icons/proccesor"
 import CuteRobotIcon from "@/components/icons/cute-robot"
 import EmailIcon from "@/components/icons/email"
 import GearIcon from "@/components/icons/gear"
-import MonkeyIcon from "@/components/icons/monkey"
 import DotsVerticalIcon from "@/components/icons/dots-vertical"
 import { Bullet } from "@/components/ui/bullet"
 import LockIcon from "@/components/icons/lock"
@@ -117,7 +116,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
     <Sidebar {...props} className={cn("sidebar-habitech py-sides", className)}>
       <SidebarHeader className="glass-habitech rounded-t-lg flex gap-3 flex-row rounded-b-none backdrop-blur-sm">
         <div className="flex overflow-clip size-12 shrink-0 items-center justify-center rounded bg-sidebar-primary-foreground/10 transition-colors group-hover:bg-sidebar-primary text-sidebar-primary-foreground">
-          <MonkeyIcon className="size-10 group-hover:scale-[1.7] origin-top-left transition-transform" />
+          <img src="/favicon.ico" alt="HABITECH Logo" className="size-10 group-hover:scale-[1.7] origin-top-left transition-transform" />
         </div>
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="text-2xl font-display">HABITECH</span>
@@ -191,7 +190,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
                   <PopoverContent className="w-56 p-0" side="bottom" align="end" sideOffset={4}>
                     <div className="flex flex-col">
                       <button className="flex items-center px-4 py-2 text-sm hover:bg-accent">
-                        <MonkeyIcon className="mr-2 h-4 w-4" />
+                        <img src="/favicon.ico" alt="HABITECH Logo" className="mr-2 h-4 w-4" />
                         Account
                       </button>
                       <button className="flex items-center px-4 py-2 text-sm hover:bg-accent">

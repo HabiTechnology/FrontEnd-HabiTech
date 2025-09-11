@@ -17,7 +17,7 @@ export function PrivyWrapper({ children }: PrivyWrapperProps) {
         appearance: {
           theme: 'dark',
           accentColor: '#007BFF',
-          logo: '/placeholder-logo.svg'
+          logo: '/favicon.ico'
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets'

@@ -25,7 +25,7 @@ export function MobileHeader({ mockData }: MobileHeaderProps) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="h-8 w-16 bg-primary rounded flex items-center justify-center">
-              <MonkeyIcon className="size-6 text-primary-foreground" />
+              <img src="/favicon.ico" alt="HABITECH Logo" className="size-6 text-primary-foreground" />
             </div>
           </div>
         </div>
