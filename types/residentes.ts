@@ -1,7 +1,15 @@
 export interface Residente {
-  id_residente: number;
+  id: number;
   nombre: string;
+  apellido: string;
   email: string;
+  telefono?: string;
+  numero_documento: string;
+  imagen_perfil?: string;
+  rol_id?: number;
+  activo: boolean;
+  creado_en: string;
+  actualizado_en: string;
 }
 
 export interface ResidenteStats {
