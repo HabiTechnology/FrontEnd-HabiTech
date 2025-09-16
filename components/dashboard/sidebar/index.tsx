@@ -35,7 +35,7 @@ import BellIcon from "@/components/icons/bell"
 import Image from "next/image"
 import { useIsV0 } from "@/lib/v0-context"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Sun, Shield } from "lucide-react"
 import UsersIcon from "@/components/icons/users"
 
 // This is sample data for the sidebar
@@ -112,6 +112,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
     return pathname.startsWith(url)
   }
 
+  const { isAdmin } = useAuth();
   return (
     <Sidebar {...props} className={cn("sidebar-habitech py-sides", className)}>
       <SidebarHeader className="glass-habitech rounded-t-lg flex gap-3 flex-row rounded-b-none backdrop-blur-sm">
@@ -152,6 +153,17 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                {/* Acceso solo para admins */}
+                {isAdmin && (
+                  <SidebarMenuItem className="sidebar-item">
+                    <SidebarMenuButton asChild isActive={isActiveRoute("/admin")}> 
+                      <a href="/admin">
+                        <Shield className="size-5" />
+                        <span>Admin/Usuarios</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
