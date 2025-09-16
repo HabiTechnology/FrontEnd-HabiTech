@@ -1,15 +1,38 @@
-import DashboardStat from "@/components/dashboard/stat"
-import { mockResidenteStats } from "@/data/residentes-mock"
-import UsersIcon from "@/components/icons/users"
-import ProcessorIcon from "@/components/icons/proccesor"
-import GearIcon from "@/components/icons/gear"
-import BoomIcon from "@/components/icons/boom"
+"use client";
+import React, { useEffect, useState } from "react";
+import DashboardStat from "@/components/dashboard/stat";
+import UsersIcon from "@/components/icons/users";
+import ProcessorIcon from "@/components/icons/proccesor";
+import BoomIcon from "@/components/icons/boom";
 
 export default function ResidentesStats() {
-  const stats = [
+  const [stats, setStats] = useState({
+    totalResidentes: 0,
+    nuevosEsteMes: 0,
+    ocupacionPromedio: 0
+  });
+
+  useEffect(() => {
+    fetch('/api/usuarios')
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) data = [];
+        setStats({
+          totalResidentes: data.length,
+          nuevosEsteMes: data.filter((r: any) => {
+            const fecha = new Date(r.fechaRegistro);
+            const hoy = new Date();
+            return fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear();
+          }).length,
+          ocupacionPromedio: Math.round((data.filter((r: any) => r.estado === 'Activo').length / (data.length || 1)) * 100)
+        });
+      });
+  }, []);
+
+  const statCards = [
     {
       label: "TOTAL RESIDENTES",
-      value: mockResidenteStats.totalResidentes.toString(),
+      value: stats.totalResidentes.toString(),
       description: "Residentes registrados",
       icon: UsersIcon,
       tag: "TOTAL",
@@ -18,16 +41,16 @@ export default function ResidentesStats() {
     },
     {
       label: "NUEVOS ESTE MES",
-      value: mockResidenteStats.nuevosEsteMes.toString(),
+      value: stats.nuevosEsteMes.toString(),
       description: "Registros recientes",
       icon: BoomIcon,
-      tag: "SEPTIEMBRE",
+      tag: "MES",
       intent: "positive" as const,
       direction: "up" as const,
     },
     {
       label: "OCUPACIÓN",
-      value: `${mockResidenteStats.ocupacionPromedio}%`,
+      value: `${stats.ocupacionPromedio}%`,
       description: "Promedio del edificio",
       icon: ProcessorIcon,
       tag: "PROMEDIO",
@@ -38,7 +61,7 @@ export default function ResidentesStats() {
 
   return (
     <>
-      {stats.map((stat, index) => (
+      {statCards.map((stat, index) => (
         <div key={index} className="grid-item">
           <DashboardStat
             label={stat.label}
@@ -54,3 +77,4 @@ export default function ResidentesStats() {
     </>
   );
 }
+

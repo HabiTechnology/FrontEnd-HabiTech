@@ -12,6 +12,7 @@
     "@emotion/is-prop-valid": "latest",
     "@eslint/eslintrc": "latest",
     "@hookform/resolvers": "^3.10.0",
+    "@neondatabase/serverless": "^1.0.1",
     "@number-flow/react": "latest",
     "@privy-io/react-auth": "^2.24.0",
     "@radix-ui/react-accordion": "1.2.2",
