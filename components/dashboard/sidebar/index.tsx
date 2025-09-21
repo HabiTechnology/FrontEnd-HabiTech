@@ -42,7 +42,7 @@ import UsersIcon from "@/components/icons/users"
 const navItems = [
   {
     title: "INICIO",
-    url: "/",
+    url: "/dashboard",
     icon: HomeIcon,
   },
   {

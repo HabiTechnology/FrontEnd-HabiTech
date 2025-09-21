@@ -39,7 +39,7 @@ export default function LoginPage() {
   // Redirigir si ya está autenticado y autorizado
   useEffect(() => {
     if (isAuthenticated && (userRole === 'admin' || userRole === 'resident')) {
-      router.push("/")
+      router.push("/dashboard")
     }
   }, [isAuthenticated, userRole, router])
 

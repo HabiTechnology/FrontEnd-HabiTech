@@ -13,7 +13,7 @@ export function PrivyLoginButton() {
   useEffect(() => {
     if (ready && authenticated && user) {
       // Usuario autenticado exitosamente, redirigir al dashboard
-      router.push('/')
+      router.push('/dashboard')
     }
   }, [ready, authenticated, user, router])
 
