@@ -1,394 +1,307 @@
-"use client"
+﻿"use client"
 
-import React, { memo, useCallback, useMemo } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Residente } from "@/types/residentes"
-import { useEffect, useState } from "react"
-import { Bullet } from "@/components/ui/bullet"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import React, { useEffect, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table'
+import { Building, UserCheck, UserX, Phone, Loader2, Search, Filter, Users } from 'lucide-react'
 
-// Memoized table row component
-const ResidenteTableRow = memo(({ 
-  residente, 
-  onView, 
-  onEdit, 
-  onDelete, 
-  loading 
-}: {
-  residente: Residente;
-  onView: (id: number) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
-  loading: boolean;
-}) => {
-  return (
-    <TableRow className="border-border/20 hover:bg-muted/50 transition-colors">
-      <TableCell className="font-medium text-foreground">
-        {residente.id}
-      </TableCell>
-      <TableCell className="text-foreground">
-        {residente.nombre}
-      </TableCell>
-      <TableCell className="text-foreground">
-        {residente.apellido || '-'}
-      </TableCell>
-      <TableCell className="text-foreground">
-        {residente.email}
-      </TableCell>
-      <TableCell className="text-foreground">
-        {residente.telefono || '-'}
-      </TableCell>
-      <TableCell className="text-foreground">
-        {residente.numero_documento || '-'}
-      </TableCell>
-      <TableCell className="text-foreground">
-        <Badge variant={residente.activo ? "outline-success" : "destructive"}>
-          {residente.activo ? "Activo" : "Inactivo"}
-        </Badge>
-      </TableCell>
-      <TableCell className="flex gap-2">
-        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => onView(residente.id)}>
-          VER
-        </Button>
-        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => onEdit(residente.id)}>
-          EDITAR
-        </Button>
-        <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => onDelete(residente.id)} disabled={loading}>
-          ELIMINAR
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-})
+interface ResidenteData {
+  id: number
+  usuario_id: number
+  departamento_id: number
+  tipo_relacion: string
+  fecha_ingreso: string
+  fecha_salida: string | null
+  nombre_contacto_emergencia: string | null
+  telefono_contacto_emergencia: string | null
+  es_principal: boolean
+  activo: boolean
+  creado_en: string
+}
 
-ResidenteTableRow.displayName = 'ResidenteTableRow';
-
-
+type FiltroEstado = 'todos' | 'activos' | 'inactivos'
 
 export default function ResidentesTable() {
-  const [residentes, setResidentes] = useState<Residente[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add');
-  
-  interface FormState {
-    id: number | undefined;
-    nombre: string;
-    apellido: string;
-    email: string;
-    telefono: string;
-    numero_documento: string;
-    imagen_perfil: string;
-    rol_id: number | undefined;
-    activo: boolean;
-    contrasena: string;
-  }
-
-  const emptyForm: FormState = {
-    id: undefined,
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    numero_documento: '',
-    imagen_perfil: '',
-    rol_id: undefined,
-    activo: true,
-    contrasena: ''
-  };
-
-  const [form, setForm] = useState<FormState>(emptyForm);
-
-  // Cargar residentes desde el backend (memoizado)
-  const fetchResidentes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/usuarios');
-      const data = await res.json();
-      setResidentes(Array.isArray(data) ? data : []);
-    } catch (e) {
-      setResidentes([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [residentes, setResidentes] = useState<ResidenteData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos')
 
   useEffect(() => {
-    fetchResidentes();
-  }, [fetchResidentes]);
+    fetchResidentes()
+  }, [])
 
-  // Memoized handlers para ver, editar y eliminar
-  const handleView = useCallback((id: number) => {
-    const residente = residentes.find(r => r.id === id);
-    if (residente) {
-      setForm({
-        id: residente.id,
-        nombre: residente.nombre,
-        apellido: residente.apellido || '',
-        email: residente.email,
-        telefono: residente.telefono || '',
-        numero_documento: residente.numero_documento,
-        imagen_perfil: residente.imagen_perfil || '',
-        rol_id: residente.rol_id,
-        activo: residente.activo,
-        contrasena: '', // No mostramos la contraseña
-      });
-      setModalMode('view');
-      setShowModal(true);
-    }
-  }, [residentes]);
-
-  const handleEdit = useCallback((id: number) => {
-    const residente = residentes.find(r => r.id === id);
-    if (residente) {
-      setForm({
-        id: residente.id,
-        nombre: residente.nombre,
-        apellido: residente.apellido || '',
-        email: residente.email,
-        telefono: residente.telefono || '',
-        numero_documento: residente.numero_documento,
-        imagen_perfil: residente.imagen_perfil || '',
-        rol_id: residente.rol_id,
-        activo: residente.activo,
-        contrasena: '', // No mostramos la contraseña
-      });
-      setModalMode('edit');
-      setShowModal(true);
-    }
-  }, [residentes]);
-
-  const handleDelete = useCallback(async (id: number) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      setLoading(true);
-      try {
-        await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
-        fetchResidentes();
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [fetchResidentes]);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const fetchResidentes = async () => {
     try {
-      const userData = {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        email: form.email,
-        telefono: form.telefono,
-        numero_documento: form.numero_documento,
-        imagen_perfil: form.imagen_perfil,
-        rol_id: form.rol_id,
-        activo: form.activo,
-        ...(modalMode === 'add' && { contrasena: form.contrasena })
-      };
-
-      if (modalMode === 'add') {
-        await fetch('/api/usuarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(userData)
-        });
-      } else if (modalMode === 'edit' && form.id) {
-        await fetch(`/api/usuarios/${form.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(userData)
-        });
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch('/api/residentes')
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
       }
-      setShowModal(false);
-      fetchResidentes();
+      
+      const data = await response.json()
+      setResidentes(data)
+    } catch (err) {
+      console.error('Error fetching residentes:', err)
+      setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  // Filtrar residentes basado en búsqueda y estado
+  const residentesFiltrados = residentes.filter(residente => {
+    // Filtro por búsqueda
+    const coincideBusqueda = busqueda === '' || 
+      residente.id.toString().includes(busqueda) ||
+      residente.usuario_id.toString().includes(busqueda) ||
+      residente.departamento_id.toString().includes(busqueda) ||
+      residente.tipo_relacion.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (residente.nombre_contacto_emergencia || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+      (residente.telefono_contacto_emergencia || '').includes(busqueda)
+
+    // Filtro por estado
+    const coincideEstado = 
+      filtroEstado === 'todos' ||
+      (filtroEstado === 'activos' && residente.activo) ||
+      (filtroEstado === 'inactivos' && !residente.activo)
+
+    return coincideBusqueda && coincideEstado
+  })
+
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Residentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Cargando residentes...</span>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <UserX className="h-5 w-5" />
+            Error cargando residentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchResidentes} variant="outline">
+              Reintentar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <Card className="bg-card border-border shadow-md">
-      <CardHeader className="border-b border-border/30 pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2.5 text-card-foreground">
-          ■ REGISTRO DE USUARIOS
-        </CardTitle>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={fetchResidentes} disabled={loading}>
-            RECARGAR
-          </Button>
-          <Button size="sm" variant="default" onClick={() => { 
-            setShowModal(true); 
-            setModalMode('add'); 
-            setForm(emptyForm);
-          }}>
-            AGREGAR USUARIO
-          </Button>
+    <div className="w-full space-y-6">
+      {/* Header con título y contador */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-6 w-6" />
+          <h2 className="text-2xl font-bold">Tabla de Residentes</h2>
         </div>
-      </CardHeader>
-      {/* Modal para agregar, editar o ver usuario */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <form onSubmit={modalMode === 'view' ? undefined : handleSave} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl space-y-4">
-            <h2 className="text-lg font-bold mb-4">
-              {modalMode === 'add' && 'Agregar Usuario'}
-              {modalMode === 'edit' && 'Editar Usuario'}
-              {modalMode === 'view' && 'Detalle de Usuario'}
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre</Label>
-                <Input
-                  id="nombre"
-                  required
-                  placeholder="Nombre"
-                  value={form.nombre}
-                  onChange={e => setForm(f => ({...f, nombre: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="apellido">Apellido</Label>
-                <Input
-                  id="apellido"
-                  required
-                  placeholder="Apellido"
-                  value={form.apellido}
-                  onChange={e => setForm(f => ({...f, apellido: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  required
-                  type="email"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={e => setForm(f => ({...f, email: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="telefono">Teléfono</Label>
-                <Input
-                  id="telefono"
-                  placeholder="Teléfono"
-                  value={form.telefono}
-                  onChange={e => setForm(f => ({...f, telefono: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="numero_documento">Número de Documento</Label>
-                <Input
-                  id="numero_documento"
-                  required
-                  placeholder="Número de Documento"
-                  value={form.numero_documento}
-                  onChange={e => setForm(f => ({...f, numero_documento: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="imagen_perfil">URL Imagen de Perfil</Label>
-                <Input
-                  id="imagen_perfil"
-                  placeholder="URL de la imagen"
-                  value={form.imagen_perfil}
-                  onChange={e => setForm(f => ({...f, imagen_perfil: e.target.value}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              {modalMode === 'add' && (
-                <div className="space-y-2">
-                  <Label htmlFor="contrasena">Contraseña</Label>
-                  <Input
-                    id="contrasena"
-                    type="password"
-                    required
-                    placeholder="Contraseña"
-                    value={form.contrasena}
-                    onChange={e => setForm(f => ({...f, contrasena: e.target.value}))}
-                  />
+        <Badge variant="secondary" className="px-3 py-1 text-sm">
+          {residentesFiltrados.length} de {residentes.length}
+        </Badge>
+      </div>
+
+      {/* Controles de búsqueda y filtros */}
+      <Card className="p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar por ID, usuario, departamento, tipo, contacto..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Select value={filtroEstado} onValueChange={(value: FiltroEstado) => setFiltroEstado(value)}>
+              <SelectTrigger className="w-[140px]">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue />
                 </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="rol_id">Rol ID</Label>
-                <Input
-                  id="rol_id"
-                  type="number"
-                  placeholder="ID del Rol"
-                  value={form.rol_id || ''}
-                  onChange={e => setForm(f => ({...f, rol_id: parseInt(e.target.value) || undefined}))}
-                  disabled={modalMode==='view'}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="activo"
-                  checked={form.activo}
-                  onCheckedChange={(checked) => setForm(f => ({...f, activo: checked as boolean}))}
-                  disabled={modalMode==='view'}
-                />
-                <Label htmlFor="activo">Usuario Activo</Label>
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <Button type="button" variant="outline" onClick={() => setShowModal(false)} disabled={loading}>
-                Cerrar
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="activos">Solo Activos</SelectItem>
+                <SelectItem value="inactivos">Solo Inactivos</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button
+              variant="outline"
+              onClick={fetchResidentes}
+              className="flex items-center gap-2"
+            >
+              Actualizar
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Tabla de residentes */}
+      <Card>
+        <CardContent className="p-0">
+        {residentesFiltrados.length === 0 ? (
+          <div className="text-center py-12">
+            <UserX className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-lg font-medium">
+              {busqueda || filtroEstado !== 'todos' 
+                ? 'No se encontraron residentes con esos criterios' 
+                : 'No hay residentes registrados'
+              }
+            </p>
+            {(busqueda || filtroEstado !== 'todos') && (
+              <Button 
+                variant="outline" 
+                onClick={() => { setBusqueda(''); setFiltroEstado('todos') }}
+                className="mt-2"
+              >
+                Limpiar filtros
               </Button>
-              {modalMode !== 'view' && (
-                <Button type="submit" variant="default" disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </Button>
-              )}
-            </div>
-          </form>
-        </div>
-      )}
-      <CardContent className="p-0">
-        <div className="overflow-x-auto table-container">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/20">
-                <TableHead className="text-muted-foreground">ID</TableHead>
-                <TableHead className="text-muted-foreground">Nombre</TableHead>
-                <TableHead className="text-muted-foreground">Apellido</TableHead>
-                <TableHead className="text-muted-foreground">Email</TableHead>
-                <TableHead className="text-muted-foreground">Teléfono</TableHead>
-                <TableHead className="text-muted-foreground">Documento</TableHead>
-                <TableHead className="text-muted-foreground">Estado</TableHead>
-                <TableHead className="text-muted-foreground">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {residentes.map((residente) => (
-                <ResidenteTableRow
-                  key={residente.id}
-                  residente={residente}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  loading={loading}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">ID</TableHead>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead>Departamento</TableHead>
+                  <TableHead>Tipo Relación</TableHead>
+                  <TableHead>Fecha Ingreso</TableHead>
+                  <TableHead>Fecha Salida</TableHead>
+                  <TableHead>Contacto Emergencia</TableHead>
+                  <TableHead>Principal</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Creado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {residentesFiltrados.map((residente) => (
+                  <TableRow key={residente.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{residente.id}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">ID: {residente.usuario_id}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <span>Depto {residente.departamento_id}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={residente.tipo_relacion === 'propietario' ? 'default' : 'secondary'}
+                        className="capitalize"
+                      >
+                        {residente.tipo_relacion}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {formatDate(residente.fecha_ingreso)}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {formatDate(residente.fecha_salida)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium">
+                          {residente.nombre_contacto_emergencia || 'N/A'}
+                        </span>
+                        {residente.telefono_contacto_emergencia && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Phone className="h-3 w-3" />
+                            {residente.telefono_contacto_emergencia}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={residente.es_principal ? 'default' : 'outline'}>
+                        {residente.es_principal ? 'Sí' : 'No'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={residente.activo ? 'default' : 'destructive'}
+                        className="flex items-center gap-1 w-fit"
+                      >
+                        {residente.activo ? (
+                          <>
+                            <UserCheck className="h-3 w-3" />
+                            Activo
+                          </>
+                        ) : (
+                          <>
+                            <UserX className="h-3 w-3" />
+                            Inactivo
+                          </>
+                        )}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {formatDate(residente.creado_en)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
+  </div>
+  )
 }

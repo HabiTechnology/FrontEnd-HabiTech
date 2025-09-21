@@ -1,80 +1,67 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import DashboardStat from "@/components/dashboard/stat";
-import UsersIcon from "@/components/icons/users";
-import ProcessorIcon from "@/components/icons/proccesor";
-import BoomIcon from "@/components/icons/boom";
+﻿"use client"
+
+import React, { useEffect, useState } from 'react'
+import DashboardStat from '@/components/dashboard/stat'
+import UsersIcon from '@/components/icons/users'
+import HomeIcon from '@/components/icons/home'
+import { AlertTriangle, Clock } from 'lucide-react'
+
+interface ResidentesStatsData {
+  totalResidentes: number
+  residentesActivos: number
+  departamentosOcupados: number
+  solicitudesPendientes: number
+}
 
 export default function ResidentesStats() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<ResidentesStatsData>({
     totalResidentes: 0,
-    nuevosEsteMes: 0,
-    ocupacionPromedio: 0
-  });
+    residentesActivos: 0,
+    departamentosOcupados: 0,
+    solicitudesPendientes: 0
+  })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/usuarios')
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) data = [];
-        setStats({
-          totalResidentes: data.length,
-          nuevosEsteMes: data.filter((r: any) => {
-            const fecha = new Date(r.fechaRegistro);
-            const hoy = new Date();
-            return fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear();
-          }).length,
-          ocupacionPromedio: Math.round((data.filter((r: any) => r.estado === 'Activo').length / (data.length || 1)) * 100)
-        });
-      });
-  }, []);
+    fetchStats()
+  }, [])
 
-  const statCards = [
-    {
-      label: "TOTAL RESIDENTES",
-      value: stats.totalResidentes.toString(),
-      description: "Residentes registrados",
-      icon: UsersIcon,
-      tag: "TOTAL",
-      intent: "positive" as const,
-      direction: "up" as const,
-    },
-    {
-      label: "NUEVOS ESTE MES",
-      value: stats.nuevosEsteMes.toString(),
-      description: "Registros recientes",
-      icon: BoomIcon,
-      tag: "MES",
-      intent: "positive" as const,
-      direction: "up" as const,
-    },
-    {
-      label: "OCUPACIÓN",
-      value: `${stats.ocupacionPromedio}%`,
-      description: "Promedio del edificio",
-      icon: ProcessorIcon,
-      tag: "PROMEDIO",
-      intent: "positive" as const,
-      direction: "up" as const,
-    },
-  ];
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/residentes/stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
+    } catch (error) {
+      console.error('Error fetching residentes stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
-      {statCards.map((stat, index) => (
-        <div key={index} className="grid-item">
-          <DashboardStat
-            label={stat.label}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
-            tag={stat.tag}
-            intent={stat.intent}
-            direction={stat.direction}
-          />
-        </div>
-      ))}
+      <DashboardStat
+        label="Total Residentes"
+        value={stats.totalResidentes.toString()}
+        icon={UsersIcon}
+      />
+      <DashboardStat
+        label="Residentes Activos"
+        value={stats.residentesActivos.toString()}
+        icon={UsersIcon}
+      />
+      <DashboardStat
+        label="Departamentos Ocupados"
+        value={stats.departamentosOcupados.toString()}
+        icon={HomeIcon}
+      />
+      <DashboardStat
+        label="Solicitudes Pendientes"
+        value={stats.solicitudesPendientes.toString()}
+        icon={AlertTriangle}
+      />
     </>
-  );
+  )
 }
-
