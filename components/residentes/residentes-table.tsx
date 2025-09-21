@@ -14,7 +14,25 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table'
-import { Building, UserCheck, UserX, Phone, Loader2, Search, Filter, Users } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Building, UserCheck, UserX, Phone, Loader2, Search, Filter, Users, Eye, Trash2, User } from 'lucide-react'
 
 interface ResidenteData {
   id: number
@@ -23,11 +41,26 @@ interface ResidenteData {
   tipo_relacion: string
   fecha_ingreso: string
   fecha_salida: string | null
-  nombre_contacto_emergencia: string | null
-  telefono_contacto_emergencia: string | null
   es_principal: boolean
   activo: boolean
+  nombre_contacto_emergencia: string | null
+  telefono_contacto_emergencia: string | null
   creado_en: string
+}
+
+interface ResidenteDetallado {
+  id: number
+  usuario_id: number
+  departamento_id: number
+  tipo_relacion: string
+  fecha_ingreso: string
+  fecha_salida: string | null
+  es_principal: boolean
+  activo: boolean
+  nombre_contacto_emergencia: string | null
+  telefono_contacto_emergencia: string | null
+  creado_en: string
+  actualizado_en: string | null
 }
 
 type FiltroEstado = 'todos' | 'activos' | 'inactivos'
@@ -38,6 +71,10 @@ export default function ResidentesTable() {
   const [error, setError] = useState<string | null>(null)
   const [busqueda, setBusqueda] = useState('')
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos')
+  const [selectedResidente, setSelectedResidente] = useState<ResidenteData | null>(null)
+  const [residenteDetallado, setResidenteDetallado] = useState<ResidenteDetallado | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
     fetchResidentes()
@@ -71,6 +108,58 @@ export default function ResidentesTable() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const eliminarResidente = async (residenteId: number) => {
+    try {
+      const response = await fetch(`/api/residentes/${residenteId}`, {
+        method: 'DELETE',
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+      
+      // Actualizar la lista después de eliminar
+      await fetchResidentes()
+      alert('Residente eliminado exitosamente')
+    } catch (err) {
+      console.error('Error eliminando residente:', err)
+      alert('Error eliminando residente: ' + (err instanceof Error ? err.message : 'Error desconocido'))
+    }
+  }
+
+  const verDetalles = async (residente: ResidenteData) => {
+    try {
+      setSelectedResidente(residente)
+      setShowDetailsModal(true)
+      setResidenteDetallado(null) // Limpiar datos anteriores
+      
+      console.log('🔍 Obteniendo detalles para residente:', residente.id)
+      
+      // Obtener información detallada solo de residentes
+      const response = await fetch(`/api/residentes/detalles/${residente.id}`)
+      if (response.ok) {
+        const detalles = await response.json()
+        console.log('✅ Detalles obtenidos:', detalles)
+        setResidenteDetallado({...detalles, actualizado_en: detalles.actualizado_en || null})
+      } else {
+        const errorData = await response.json()
+        console.error('❌ Error del servidor:', errorData)
+        // Si falla, usar los datos básicos que ya tenemos
+        setResidenteDetallado({...residente, actualizado_en: null})
+      }
+    } catch (error) {
+      console.error('❌ Error de red:', error)
+      // Mantener el modal abierto con información básica
+      setResidenteDetallado({...residente, actualizado_en: null})
+    }
+  }
+
+  const cerrarModal = () => {
+    setShowDetailsModal(false)
+    setSelectedResidente(null)
+    setResidenteDetallado(null)
   }
 
   // Filtrar residentes basado en búsqueda y estado
@@ -219,11 +308,10 @@ export default function ResidentesTable() {
                   <TableHead>Departamento</TableHead>
                   <TableHead>Tipo Relación</TableHead>
                   <TableHead>Fecha Ingreso</TableHead>
-                  <TableHead>Fecha Salida</TableHead>
                   <TableHead>Contacto Emergencia</TableHead>
                   <TableHead>Principal</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead>Creado</TableHead>
+                  <TableHead className="w-32">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -251,9 +339,6 @@ export default function ResidentesTable() {
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDate(residente.fecha_ingreso)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(residente.fecha_salida)}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
@@ -291,8 +376,45 @@ export default function ResidentesTable() {
                         )}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(residente.creado_en)}
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => verDetalles(residente)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar residente?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente el residente 
+                                con ID {residente.id} del sistema.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => eliminarResidente(residente.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -301,6 +423,161 @@ export default function ResidentesTable() {
           </div>
         )}
       </CardContent>
+
+      {/* Modal de Detalles */}
+      <Dialog open={showDetailsModal} onOpenChange={cerrarModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Detalles del Residente
+            </DialogTitle>
+            <DialogDescription>
+              Información detallada del residente
+            </DialogDescription>
+          </DialogHeader>
+          
+          {residenteDetallado ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Columna 1: Información Básica */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
+                  <User className="h-5 w-5 text-[#007BFF]" />
+                  Información Básica
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">ID Residente</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-semibold">{residenteDetallado.id}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">ID Usuario</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-semibold">{residenteDetallado.usuario_id}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">ID Departamento</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-semibold">{residenteDetallado.departamento_id}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Tipo de Relación</label>
+                        <div className="mt-1">
+                          <Badge variant={residenteDetallado.tipo_relacion === 'propietario' ? 'default' : 'secondary'} className="text-xs capitalize">
+                            {residenteDetallado.tipo_relacion}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Residente Principal</label>
+                        <div className="mt-1">
+                          <Badge variant={residenteDetallado.es_principal ? 'default' : 'outline'} className="text-xs">
+                            {residenteDetallado.es_principal ? '✅ Sí' : '❌ No'}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Estado</label>
+                        <div className="mt-1">
+                          <Badge variant={residenteDetallado.activo ? 'default' : 'destructive'} className="text-xs flex items-center gap-1 w-fit">
+                            {residenteDetallado.activo ? (
+                              <>
+                                <UserCheck className="h-3 w-3" />
+                                Activo
+                              </>
+                            ) : (
+                              <>
+                                <UserX className="h-3 w-3" />
+                                Inactivo
+                              </>
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna 2: Fechas y Contacto */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
+                  <Phone className="h-5 w-5 text-[#007BFF]" />
+                  Fechas y Contacto
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Fecha de Ingreso</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF]">{formatDate(residenteDetallado.fecha_ingreso)}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Fecha de Salida</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF]">
+                          {residenteDetallado.fecha_salida ? formatDate(residenteDetallado.fecha_salida) : 'Aún reside aquí'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Contacto de Emergencia</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF]">
+                          {residenteDetallado.nombre_contacto_emergencia || 'No especificado'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Teléfono de Emergencia</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] flex items-center gap-2">
+                          {residenteDetallado.telefono_contacto_emergencia ? (
+                            <>
+                              <Phone className="h-4 w-4 text-[#007BFF]" />
+                              {residenteDetallado.telefono_contacto_emergencia}
+                            </>
+                          ) : (
+                            'No especificado'
+                          )}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs font-medium text-[#A0AAB4]">Creado en</label>
+                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] text-xs">
+                          {formatDate(residenteDetallado.creado_en)}
+                        </p>
+                      </div>
+                      
+                      {residenteDetallado.actualizado_en && (
+                        <div>
+                          <label className="text-xs font-medium text-[#A0AAB4]">Actualizado en</label>
+                          <p className="text-[#1A2E49] dark:text-[#FFFFFF] text-xs">
+                            {formatDate(residenteDetallado.actualizado_en)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : selectedResidente ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex items-center gap-2 text-[#A0AAB4]">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Cargando información detallada...
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </Card>
   </div>
   )

@@ -10,8 +10,10 @@ export async function GET() {
     const [
       totalResidentes,
       residentesActivos,
-      departamentosOcupados,
-      solicitudesPendientes
+      residentesInactivos,
+      propietarios,
+      inquilinos,
+      familiares
     ] = await Promise.all([
       // Total de residentes
       sql`SELECT COUNT(*) as total FROM residentes`,
@@ -19,26 +21,26 @@ export async function GET() {
       // Residentes activos
       sql`SELECT COUNT(*) as total FROM residentes WHERE activo = true`,
       
-      // Departamentos ocupados (con residentes activos)
-      sql`
-        SELECT COUNT(DISTINCT departamento_id) as total 
-        FROM residentes 
-        WHERE activo = true
-      `,
+      // Residentes inactivos
+      sql`SELECT COUNT(*) as total FROM residentes WHERE activo = false`,
       
-      // Solicitudes pendientes (asumiendo que hay una tabla de solicitudes)
-      sql`
-        SELECT COUNT(*) as total 
-        FROM solicitudes_mantenimiento 
-        WHERE estado = 'pendiente'
-      `.catch(() => [{ total: 0 }]) // Fallback si no existe la tabla
+      // Propietarios
+      sql`SELECT COUNT(*) as total FROM residentes WHERE tipo_relacion = 'propietario'`,
+      
+      // Inquilinos
+      sql`SELECT COUNT(*) as total FROM residentes WHERE tipo_relacion = 'inquilino'`,
+      
+      // Familiares
+      sql`SELECT COUNT(*) as total FROM residentes WHERE tipo_relacion = 'familiar'`
     ]);
 
     const stats = {
       totalResidentes: parseInt(totalResidentes[0]?.total || 0),
       residentesActivos: parseInt(residentesActivos[0]?.total || 0),
-      departamentosOcupados: parseInt(departamentosOcupados[0]?.total || 0),
-      solicitudesPendientes: parseInt(solicitudesPendientes[0]?.total || 0)
+      residentesInactivos: parseInt(residentesInactivos[0]?.total || 0),
+      propietarios: parseInt(propietarios[0]?.total || 0),
+      inquilinos: parseInt(inquilinos[0]?.total || 0),
+      familiares: parseInt(familiares[0]?.total || 0)
     };
 
     console.log('📊 Estadísticas calculadas:', stats);
@@ -52,8 +54,10 @@ export async function GET() {
     return NextResponse.json({
       totalResidentes: 0,
       residentesActivos: 0,
-      departamentosOcupados: 0,
-      solicitudesPendientes: 0
+      residentesInactivos: 0,
+      propietarios: 0,
+      inquilinos: 0,
+      familiares: 0
     });
   }
 }

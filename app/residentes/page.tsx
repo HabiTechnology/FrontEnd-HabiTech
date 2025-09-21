@@ -2,18 +2,14 @@
 
 import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
-import DashboardStat from "@/components/dashboard/stat"
 import UsersIcon from "@/components/icons/users"
-import HomeIcon from "@/components/icons/home"
-import { AlertTriangle } from "lucide-react"
 import { PageTransition } from "@/components/animations/page-transition"
 import StaggerAnimation from "@/components/animations/stagger-animation"
-import AnimatedButton from "@/components/animations/animated-button"
 import FloatingElement from "@/components/animations/floating-element"
-import { useEffect, useState } from "react"
+import { ResidentesStats } from "@/components/residentes"
 
 // Import the actual ResidentesTable component
-const ResidentesTable = dynamic(() => import("@/components/residentes/residentes-table"), {
+const ResidentesTable = dynamic(() => import("@/components/residentes/residentes-table-simple"), {
   ssr: false,
   loading: () => <div className="h-[600px] w-full animate-pulse bg-muted rounded" />
 })
@@ -21,83 +17,10 @@ const ResidentesTable = dynamic(() => import("@/components/residentes/residentes
 interface ResidentesStatsData {
   totalResidentes: number
   residentesActivos: number
-  departamentosOcupados: number
-  solicitudesPendientes: number
-}
-
-function ResidentesStats() {
-  const [stats, setStats] = useState<ResidentesStatsData>({
-    totalResidentes: 0,
-    residentesActivos: 0,
-    departamentosOcupados: 0,
-    solicitudesPendientes: 0
-  })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/residentes/stats')
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data)
-        }
-      } catch (error) {
-        console.error('Error fetching residentes stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
-  }, [])
-
-  if (loading) {
-    return (
-      <>
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
-        ))}
-      </>
-    )
-  }
-
-  return (
-    <>
-      <DashboardStat
-        label="Total Residentes"
-        value={stats.totalResidentes.toString()}
-        description="Usuarios registrados"
-        icon={UsersIcon}
-        intent="neutral"
-      />
-      
-      <DashboardStat
-        label="Residentes Activos"
-        value={stats.residentesActivos.toString()}
-        description="Actualmente viviendo"
-        icon={UsersIcon}
-        intent="positive"
-        direction="up"
-      />
-      
-      <DashboardStat
-        label="Departamentos Ocupados"
-        value={stats.departamentosOcupados.toString()}
-        description="Unidades habitadas"
-        icon={HomeIcon}
-        intent="neutral"
-      />
-      
-      <DashboardStat
-        label="Solicitudes Pendientes"
-        value={stats.solicitudesPendientes.toString()}
-        description="Requieren atención"
-        icon={AlertTriangle}
-        intent={stats.solicitudesPendientes > 0 ? "negative" : "positive"}
-      />
-    </>
-  )
+  residentesInactivos: number
+  propietarios: number
+  inquilinos: number
+  familiares: number
 }
 
 export default function ResidentesPage() {
@@ -133,7 +56,7 @@ export default function ResidentesPage() {
         <div className="relative z-1">
           {/* Statistics Cards with Stagger Animation */}
           <StaggerAnimation delay={200} staggerDelay={120}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <ResidentesStats />
             </div>
           </StaggerAnimation>
