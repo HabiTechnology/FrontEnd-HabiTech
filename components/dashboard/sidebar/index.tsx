@@ -3,6 +3,8 @@
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context-simple-fixed"
+import AnimatedButton from "@/components/animations/animated-button"
+import StaggerAnimation from "@/components/animations/stagger-animation"
 
 import {
   Sidebar,
@@ -136,35 +138,41 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
               {group.title}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem
-                    key={item.title}
-                    className="sidebar-item"
-                  >
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActiveRoute(item.url)}
+              <StaggerAnimation delay={100} staggerDelay={50}>
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <SidebarMenuItem
+                      key={item.title}
+                      className="sidebar-item"
                     >
-                      <a href={item.url}>
-                        <item.icon className="size-5" />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-                {/* Acceso solo para admins */}
-                {isAdmin && (
-                  <SidebarMenuItem className="sidebar-item">
-                    <SidebarMenuButton asChild isActive={isActiveRoute("/admin")}> 
-                      <a href="/admin">
-                        <Shield className="size-5" />
-                        <span>Admin/Usuarios</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
+                      <AnimatedButton variant="hover">
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActiveRoute(item.url)}
+                        >
+                          <a href={item.url}>
+                            <item.icon className="size-5" />
+                            <span>{item.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </AnimatedButton>
+                    </SidebarMenuItem>
+                  ))}
+                  {/* Acceso solo para admins */}
+                  {isAdmin && (
+                    <SidebarMenuItem className="sidebar-item">
+                      <AnimatedButton variant="hover">
+                        <SidebarMenuButton asChild isActive={isActiveRoute("/admin")}> 
+                          <a href="/admin">
+                            <Shield className="size-5" />
+                            <span>Admin/Usuarios</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </AnimatedButton>
+                    </SidebarMenuItem>
+                  )}
+                </SidebarMenu>
+              </StaggerAnimation>
             </SidebarGroupContent>
           </SidebarGroup>
         ))}

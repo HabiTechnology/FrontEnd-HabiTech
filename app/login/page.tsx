@@ -10,6 +10,10 @@ import { Wallet, Shield, Sparkles, AlertCircle, CheckCircle, Users, UserCheck } 
 import { useAuth } from "@/lib/auth-context-simple-fixed"
 import { PrivyLoginButton } from "@/components/privy-login-button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import PageTransition from "@/components/animations/page-transition"
+import StaggerAnimation from "@/components/animations/stagger-animation"
+import FloatingElement from "@/components/animations/floating-element"
+import AnimatedButton from "@/components/animations/animated-button"
 
 export default function LoginPage() {
   const [showRegister, setShowRegister] = useState(false)
@@ -178,7 +182,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <PageTransition>
+      <div className="min-h-screen relative overflow-hidden">
       <ThemeToggle />
       
       {/* Elegant Minimalist Background that adapts to theme */}
@@ -196,22 +201,18 @@ export default function LoginPage() {
             const size = ((seed * 30) % 80) + 60;
             
             return (
-              <div
-                key={i}
-                className="absolute rounded-full opacity-10 dark:opacity-20"
-                style={{
-                  left: `${left}%`,
-                  top: `${top}%`,
-                  animationName: 'float',
-                  animationDuration: '8s',
-                  animationTimingFunction: 'ease-in-out',
-                  animationIterationCount: 'infinite',
-                  animationDelay: `${delay}s`,
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  background: `radial-gradient(circle, rgb(var(--color-primary) / 0.4), rgb(var(--color-primary) / 0.1))`,
-                }}
-              />
+              <FloatingElement key={i} intensity={8} duration={4000 + (i * 500)}>
+                <div
+                  className="absolute rounded-full bg-primary/10 dark:bg-primary/5 backdrop-blur-md"
+                  style={{
+                    left: `${left}%`,
+                    top: `${top}%`,
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    animationDelay: `${delay}s`,
+                  }}
+                />
+              </FloatingElement>
             );
           })}
         </div>
@@ -231,7 +232,8 @@ export default function LoginPage() {
       
       {/* Main Login Form */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
-        <Card className="w-full max-w-md backdrop-blur-2xl bg-card/90 border border-border/40 shadow-2xl rounded-3xl animate-fadeIn hover:scale-[1.02] transition-all duration-700">
+        <StaggerAnimation delay={300} staggerDelay={150}>
+          <Card className="w-full max-w-md backdrop-blur-2xl bg-card/90 border border-border/40 shadow-2xl rounded-3xl animate-fadeIn hover:scale-[1.02] transition-all duration-700">
           <CardHeader className="space-y-8 text-center pb-10 pt-12">
             {/* Elegant Logo Circle adapts to theme */}
             <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary via-primary/80 to-primary/60 rounded-full flex items-center justify-center shadow-2xl animate-float relative overflow-hidden">
@@ -276,7 +278,9 @@ export default function LoginPage() {
 
               {/* Main Connect Button - Privy Integration */}
               <div className="space-y-4">
-                <PrivyLoginButton />
+                <AnimatedButton variant="hover">
+                  <PrivyLoginButton />
+                </AnimatedButton>
 
                 {/* Elegant divider adapts to theme */}
                 <div className="flex items-center gap-4 py-1">
@@ -310,16 +314,21 @@ export default function LoginPage() {
             
             {/* Register Button - Elegant adapts to theme */}
             <div className="text-center pt-4 px-4">
-              <Button 
-                variant="ghost" 
+              <AnimatedButton 
                 onClick={() => setShowRegister(true)}
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
+                variant="hover"
               >
-                ¿Nuevo residente? Solicita departamento
-              </Button>
+                <Button 
+                  variant="ghost" 
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
+                >
+                  ¿Nuevo residente? Solicita departamento
+                </Button>
+              </AnimatedButton>
             </div>
           </CardContent>
         </Card>
+        </StaggerAnimation>
       </div>
 
       {/* Elegant Custom CSS */}
@@ -361,6 +370,7 @@ export default function LoginPage() {
         .animate-shake { animation: shake 0.4s ease-in-out; }
         .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
       `}</style>
-    </div>
+      </div>
+    </PageTransition>
   )
 }

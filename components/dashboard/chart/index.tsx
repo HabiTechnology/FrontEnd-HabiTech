@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import mockDataJson from "@/mock.json"
 import { Bullet } from "@/components/ui/bullet"
 import type { MockData, TimePeriod } from "@/types/dashboard"
+import AnimatedButton from "@/components/animations/animated-button"
+import FloatingElement from "@/components/animations/floating-element"
 
 const mockData = mockDataJson as MockData
 
@@ -146,13 +148,26 @@ export default function DashboardChart() {
   }
 
   return (
-    <div className="dashboard-section p-4">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="max-md:gap-4">
+    <div className="dashboard-section p-4 relative group hover:shadow-lg transition-all duration-300">
+      {/* Floating background elements */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <FloatingElement intensity={2} duration={3000}>
+          <div className="absolute top-4 right-4 w-6 h-6 bg-primary/5 rounded-full" />
+        </FloatingElement>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="max-md:gap-4 relative z-10">
         <div className="flex items-center justify-between mb-4 max-md:contents card-divider">
           <TabsList className="max-md:w-full">
-            <TabsTrigger value="week">SEMANA</TabsTrigger>
-            <TabsTrigger value="month">MES</TabsTrigger>
-            <TabsTrigger value="year">AÑO</TabsTrigger>
+            <AnimatedButton variant="hover">
+              <TabsTrigger value="week">SEMANA</TabsTrigger>
+            </AnimatedButton>
+            <AnimatedButton variant="hover">
+              <TabsTrigger value="month">MES</TabsTrigger>
+            </AnimatedButton>
+            <AnimatedButton variant="hover">
+              <TabsTrigger value="year">AÑO</TabsTrigger>
+            </AnimatedButton>
           </TabsList>
           <div className="flex items-center gap-6 max-md:order-1">
             {Object.entries(chartConfig).map(([key, value]) => (

@@ -12,6 +12,10 @@ import { Settings, Users, Plus, List, CheckCircle } from 'lucide-react'
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth-integrated'
 import React from 'react'
+import { PageTransition } from "@/components/animations/page-transition"
+import StaggerAnimation from "@/components/animations/stagger-animation"
+import AnimatedButton from "@/components/animations/animated-button"
+import FloatingElement from "@/components/animations/floating-element"
 
 export default function ContractAdmin() {
   const { contract, isContractConnected, addAdmin, addResident, removeUser } = useHabiTechContract();
@@ -93,16 +97,39 @@ export default function ContractAdmin() {
 
   return (
     <AdminGuard>
-      <div className="space-y-6 p-6">
-        {/* Eliminada advertencia de red Sepolia */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Agregar Administrador
-              </CardTitle>
-            </CardHeader>
+      <PageTransition>
+        <div className="space-y-6 p-6 relative">
+          {/* Floating background elements */}
+          <div className="fixed inset-0 pointer-events-none -z-10">
+            {[...Array(3)].map((_, i) => {
+              const positions = [
+                { top: '18%', right: '15%' },
+                { top: '45%', left: '10%' },
+                { bottom: '25%', right: '8%' }
+              ];
+              
+              return (
+                <FloatingElement key={i} intensity={5} duration={2600 + (i * 500)}>
+                  <div
+                    className="absolute w-16 h-16 bg-red-500/10 dark:bg-red-400/15 rounded-full backdrop-blur-sm"
+                    style={positions[i]}
+                  />
+                </FloatingElement>
+              );
+            })}
+          </div>
+
+          <div className="relative z-1">
+            {/* Eliminada advertencia de red Sepolia */}
+            <StaggerAnimation delay={200} staggerDelay={150}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      Agregar Administrador
+                    </CardTitle>
+                  </CardHeader>
             <CardContent>
               <form
                 className="space-y-4"
@@ -146,9 +173,11 @@ export default function ContractAdmin() {
                     required
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? 'Agregando...' : 'Agregar Admin'}
-                </Button>
+                <AnimatedButton variant="hover">
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? 'Agregando...' : 'Agregar Admin'}
+                  </Button>
+                </AnimatedButton>
               </form>
             </CardContent>
           </Card>
@@ -202,15 +231,18 @@ export default function ContractAdmin() {
                     required
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? 'Agregando...' : 'Agregar Residente'}
-                </Button>
+                <AnimatedButton variant="hover">
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? 'Agregando...' : 'Agregar Residente'}
+                  </Button>
+                </AnimatedButton>
               </form>
             </CardContent>
           </Card>
         </div>
+        
         {users.length > 0 && (
-          <Card>
+          <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <List className="h-5 w-5" />
@@ -234,27 +266,29 @@ export default function ContractAdmin() {
                         {user.type === 'admin' ? 'Admin' : 'Residente'}
                       </span>
                       {isAdmin && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={async () => {
-                            if (!isContractConnected) return alert('Debes conectar tu wallet');
-                            if (!window.confirm('¿Seguro que deseas eliminar este usuario?')) return;
-                            setLoading(true);
-                            try {
-                              await removeUser(user.address);
-                              alert('Usuario eliminado');
-                              await loadContractData();
-                            } catch (err: any) {
-                              alert('Error: ' + (err?.message || err));
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
-                          disabled={loading}
-                        >
-                          Eliminar
-                        </Button>
+                        <AnimatedButton variant="hover">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              if (!isContractConnected) return alert('Debes conectar tu wallet');
+                              if (!window.confirm('¿Seguro que deseas eliminar este usuario?')) return;
+                              setLoading(true);
+                              try {
+                                await removeUser(user.address);
+                                alert('Usuario eliminado');
+                                await loadContractData();
+                              } catch (err: any) {
+                                alert('Error: ' + (err?.message || err));
+                              } finally {
+                                setLoading(false);
+                              }
+                            }}
+                            disabled={loading}
+                          >
+                            Eliminar
+                          </Button>
+                        </AnimatedButton>
                       )}
                     </div>
                   </div>
@@ -263,13 +297,17 @@ export default function ContractAdmin() {
             </CardContent>
           </Card>
         )}
-        <Alert>
+        
+        <Alert className="mt-6">
           <AlertDescription>
             <strong>Para agregar usuarios:</strong> Usa herramientas como Remix, Etherscan, o la consola del navegador.<br/>
             El contrato tiene las funciones <code>addAdmin(address, name)</code> y <code>addResident(address, name)</code>.
           </AlertDescription>
         </Alert>
-      </div>
+      </StaggerAnimation>
+    </div>
+  </div>
+</PageTransition>
     </AdminGuard>
   );
 }

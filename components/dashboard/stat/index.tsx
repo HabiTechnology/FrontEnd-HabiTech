@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bullet } from "@/components/ui/bullet";
 import { cn } from "@/lib/utils";
+import FloatingElement from "@/components/animations/floating-element";
 
 interface DashboardStatProps {
   label: string;
@@ -58,16 +59,23 @@ export default function DashboardStat({
   const { prefix, numericValue, suffix, isNumeric } = parseValue(value);
 
   return (
-    <Card className="stat-card-habitech relative overflow-hidden">
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle className="flex items-center gap-2.5">
+    <Card className="stat-card-habitech relative overflow-hidden group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+      {/* Floating background element */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <FloatingElement intensity={3} duration={2000}>
+          <div className="absolute top-2 right-2 w-8 h-8 bg-primary/10 rounded-full" />
+        </FloatingElement>
+      </div>
+      
+      <CardHeader className="flex items-center justify-between relative z-10">
+        <CardTitle className="flex items-center gap-2.5 group-hover:text-primary transition-colors duration-300">
           <Bullet />
           {label}
         </CardTitle>
-        <Icon className="size-4 text-muted-foreground" />
+        <Icon className="size-4 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
       </CardHeader>
 
-      <CardContent className="bg-accent/50 backdrop-filter backdrop-blur-sm flex-1 pt-2 md:pt-6 overflow-clip relative border-t border-border/50">
+      <CardContent className="bg-accent/50 backdrop-filter backdrop-blur-sm flex-1 pt-2 md:pt-6 overflow-clip relative border-t border-border/50 z-10">
         <div className="flex items-center">
           <span className="text-4xl md:text-5xl font-display text-card-foreground">
             {isNumeric ? (
