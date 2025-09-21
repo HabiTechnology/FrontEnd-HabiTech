@@ -46,6 +46,25 @@ interface ResidenteData {
   nombre_contacto_emergencia: string | null
   telefono_contacto_emergencia: string | null
   creado_en: string
+  // Datos del usuario relacionado
+  usuario?: {
+    nombre: string
+    apellido: string
+    correo: string
+    telefono: string | null
+    numero_documento: string
+    imagen_perfil: string | null
+  }
+  // Datos del departamento relacionado
+  departamento?: {
+    numero: string
+    piso: number
+    dormitorios: number
+    banos: number
+    area_m2: number | null
+    renta_mensual: number
+    estado: string
+  }
 }
 
 interface ResidenteDetallado {
@@ -83,16 +102,20 @@ export default function ResidentesTableSimple() {
   const fetchResidentes = async () => {
     try {
       setLoading(true)
+      console.log('🔍 Obteniendo residentes...')
       const response = await fetch('/api/residentes')
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Datos recibidos:', data)
+        console.log('🔎 Primer residente:', data[0])
         setResidentes(data)
         setError(null)
       } else {
+        console.error('❌ Error en respuesta:', response.status)
         setError('Error al cargar residentes')
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('❌ Error:', error)
       setError('Error de conexión')
     } finally {
       setLoading(false)
@@ -176,7 +199,14 @@ export default function ResidentesTableSimple() {
       residente.usuario_id.toString().includes(busqueda.toLowerCase()) ||
       residente.departamento_id.toString().includes(busqueda.toLowerCase()) ||
       residente.tipo_relacion.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (residente.nombre_contacto_emergencia && residente.nombre_contacto_emergencia.toLowerCase().includes(busqueda.toLowerCase()))
+      (residente.nombre_contacto_emergencia && residente.nombre_contacto_emergencia.toLowerCase().includes(busqueda.toLowerCase())) ||
+      // Buscar en datos del usuario
+      (residente.usuario?.nombre && residente.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())) ||
+      (residente.usuario?.apellido && residente.usuario.apellido.toLowerCase().includes(busqueda.toLowerCase())) ||
+      (residente.usuario?.correo && residente.usuario.correo.toLowerCase().includes(busqueda.toLowerCase())) ||
+      (residente.usuario?.numero_documento && residente.usuario.numero_documento.toLowerCase().includes(busqueda.toLowerCase())) ||
+      // Buscar en datos del departamento
+      (residente.departamento?.numero && residente.departamento.numero.toLowerCase().includes(busqueda.toLowerCase()))
 
     // Filtro por estado
     const coincideEstado = filtroEstado === 'todos' ||
@@ -227,7 +257,7 @@ export default function ResidentesTableSimple() {
           <div className="flex items-center gap-2 flex-1">
             <Search className="h-4 w-4 text-[#A0AAB4]" />
             <Input
-              placeholder="Buscar por ID, usuario, departamento o nombre..."
+              placeholder="Buscar por ID, nombre, documento, departamento..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="flex-1"
@@ -262,7 +292,8 @@ export default function ResidentesTableSimple() {
               <TableHeader className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Usuario</TableHead>
+                  <TableHead>Residente</TableHead>
+                  <TableHead>Documento</TableHead>
                   <TableHead>Departamento</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Principal</TableHead>
@@ -275,8 +306,49 @@ export default function ResidentesTableSimple() {
                 {residentesFiltrados.map((residente) => (
                   <TableRow key={residente.id}>
                     <TableCell className="font-semibold">{residente.id}</TableCell>
-                    <TableCell>{residente.usuario_id}</TableCell>
-                    <TableCell>{residente.departamento_id}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {residente.usuario?.nombre && residente.usuario?.apellido 
+                            ? `${residente.usuario.nombre} ${residente.usuario.apellido}`
+                            : `Usuario ID: ${residente.usuario_id}`
+                          }
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {residente.usuario?.correo || 'Sin correo'}
+                        </span>
+                        {residente.usuario?.telefono && (
+                          <span className="text-xs text-muted-foreground">
+                            {residente.usuario.telefono}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {residente.usuario?.numero_documento || 'No disponible'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {residente.departamento?.numero 
+                            ? `Dept. ${residente.departamento.numero}`
+                            : `Dept. ID: ${residente.departamento_id}`
+                          }
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {residente.departamento?.piso 
+                            ? `Piso ${residente.departamento.piso}`
+                            : 'Sin info de piso'
+                          }
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {residente.departamento?.dormitorios && residente.departamento?.banos
+                            ? `${residente.departamento.dormitorios}D / ${residente.departamento.banos}B`
+                            : 'Sin info de habitaciones'
+                          }
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={residente.tipo_relacion === 'propietario' ? 'default' : 'secondary'}>
                         {residente.tipo_relacion}

@@ -1,4 +1,37 @@
-export interface Usuario {
+export interface ResidenteCompleto {
+  id: number;
+  usuario_id: number;
+  departamento_id: number;
+  tipo_relacion: string;
+  fecha_ingreso: string;
+  fecha_salida?: string;
+  nombre_contacto_emergencia?: string;
+  telefono_contacto_emergencia?: string;
+  es_principal: boolean;
+  activo: boolean;
+  creado_en: string;
+  // Datos relacionados
+  usuario?: {
+    nombre: string;
+    apellido: string;
+    correo: string;
+    telefono?: string;
+    numero_documento: string;
+    imagen_perfil?: string;
+  };
+  departamento?: {
+    numero: string;
+    piso: number;
+    dormitorios: number;
+    banos: number;
+    area_m2?: number;
+    renta_mensual: number;
+    estado: string;
+  };
+}
+
+// Tipos legacy para mantener compatibilidad con componentes existentes
+export interface UsuarioLegacy {
   id: number;
   nombre: string;
   email: string;
@@ -10,7 +43,7 @@ export interface Usuario {
   rol?: string;
 }
 
-export interface Departamento {
+export interface DepartamentoLegacy {
   id: number;
   numero: string;
   piso: number;
@@ -36,10 +69,10 @@ export interface ContactoEmergencia {
   telefono?: string;
 }
 
-export interface ResidenteCompleto {
+export interface ResidenteCompletoLegacy {
   id: number;
-  usuario: Usuario;
-  departamento: Departamento;
+  usuario: UsuarioLegacy;
+  departamento: DepartamentoLegacy;
   contrato: Contrato;
   contacto_emergencia: ContactoEmergencia;
   es_principal: boolean;
