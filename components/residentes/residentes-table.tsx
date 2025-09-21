@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { memo, useCallback, useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +18,62 @@ import { Bullet } from "@/components/ui/bullet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+
+// Memoized table row component
+const ResidenteTableRow = memo(({ 
+  residente, 
+  onView, 
+  onEdit, 
+  onDelete, 
+  loading 
+}: {
+  residente: Residente;
+  onView: (id: number) => void;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
+  loading: boolean;
+}) => {
+  return (
+    <TableRow className="border-border/20 hover:bg-muted/50 transition-colors">
+      <TableCell className="font-medium text-foreground">
+        {residente.id}
+      </TableCell>
+      <TableCell className="text-foreground">
+        {residente.nombre}
+      </TableCell>
+      <TableCell className="text-foreground">
+        {residente.apellido || '-'}
+      </TableCell>
+      <TableCell className="text-foreground">
+        {residente.email}
+      </TableCell>
+      <TableCell className="text-foreground">
+        {residente.telefono || '-'}
+      </TableCell>
+      <TableCell className="text-foreground">
+        {residente.numero_documento || '-'}
+      </TableCell>
+      <TableCell className="text-foreground">
+        <Badge variant={residente.activo ? "outline-success" : "destructive"}>
+          {residente.activo ? "Activo" : "Inactivo"}
+        </Badge>
+      </TableCell>
+      <TableCell className="flex gap-2">
+        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => onView(residente.id)}>
+          VER
+        </Button>
+        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => onEdit(residente.id)}>
+          EDITAR
+        </Button>
+        <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => onDelete(residente.id)} disabled={loading}>
+          ELIMINAR
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+})
+
+ResidenteTableRow.displayName = 'ResidenteTableRow';
 
 
 
@@ -55,8 +111,8 @@ export default function ResidentesTable() {
 
   const [form, setForm] = useState<FormState>(emptyForm);
 
-  // Cargar residentes desde el backend
-  const fetchResidentes = async () => {
+  // Cargar residentes desde el backend (memoizado)
+  const fetchResidentes = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/usuarios');
@@ -67,14 +123,14 @@ export default function ResidentesTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchResidentes();
-  }, []);
+  }, [fetchResidentes]);
 
-  // Handlers para ver, editar y eliminar
-  const handleView = (id: number) => {
+  // Memoized handlers para ver, editar y eliminar
+  const handleView = useCallback((id: number) => {
     const residente = residentes.find(r => r.id === id);
     if (residente) {
       setForm({
@@ -92,9 +148,9 @@ export default function ResidentesTable() {
       setModalMode('view');
       setShowModal(true);
     }
-  };
+  }, [residentes]);
 
-  const handleEdit = (id: number) => {
+  const handleEdit = useCallback((id: number) => {
     const residente = residentes.find(r => r.id === id);
     if (residente) {
       setForm({
@@ -112,9 +168,9 @@ export default function ResidentesTable() {
       setModalMode('edit');
       setShowModal(true);
     }
-  };
+  }, [residentes]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = useCallback(async (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
       setLoading(true);
       try {
@@ -124,7 +180,7 @@ export default function ResidentesTable() {
         setLoading(false);
       }
     }
-  };
+  }, [fetchResidentes]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -320,45 +376,14 @@ export default function ResidentesTable() {
             </TableHeader>
             <TableBody>
               {residentes.map((residente) => (
-                <TableRow 
+                <ResidenteTableRow
                   key={residente.id}
-                  className="border-border/20 hover:bg-muted/50 transition-colors"
-                >
-                  <TableCell className="font-medium text-foreground">
-                    {residente.id}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {residente.nombre}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {residente.apellido || '-'}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {residente.email}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {residente.telefono || '-'}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {residente.numero_documento || '-'}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    <Badge variant={residente.activo ? "outline-success" : "destructive"}>
-                      {residente.activo ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleView(residente.id)}>
-                      VER
-                    </Button>
-                    <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleEdit(residente.id)}>
-                      EDITAR
-                    </Button>
-                    <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => handleDelete(residente.id)} disabled={loading}>
-                      ELIMINAR
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                  residente={residente}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  loading={loading}
+                />
               ))}
             </TableBody>
           </Table>

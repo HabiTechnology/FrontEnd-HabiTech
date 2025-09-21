@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts"
-
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import mockDataJson from "@/mock.json"

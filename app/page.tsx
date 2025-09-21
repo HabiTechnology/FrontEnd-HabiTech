@@ -1,8 +1,8 @@
+"use client"
+
+import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
 import DashboardStat from "@/components/dashboard/stat"
-import DashboardChart from "@/components/dashboard/chart"
-import RebelsRanking from "@/components/dashboard/rebels-ranking"
-import SecurityStatus from "@/components/dashboard/security-status"
 import { RoleGuard } from "@/components/role-guard"
 import BracketsIcon from "@/components/icons/brackets"
 import GearIcon from "@/components/icons/gear"
@@ -10,6 +10,22 @@ import ProcessorIcon from "@/components/icons/proccesor"
 import BoomIcon from "@/components/icons/boom"
 import mockDataJson from "@/mock.json"
 import type { MockData } from "@/types/dashboard"
+
+// Lazy load heavy components
+const DashboardChart = dynamic(() => import("@/components/dashboard/chart"), {
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full animate-pulse bg-muted rounded mb-6" />
+})
+
+const RebelsRanking = dynamic(() => import("@/components/dashboard/rebels-ranking"), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full animate-pulse bg-muted rounded" />
+})
+
+const SecurityStatus = dynamic(() => import("@/components/dashboard/security-status"), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full animate-pulse bg-muted rounded" />
+})
 
 const mockData = mockDataJson as MockData
 

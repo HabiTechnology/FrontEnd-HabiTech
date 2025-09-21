@@ -1,8 +1,16 @@
+"use client"
+
+import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
-import Notifications from "@/components/dashboard/notifications"
 import BellIcon from "@/components/icons/bell"
 import mockDataJson from "@/mock.json"
 import type { MockData } from "@/types/dashboard"
+
+// Lazy load notifications component
+const Notifications = dynamic(() => import("@/components/dashboard/notifications"), {
+  ssr: false,
+  loading: () => <div className="h-[500px] w-full animate-pulse bg-muted rounded" />
+})
 
 const mockData = mockDataJson as MockData
 

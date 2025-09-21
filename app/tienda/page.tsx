@@ -1,9 +1,15 @@
+"use client"
+
+import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
-import { 
-  TiendaStats, 
-  TiendaCatalogo
-} from "@/components/tienda"
+import { TiendaStats } from "@/components/tienda"
 import ShoppingCartIcon from "@/components/icons/shopping-cart"
+
+// Lazy load the catalog component
+const TiendaCatalogo = dynamic(() => import("@/components/tienda/tienda-catalogo"), {
+  ssr: false,
+  loading: () => <div className="h-[600px] w-full animate-pulse bg-muted rounded" />
+})
 
 export default function TiendaPage() {
   return (

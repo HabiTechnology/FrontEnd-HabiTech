@@ -1,9 +1,15 @@
+"use client"
+
+import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
-import { 
-  ResidentesTable, 
-  ResidentesStats
-} from "@/components/residentes"
+import { ResidentesStats } from "@/components/residentes"
 import UsersIcon from "@/components/icons/users"
+
+// Lazy load the heavy table component
+const ResidentesTable = dynamic(() => import("@/components/residentes/residentes-table"), {
+  ssr: false,
+  loading: () => <div className="h-[600px] w-full animate-pulse bg-muted rounded" />
+})
 
 export default function ResidentesPage() {
   return (
