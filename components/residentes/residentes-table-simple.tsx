@@ -32,7 +32,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Building, UserCheck, UserX, Phone, Loader2, Search, Filter, Users, Eye, Trash2, User } from 'lucide-react'
+import { Building, UserCheck, UserX, Phone, Loader2, Search, Filter, Users, Eye, Trash2, User, FileText, Download } from 'lucide-react'
+import { generarPDFTablaCompleta, generarPDFResidenteIndividual } from '@/lib/pdf-utils'
 
 interface ResidenteData {
   id: number
@@ -140,15 +141,23 @@ export default function ResidentesTableSimple() {
       const response = await fetch(`/api/residentes/${residente.id}`, {
         method: 'DELETE'
       })
+      
       if (response.ok) {
+        // Actualizar la lista local removiendo el residente eliminado
         setResidentes(prev => prev.filter(r => r.id !== residente.id))
         setShowDeleteModal(false)
         setSelectedResidente(null)
+        
+        // Mostrar mensaje de éxito
+        alert('Residente eliminado exitosamente')
       } else {
-        console.error('Error eliminando residente')
+        const errorData = await response.json()
+        console.error('Error eliminando residente:', errorData)
+        alert(errorData.error || 'Error al eliminar el residente')
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error de red:', error)
+      alert('Error de conexión. Por favor, intenta de nuevo.')
     }
   }
 
@@ -276,6 +285,17 @@ export default function ResidentesTableSimple() {
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Botón Exportar PDF */}
+          <Button
+            onClick={async () => await generarPDFTablaCompleta(residentesFiltrados)}
+            variant="outline"
+            className="flex items-center gap-2 bg-[#007BFF] text-white hover:bg-[#0056b3] border-[#007BFF]"
+            title={`Exportar ${residentesFiltrados.length} residente(s) a PDF`}
+          >
+            <FileText className="h-4 w-4" />
+            Exportar PDF ({residentesFiltrados.length})
+          </Button>
         </div>
       </CardHeader>
 
@@ -386,12 +406,24 @@ export default function ResidentesTableSimple() {
                           <Eye className="h-4 w-4" />
                           Ver más
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => await generarPDFResidenteIndividual(residente)}
+                          className="flex items-center gap-1 text-[#007BFF] hover:text-[#0056b3] hover:bg-[#007BFF]/10"
+                        >
+                          <Download className="h-4 w-4" />
+                          PDF
+                        </Button>
                         <AlertDialog open={showDeleteModal && selectedResidente?.id === residente.id} onOpenChange={setShowDeleteModal}>
                           <AlertDialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedResidente(residente)}
+                              onClick={() => {
+                                setSelectedResidente(residente)
+                                setShowDeleteModal(true)
+                              }}
                               className="flex items-center gap-1 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -427,15 +459,34 @@ export default function ResidentesTableSimple() {
       <Dialog open={showDetailsModal} onOpenChange={cerrarModal}>
         <DialogContent className="max-w-[99vw] w-[99vw] min-w-[1400px] h-[95vh] overflow-y-auto p-8">
           <DialogHeader className="mb-8">
-            <DialogTitle className="text-3xl font-bold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-4">
-              <div className="bg-gradient-to-r from-[#007BFF] to-[#1A2E49] p-4 rounded-full">
-                <Users className="h-8 w-8 text-white" />
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-3xl font-bold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-4">
+                  <div className="bg-gradient-to-r from-[#007BFF] to-[#1A2E49] p-4 rounded-full">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  Información Completa del Residente
+                </DialogTitle>
+                <DialogDescription className="text-lg text-[#A0AAB4] mt-3">
+                  Datos completos del usuario, departamento y residencia en el sistema HabiTech
+                </DialogDescription>
               </div>
-              Información Completa del Residente
-            </DialogTitle>
-            <DialogDescription className="text-lg text-[#A0AAB4] mt-3">
-              Datos completos del usuario, departamento y residencia en el sistema HabiTech
-            </DialogDescription>
+              
+              {/* Botón PDF en el Modal */}
+              {selectedResidente && residenteDetallado && (
+                <Button
+                  onClick={async () => await generarPDFResidenteIndividual({
+                    ...selectedResidente,
+                    ...residenteDetallado
+                  })}
+                  variant="outline"
+                  className="flex items-center gap-2 bg-[#007BFF] text-white hover:bg-[#0056b3] border-[#007BFF] px-6 py-3"
+                >
+                  <FileText className="h-5 w-5" />
+                  Generar PDF Detallado
+                </Button>
+              )}
+            </div>
           </DialogHeader>
           
           {residenteDetallado && selectedResidente ? (

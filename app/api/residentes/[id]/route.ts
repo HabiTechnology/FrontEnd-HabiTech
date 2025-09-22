@@ -143,3 +143,67 @@ export async function GET(
     )
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const residenteId = parseInt(params.id)
+    
+    if (isNaN(residenteId)) {
+      return NextResponse.json(
+        { error: 'ID de residente inválido' },
+        { status: 400 }
+      )
+    }
+
+    console.log('🗑️ Eliminando residente:', residenteId)
+
+    // Verificar si el residente existe antes de eliminar
+    const existeResidente = await sql`
+      SELECT id FROM residentes WHERE id = ${residenteId}
+    `
+
+    if (existeResidente.length === 0) {
+      return NextResponse.json(
+        { error: 'Residente no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Eliminar el residente
+    const result = await sql`
+      DELETE FROM residentes 
+      WHERE id = ${residenteId}
+      RETURNING id
+    `
+
+    if (result.length === 0) {
+      return NextResponse.json(
+        { error: 'No se pudo eliminar el residente' },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Residente eliminado exitosamente:', residenteId)
+
+    return NextResponse.json(
+      { 
+        message: 'Residente eliminado exitosamente',
+        id: residenteId
+      },
+      { status: 200 }
+    )
+
+  } catch (error) {
+    console.error('❌ Error al eliminar residente:', error)
+    return NextResponse.json(
+      { 
+        error: 'Error interno del servidor', 
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
+      { status: 500 }
+    )
+  }
+}
