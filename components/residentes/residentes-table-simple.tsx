@@ -425,192 +425,302 @@ export default function ResidentesTableSimple() {
 
       {/* Modal de Detalles - Solo Información de Residentes */}
       <Dialog open={showDetailsModal} onOpenChange={cerrarModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#007BFF]" />
-              Información Detallada del Residente
+        <DialogContent className="max-w-[99vw] w-[99vw] min-w-[1400px] h-[95vh] overflow-y-auto p-8">
+          <DialogHeader className="mb-8">
+            <DialogTitle className="text-3xl font-bold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-4">
+              <div className="bg-gradient-to-r from-[#007BFF] to-[#1A2E49] p-4 rounded-full">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              Información Completa del Residente
             </DialogTitle>
-            <DialogDescription>
-              Datos completos del residente en el sistema HabiTech
+            <DialogDescription className="text-lg text-[#A0AAB4] mt-3">
+              Datos completos del usuario, departamento y residencia en el sistema HabiTech
             </DialogDescription>
           </DialogHeader>
           
-          {residenteDetallado ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Columna Izquierda: Información Básica */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
-                  <User className="h-5 w-5 text-[#007BFF]" />
-                  Información Básica
-                </h3>
-                
-                <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">ID Residente</label>
-                      <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-bold text-lg">{residenteDetallado.id}</p>
+          {residenteDetallado && selectedResidente ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4">
+              
+              {/* Columna 1: Información del Usuario */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-[#007BFF]/10 to-[#1A2E49]/5 rounded-2xl p-8 border border-[#007BFF]/20">
+                  <h3 className="text-2xl font-bold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-4 mb-6">
+                    <div className="bg-[#007BFF] p-3 rounded-xl">
+                      <User className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Tipo de Relación</label>
-                      <div className="mt-1">
-                        <Badge 
-                          variant={residenteDetallado.tipo_relacion === 'propietario' ? 'default' : 'secondary'} 
-                          className="text-sm px-3 py-1"
-                        >
-                          {residenteDetallado.tipo_relacion.charAt(0).toUpperCase() + residenteDetallado.tipo_relacion.slice(1)}
-                        </Badge>
+                    Datos del Usuario
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 p-4 bg-white dark:bg-[#1A2E49] rounded-xl shadow-sm">
+                      <div className="w-16 h-16 bg-gradient-to-br from-[#007BFF] to-[#1A2E49] rounded-full flex items-center justify-center text-white font-bold text-xl">
+                        {selectedResidente.usuario?.nombre?.[0] || 'U'}
                       </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Residente Principal</label>
-                      <div className="mt-1">
-                        <Badge 
-                          variant={residenteDetallado.es_principal ? 'default' : 'outline'} 
-                          className="text-sm px-3 py-1"
-                        >
-                          {residenteDetallado.es_principal ? '✅ Principal' : '👥 Secundario'}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Estado de Residencia</label>
-                      <div className="mt-1">
-                        <Badge 
-                          variant={residenteDetallado.activo ? 'default' : 'destructive'} 
-                          className="text-sm px-3 py-1 flex items-center gap-1 w-fit"
-                        >
-                          {residenteDetallado.activo ? (
-                            <>
-                              <UserCheck className="h-4 w-4" />
-                              Activo
-                            </>
-                          ) : (
-                            <>
-                              <UserX className="h-4 w-4" />
-                              Inactivo
-                            </>
-                          )}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Información de Referencias */}
-                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
-                  🔗 Referencias del Sistema
-                </h3>
-                
-                <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">ID Usuario</label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <User className="h-4 w-4 text-[#007BFF]" />
-                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-semibold">{residenteDetallado.usuario_id}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">ID Departamento</label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Building className="h-4 w-4 text-[#007BFF]" />
-                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-semibold">{residenteDetallado.departamento_id}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Columna Derecha: Fechas y Contacto */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
-                  📅 Fechas Importantes
-                </h3>
-                
-                <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Fecha de Ingreso</label>
-                      <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-medium text-lg">
-                        {formatDate(residenteDetallado.fecha_ingreso)}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Fecha de Salida</label>
-                      <p className="text-[#1A2E49] dark:text-[#FFFFFF]">
-                        {residenteDetallado.fecha_salida ? formatDate(residenteDetallado.fecha_salida) : '🏠 Aún reside aquí'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Registro en Sistema</label>
-                      <p className="text-[#1A2E49] dark:text-[#FFFFFF] text-sm">
-                        {formatDate(residenteDetallado.creado_en)}
-                      </p>
-                    </div>
-                    {residenteDetallado.actualizado_en && (
                       <div>
-                        <label className="text-sm font-medium text-[#A0AAB4]">Última Actualización</label>
-                        <p className="text-[#1A2E49] dark:text-[#FFFFFF] text-sm">
-                          {formatDate(residenteDetallado.actualizado_en)}
+                        <p className="font-bold text-xl text-[#1A2E49] dark:text-white">
+                          {selectedResidente.usuario?.nombre && selectedResidente.usuario?.apellido 
+                            ? `${selectedResidente.usuario.nombre} ${selectedResidente.usuario.apellido}`
+                            : 'Usuario no disponible'
+                          }
+                        </p>
+                        <p className="text-sm text-[#A0AAB4] mt-1">ID: {selectedResidente.usuario_id}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="p-4 bg-white dark:bg-[#1A2E49] rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-[#A0AAB4] uppercase tracking-wide">Correo Electrónico</label>
+                        <p className="text-[#1A2E49] dark:text-white font-medium mt-2 flex items-center gap-3 text-lg">
+                          <span>📧</span>
+                          {selectedResidente.usuario?.correo || 'No disponible'}
                         </p>
                       </div>
-                    )}
+                      
+                      <div className="p-4 bg-white dark:bg-[#1A2E49] rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-[#A0AAB4] uppercase tracking-wide">Documento</label>
+                        <p className="text-[#1A2E49] dark:text-white font-medium mt-2 flex items-center gap-3 text-lg">
+                          <span>🆔</span>
+                          {selectedResidente.usuario?.numero_documento || 'No disponible'}
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-white dark:bg-[#1A2E49] rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-[#A0AAB4] uppercase tracking-wide">Teléfono</label>
+                        <p className="text-[#1A2E49] dark:text-white font-medium mt-2 flex items-center gap-3 text-lg">
+                          <Phone className="h-5 w-5 text-[#007BFF]" />
+                          {selectedResidente.usuario?.telefono || 'No disponible'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Contacto de Emergencia */}
-                <h3 className="text-lg font-semibold text-[#1A2E49] dark:text-[#F5F7FA] flex items-center gap-2 border-b pb-2">
-                  <Phone className="h-5 w-5 text-[#007BFF]" />
-                  Contacto de Emergencia
-                </h3>
                 
-                <div className="p-4 bg-[#F5F7FA] dark:bg-[#1A2E49] rounded-lg border">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Nombre del Contacto</label>
-                      <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-medium">
+                {/* Contacto de Emergencia */}
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-red-200 dark:border-red-800">
+                  <h3 className="text-xl font-bold text-red-800 dark:text-red-200 flex items-center gap-4 mb-6">
+                    <div className="bg-red-500 p-3 rounded-xl">
+                      <Phone className="h-5 w-5 text-white" />
+                    </div>
+                    Contacto de Emergencia
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white dark:bg-red-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-red-600 dark:text-red-300 uppercase tracking-wide">Nombre</label>
+                      <p className="text-red-800 dark:text-red-100 font-medium mt-2 text-lg">
                         {residenteDetallado.nombre_contacto_emergencia || '❌ No especificado'}
                       </p>
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-[#A0AAB4]">Teléfono de Emergencia</label>
-                      <div className="flex items-center gap-2">
-                        {residenteDetallado.telefono_contacto_emergencia ? (
-                          <>
-                            <Phone className="h-4 w-4 text-[#007BFF]" />
-                            <p className="text-[#1A2E49] dark:text-[#FFFFFF] font-medium">
-                              {residenteDetallado.telefono_contacto_emergencia}
-                            </p>
-                          </>
-                        ) : (
-                          <p className="text-[#A0AAB4]">❌ No especificado</p>
-                        )}
+                    
+                    <div className="p-4 bg-white dark:bg-red-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-red-600 dark:text-red-300 uppercase tracking-wide">Teléfono</label>
+                      <p className="text-red-800 dark:text-red-100 font-medium mt-2 text-lg">
+                        {residenteDetallado.telefono_contacto_emergencia || '❌ No especificado'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna 2: Información del Departamento */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-8 border border-green-200 dark:border-green-800">
+                  <h3 className="text-2xl font-bold text-green-800 dark:text-green-200 flex items-center gap-4 mb-6">
+                    <div className="bg-green-500 p-3 rounded-xl">
+                      <Building className="h-6 w-6 text-white" />
+                    </div>
+                    Información del Departamento
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 p-6 bg-white dark:bg-green-900/30 rounded-xl shadow-sm">
+                      <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
+                        {selectedResidente.departamento?.numero || selectedResidente.departamento_id}
+                      </div>
+                      <div>
+                        <p className="font-bold text-2xl text-green-800 dark:text-green-100">
+                          Departamento {selectedResidente.departamento?.numero || selectedResidente.departamento_id}
+                        </p>
+                        <p className="text-green-600 dark:text-green-300 text-lg mt-1">
+                          Piso {selectedResidente.departamento?.piso || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-6 bg-white dark:bg-green-900/30 rounded-xl text-center shadow-sm">
+                        <div className="text-3xl font-bold text-green-800 dark:text-green-100 mb-2">
+                          {selectedResidente.departamento?.dormitorios || '?'}
+                        </div>
+                        <div className="text-sm text-green-600 dark:text-green-300 font-medium uppercase">Dormitorios</div>
+                      </div>
+                      
+                      <div className="p-6 bg-white dark:bg-green-900/30 rounded-xl text-center shadow-sm">
+                        <div className="text-3xl font-bold text-green-800 dark:text-green-100 mb-2">
+                          {selectedResidente.departamento?.banos || '?'}
+                        </div>
+                        <div className="text-sm text-green-600 dark:text-green-300 font-medium uppercase">Baños</div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-white dark:bg-green-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-green-600 dark:text-green-300 uppercase tracking-wide">Área</label>
+                      <p className="text-green-800 dark:text-green-100 font-bold text-2xl mt-2">
+                        {selectedResidente.departamento?.area_m2 ? `${selectedResidente.departamento.area_m2} m²` : 'No disponible'}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-white dark:bg-green-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-green-600 dark:text-green-300 uppercase tracking-wide">Renta Mensual</label>
+                      <p className="text-green-800 dark:text-green-100 font-bold text-2xl mt-2">
+                        {selectedResidente.departamento?.renta_mensual ? `$${selectedResidente.departamento.renta_mensual}` : 'No disponible'}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-white dark:bg-green-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-green-600 dark:text-green-300 uppercase tracking-wide">Estado</label>
+                      <div className="mt-3">
+                        <Badge 
+                          variant={selectedResidente.departamento?.estado === 'disponible' ? 'default' : 'secondary'}
+                          className="bg-green-100 text-green-800 border-green-300 dark:bg-green-800 dark:text-green-100 text-lg px-4 py-2"
+                        >
+                          {selectedResidente.departamento?.estado || 'Desconocido'}
+                        </Badge>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Estadísticas Rápidas */}
-                <div className="p-4 bg-gradient-to-r from-[#007BFF]/10 to-[#1A2E49]/10 rounded-lg border border-[#007BFF]/20">
-                  <h4 className="font-semibold text-[#1A2E49] dark:text-[#F5F7FA] mb-2">📊 Resumen</h4>
-                  <div className="text-sm text-[#A0AAB4] space-y-1">
-                    <p>• Residente {residenteDetallado.tipo_relacion} {residenteDetallado.es_principal ? '(Principal)' : '(Secundario)'}</p>
-                    <p>• Estado: {residenteDetallado.activo ? '✅ Activo' : '❌ Inactivo'}</p>
-                    <p>• Días desde ingreso: {Math.floor((new Date().getTime() - new Date(residenteDetallado.fecha_ingreso).getTime()) / (1000 * 3600 * 24))}</p>
-                    {residenteDetallado.telefono_contacto_emergencia && <p>• ✅ Contacto de emergencia configurado</p>}
+              {/* Columna 3: Información de Residencia */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-4 mb-6">
+                    <div className="bg-purple-500 p-3 rounded-xl">
+                      <UserCheck className="h-6 w-6 text-white" />
+                    </div>
+                    Datos de Residencia
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div className="p-6 bg-white dark:bg-purple-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wide">ID Residente</label>
+                      <p className="text-purple-800 dark:text-purple-100 font-bold text-3xl mt-2">#{residenteDetallado.id}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="p-4 bg-white dark:bg-purple-900/30 rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wide">Tipo de Relación</label>
+                        <div className="mt-3">
+                          <Badge 
+                            variant={residenteDetallado.tipo_relacion === 'propietario' ? 'default' : 'secondary'}
+                            className="bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-800 dark:text-purple-100 text-lg px-4 py-2"
+                          >
+                            {residenteDetallado.tipo_relacion.charAt(0).toUpperCase() + residenteDetallado.tipo_relacion.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-white dark:bg-purple-900/30 rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wide">Residente Principal</label>
+                        <div className="mt-3">
+                          <Badge 
+                            variant={residenteDetallado.es_principal ? 'default' : 'outline'}
+                            className="bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-800 dark:text-purple-100 text-lg px-4 py-2"
+                          >
+                            {residenteDetallado.es_principal ? '✅ Principal' : '👥 Secundario'}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-white dark:bg-purple-900/30 rounded-xl shadow-sm">
+                        <label className="text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wide">Estado</label>
+                        <div className="mt-3">
+                          <Badge 
+                            variant={residenteDetallado.activo ? 'default' : 'destructive'}
+                            className="text-lg px-4 py-2 flex items-center gap-3 w-fit"
+                          >
+                            {residenteDetallado.activo ? (
+                              <>
+                                <UserCheck className="h-5 w-5" />
+                                Activo
+                              </>
+                            ) : (
+                              <>
+                                <UserX className="h-5 w-5" />
+                                Inactivo
+                              </>
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Fechas Importantes */}
+                <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800">
+                  <h3 className="text-xl font-bold text-amber-800 dark:text-amber-200 flex items-center gap-4 mb-6">
+                    <div className="bg-amber-500 p-3 rounded-xl">
+                      📅
+                    </div>
+                    Fechas Importantes
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white dark:bg-amber-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-amber-600 dark:text-amber-300 uppercase tracking-wide">Fecha de Ingreso</label>
+                      <p className="text-amber-800 dark:text-amber-100 font-bold text-xl mt-2">
+                        {formatDate(residenteDetallado.fecha_ingreso)}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-white dark:bg-amber-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-amber-600 dark:text-amber-300 uppercase tracking-wide">Fecha de Salida</label>
+                      <p className="text-amber-800 dark:text-amber-100 font-medium mt-2 text-lg">
+                        {residenteDetallado.fecha_salida ? formatDate(residenteDetallado.fecha_salida) : '🏠 Aún reside aquí'}
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-white dark:bg-amber-900/30 rounded-xl shadow-sm">
+                      <label className="text-xs font-medium text-amber-600 dark:text-amber-300 uppercase tracking-wide">Días de Residencia</label>
+                      <p className="text-amber-800 dark:text-amber-100 font-bold text-2xl mt-2">
+                        {Math.floor((new Date().getTime() - new Date(residenteDetallado.fecha_ingreso).getTime()) / (1000 * 3600 * 24))} días
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Resumen Rápido */}
+                <div className="bg-gradient-to-br from-[#007BFF]/10 to-[#1A2E49]/10 rounded-2xl p-6 border border-[#007BFF]/20">
+                  <h4 className="font-bold text-[#1A2E49] dark:text-[#F5F7FA] mb-4 flex items-center gap-3 text-lg">
+                    📊 Resumen Rápido
+                  </h4>
+                  <div className="text-base text-[#A0AAB4] space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 bg-[#007BFF] rounded-full"></span>
+                      <span>Residente {residenteDetallado.tipo_relacion} {residenteDetallado.es_principal ? '(Principal)' : '(Secundario)'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      <span>Estado: {residenteDetallado.activo ? 'Activo' : 'Inactivo'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
+                      <span>Departamento: {selectedResidente.departamento?.numero || selectedResidente.departamento_id}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          ) : selectedResidente ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex flex-col items-center gap-3 text-[#A0AAB4]">
-                <Loader2 className="h-8 w-8 animate-spin text-[#007BFF]" />
-                <p>Cargando información detallada...</p>
+          ) : (
+            <div className="flex items-center justify-center h-96">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-12 w-12 animate-spin text-[#007BFF]" />
+                <span className="text-xl text-[#A0AAB4]">Cargando información...</span>
               </div>
             </div>
-          ) : null}
+          )}
         </DialogContent>
       </Dialog>
     </Card>
