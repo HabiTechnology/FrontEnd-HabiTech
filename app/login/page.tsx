@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { RegisterForm } from "@/components/register-form"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Wallet, Shield, Sparkles, AlertCircle, CheckCircle, Users, UserCheck } from "lucide-react"
@@ -14,9 +15,11 @@ import PageTransition from "@/components/animations/page-transition"
 import StaggerAnimation from "@/components/animations/stagger-animation"
 import FloatingElement from "@/components/animations/floating-element"
 import AnimatedButton from "@/components/animations/animated-button"
+import FormularioSolicitudRentaModal from "@/components/solicitud-renta/formulario-solicitud-renta-modal"
 
 export default function LoginPage() {
   const [showRegister, setShowRegister] = useState(false)
+  const [showSolicitudRenta, setShowSolicitudRenta] = useState(false)
   const [error, setError] = useState("")
   const { 
     isAuthenticated, 
@@ -314,17 +317,13 @@ export default function LoginPage() {
             
             {/* Register Button - Elegant adapts to theme */}
             <div className="text-center pt-4 px-4">
-              <AnimatedButton 
-                onClick={() => setShowRegister(true)}
-                variant="hover"
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowSolicitudRenta(true)}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
               >
-                <Button 
-                  variant="ghost" 
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
-                >
-                  ¿Nuevo residente? Solicita departamento
-                </Button>
-              </AnimatedButton>
+                ¿Nuevo residente? Solicita departamento
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -371,6 +370,26 @@ export default function LoginPage() {
         .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
       `}</style>
       </div>
+
+      {/* Modal de Solicitud de Renta */}
+      <Dialog open={showSolicitudRenta} onOpenChange={setShowSolicitudRenta}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="text-2xl font-bold text-center">
+              Solicitud de Departamento
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Complete el formulario para solicitar el arriendo de un departamento
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-6 pt-0">
+            <FormularioSolicitudRentaModal 
+              onSuccess={() => setShowSolicitudRenta(false)}
+              onCancel={() => setShowSolicitudRenta(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   )
 }

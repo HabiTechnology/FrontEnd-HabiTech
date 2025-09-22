@@ -92,12 +92,45 @@ export async function POST(request: Request) {
     } = body;
 
     // Validaciones básicas
-    if (!numero || piso === undefined || !dormitorios || !banos || !renta_mensual || !mantenimiento_mensual) {
+    if (!numero || piso === undefined || dormitorios === undefined || banos === undefined || renta_mensual === undefined || mantenimiento_mensual === undefined) {
       return NextResponse.json(
         { error: 'Los campos numero, piso, dormitorios, banos, renta_mensual y mantenimiento_mensual son obligatorios' },
         { status: 400 }
       );
     }
+
+    // Validaciones de tipos
+    if (typeof numero !== 'string' || numero.trim() === '') {
+      return NextResponse.json(
+        { error: 'El número del departamento debe ser un texto válido' },
+        { status: 400 }
+      );
+    }
+
+    if (piso < 1) {
+      return NextResponse.json(
+        { error: 'El piso debe ser mayor a 0' },
+        { status: 400 }
+      );
+    }
+
+    // Preparar datos para inserción
+    const serviciosJson = servicios ? JSON.stringify(servicios) : null;
+    const imagenesJson = imagenes && Array.isArray(imagenes) ? JSON.stringify(imagenes) : null;
+
+    console.log('📊 Datos preparados para inserción:', {
+      numero,
+      piso,
+      dormitorios,
+      banos,
+      area_m2,
+      renta_mensual,
+      mantenimiento_mensual,
+      estado: estado || 'disponible',
+      descripcion: descripcion || null,
+      serviciosJson,
+      imagenesJson
+    });
 
     // Crear departamento
     const nuevoDepartamento = await sql`
@@ -125,8 +158,8 @@ export async function POST(request: Request) {
         ${mantenimiento_mensual}, 
         ${estado || 'disponible'}, 
         ${descripcion || null},
-        ${servicios || null},
-        ${imagenes || null},
+        ${serviciosJson},
+        ${imagenesJson},
         true
       )
       RETURNING *

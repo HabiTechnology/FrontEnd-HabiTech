@@ -48,6 +48,11 @@ const navItems = [
     icon: HomeIcon,
   },
   {
+    title: "DEPARTAMENTOS",
+    url: "/departamentos",
+    icon: BracketsIcon,
+  },
+  {
     title: "RESIDENTES",
     url: "/residentes",
     icon: UsersIcon,
