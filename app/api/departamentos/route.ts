@@ -1,15 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { 
+  validateApiInput, 
+  sanitizeQueryParams, 
+  validatePaginationParams,
+  departamentoValidationSchema,
+  SECURITY_CONSTANTS
+} from '@/lib/security-validation';
 
 export async function GET(request: Request) {
   try {
     console.log('🔍 Conectando a base de datos para obtener departamentos...');
     
-    // Obtener parámetros de consulta
+    // Obtener y sanitizar parámetros de consulta
     const { searchParams } = new URL(request.url);
-    const soloDisponibles = searchParams.get('disponibles') === 'true';
+    const rawParams = Object.fromEntries(searchParams.entries());
+    const sanitizedParams = sanitizeQueryParams(rawParams);
     
-    console.log('📊 Parámetros:', { soloDisponibles });
+    const soloDisponibles = sanitizedParams.disponibles === 'true';
+    const page = parseInt(sanitizedParams.page || '1', 10);
+    const limit = parseInt(sanitizedParams.limit || '10', 10);
+    
+    // Validar parámetros de paginación
+    const { page: validPage, limit: validLimit } = validatePaginationParams(page, limit);
+    
+    console.log('📊 Parámetros validados:', { soloDisponibles, page: validPage, limit: validLimit });
+    
+    // Validar headers de autorización básica
+    const authHeader = request.headers.get('authorization');
+    const sessionCookie = request.headers.get('cookie')?.includes('privy-session');
+    
+    if (!authHeader && !sessionCookie && process.env.NODE_ENV === 'production') {
+      return NextResponse.json(
+        { error: 'Acceso no autorizado' },
+        { status: 401 }
+      );
+    }
+    
     console.log('🔗 DATABASE_URL existe:', !!process.env.DATABASE_URL);
     
     // Query para obtener departamentos
@@ -74,51 +101,56 @@ export async function POST(request: Request) {
   try {
     console.log('🔍 Creando nuevo departamento...');
     
-    const body = await request.json();
-    console.log('📝 Datos recibidos:', body);
-
-    const { 
-      numero, 
-      piso, 
-      dormitorios, 
-      banos, 
-      area_m2, 
-      renta_mensual, 
-      mantenimiento_mensual, 
-      estado, 
-      descripcion,
-      servicios,
-      imagenes
-    } = body;
-
-    // Validaciones básicas
-    if (!numero || piso === undefined || dormitorios === undefined || banos === undefined || renta_mensual === undefined || mantenimiento_mensual === undefined) {
+    // Validar autorización
+    const authHeader = request.headers.get('authorization');
+    const sessionCookie = request.headers.get('cookie')?.includes('privy-session');
+    
+    if (!authHeader && !sessionCookie) {
       return NextResponse.json(
-        { error: 'Los campos numero, piso, dormitorios, banos, renta_mensual y mantenimiento_mensual son obligatorios' },
+        { error: 'Acceso no autorizado' },
+        { status: 401 }
+      );
+    }
+    
+    // Validar tamaño del contenido
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > SECURITY_CONSTANTS.MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'Contenido demasiado grande' },
+        { status: 413 }
+      );
+    }
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'JSON inválido en el cuerpo de la petición' },
         { status: 400 }
       );
     }
-
-    // Validaciones de tipos
-    if (typeof numero !== 'string' || numero.trim() === '') {
+    
+    console.log('📝 Datos recibidos para validación');
+    
+    // Validar datos con schema de seguridad
+    const validation = validateApiInput(body, departamentoValidationSchema);
+    
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'El número del departamento debe ser un texto válido' },
+        { 
+          error: 'Datos inválidos', 
+          details: validation.error,
+          code: 'VALIDATION_ERROR'
+        },
         { status: 400 }
       );
     }
-
-    if (piso < 1) {
-      return NextResponse.json(
-        { error: 'El piso debe ser mayor a 0' },
-        { status: 400 }
-      );
-    }
-
-    // Preparar datos para inserción
-    const serviciosJson = servicios ? JSON.stringify(servicios) : null;
-    const imagenesJson = imagenes && Array.isArray(imagenes) ? JSON.stringify(imagenes) : null;
-
-    console.log('📊 Datos preparados para inserción:', {
+    
+    const validatedData = validation.data;
+    
+    // Extraer datos validados
+    const {
       numero,
       piso,
       dormitorios,
@@ -126,11 +158,17 @@ export async function POST(request: Request) {
       area_m2,
       renta_mensual,
       mantenimiento_mensual,
-      estado: estado || 'disponible',
-      descripcion: descripcion || null,
-      serviciosJson,
-      imagenesJson
-    });
+      estado,
+      descripcion,
+      servicios,
+      imagenes
+    } = validatedData;
+
+    // Preparar datos para inserción con validación adicional
+    const serviciosJson = servicios && Array.isArray(servicios) ? JSON.stringify(servicios) : null;
+    const imagenesJson = imagenes && Array.isArray(imagenes) ? JSON.stringify(imagenes) : null;
+
+    console.log('📊 Datos validados preparados para inserción');
 
     // Crear departamento
     const nuevoDepartamento = await sql`

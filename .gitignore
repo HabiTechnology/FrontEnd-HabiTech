@@ -16,8 +16,42 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env*
+# ============================================
+# 🔒 ARCHIVOS SENSIBLES DE SEGURIDAD
+# ============================================
+
+# Variables de entorno (CRÍTICO - nunca commitear)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.staging
+
+# Secrets y configuraciones privadas
+/secrets/
+/private/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Logs de seguridad
+/logs/
+*.log
+/audit/
+
+# Cache de seguridad
+.security-cache/
+.auth-cache/
+
+# Archivos de backup que pueden contener datos sensibles  
+*.backup
+*.bak
+*.sql
+*.dump
+
+# ============================================
 
 # vercel
 .vercel
@@ -25,3 +59,27 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDEs
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Coverage reports
+/coverage/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
