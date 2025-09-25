@@ -10,13 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Building, Edit, Eye, Filter, Search, AlertCircle, CheckCircle, Home, DollarSign, X } from "lucide-react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Plus, Building, Edit, Eye, Filter, Search, AlertCircle, CheckCircle, Home, DollarSign, X, FileText, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Departamento, DepartamentoFormData } from "@/types/departamentos"
 import DashboardPageLayout from "@/components/dashboard/layout"
 import StaggerAnimation from "@/components/animations/stagger-animation"
 import { RoleGuard } from "@/components/role-guard"
 import DepartamentoDetalleModal from "@/components/departamentos/departamento-detalle-modal"
+import { generarPDF } from "@/lib/pdf-utils"
 
 export default function DepartamentosPage() {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([])
@@ -27,7 +29,17 @@ export default function DepartamentosPage() {
   const [busqueda, setBusqueda] = useState("")
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState<Departamento | null>(null)
   const [showDetalle, setShowDetalle] = useState(false)
+  const [showEditarModal, setShowEditarModal] = useState(false)
+  const [showEliminarModal, setShowEliminarModal] = useState(false)
+  const [departamentoAEditar, setDepartamentoAEditar] = useState<Departamento | null>(null)
+  const [departamentoAEliminar, setDepartamentoAEliminar] = useState<Departamento | null>(null)
   const { toast } = useToast()
+
+  // Debug para estados del modal
+  useEffect(() => {
+    console.log('📊 Estado showEliminarModal:', showEliminarModal)
+    console.log('📊 Departamento a eliminar:', departamentoAEliminar?.numero)
+  }, [showEliminarModal, departamentoAEliminar])
 
   // Estado del formulario
   const [formularioData, setFormularioData] = useState<DepartamentoFormData>({
@@ -119,7 +131,7 @@ export default function DepartamentosPage() {
         piso: Number(formularioData.piso),
         dormitorios: Number(formularioData.dormitorios),
         banos: Number(formularioData.banos),
-        area_m2: formularioData.area_m2 ? Number(formularioData.area_m2) : null,
+        area_m2: (formularioData.area_m2 && formularioData.area_m2 > 0) ? Number(formularioData.area_m2) : null,
         renta_mensual: Number(formularioData.renta_mensual),
         mantenimiento_mensual: Number(formularioData.mantenimiento_mensual),
         // Asegurar que servicios e imágenes son objetos válidos
@@ -191,6 +203,190 @@ export default function DepartamentosPage() {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Error al crear departamento",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Editar departamento
+  const editarDepartamento = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!departamentoAEditar) return
+
+    try {
+      console.log('📝 Editando departamento:', departamentoAEditar.id, formularioData)
+
+      // Preparar datos para envío
+      const datosParaEnvio = {
+        ...formularioData,
+        piso: Number(formularioData.piso),
+        dormitorios: Number(formularioData.dormitorios),
+        banos: Number(formularioData.banos),
+        area_m2: (formularioData.area_m2 && formularioData.area_m2 > 0) ? Number(formularioData.area_m2) : null,
+        renta_mensual: Number(formularioData.renta_mensual),
+        mantenimiento_mensual: Number(formularioData.mantenimiento_mensual),
+        servicios: formularioData.servicios || {},
+        imagenes: formularioData.imagenes || []
+      }
+
+      const response = await fetch(`/api/departamentos/${departamentoAEditar.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosParaEnvio)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al editar departamento')
+      }
+
+      const departamentoActualizado = await response.json()
+      
+      toast({
+        title: "¡Éxito!",
+        description: `Departamento ${departamentoActualizado.numero} editado exitosamente`,
+      })
+
+      // Recargar lista y cerrar modal
+      await cargarDepartamentos()
+      setShowEditarModal(false)
+      setDepartamentoAEditar(null)
+      
+    } catch (error) {
+      console.error('Error editando departamento:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al editar departamento",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Eliminar departamento
+  const eliminarDepartamento = async () => {
+    if (!departamentoAEliminar) return
+
+    try {
+      console.log('🗑️ Eliminando departamento:', departamentoAEliminar.id)
+
+      // Mostrar toast de "eliminando" para feedback inmediato
+      const numeroDepto = departamentoAEliminar.numero
+      
+      toast({
+        title: "Eliminando...",
+        description: `Eliminando departamento ${numeroDepto}`,
+      })
+
+      const response = await fetch(`/api/departamentos/${departamentoAEliminar.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al eliminar departamento')
+      }
+
+      // Cerrar modal primero para mejor UX
+      setShowEliminarModal(false)
+      setDepartamentoAEliminar(null)
+      
+      // Recargar lista
+      await cargarDepartamentos()
+
+      // Toast de éxito después de recargar
+      toast({
+        title: "¡Eliminado!",
+        description: `Departamento ${numeroDepto} eliminado exitosamente`,
+        variant: "default"
+      })
+      
+    } catch (error) {
+      console.error('Error eliminando departamento:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al eliminar departamento",
+        variant: "destructive"
+      })
+      
+      // Cerrar modal incluso si hay error
+      setShowEliminarModal(false)
+      setDepartamentoAEliminar(null)
+    }
+  }
+
+  // Iniciar edición de departamento
+  const iniciarEdicion = (departamento: Departamento) => {
+    setDepartamentoAEditar(departamento)
+    // Cargar datos en el formulario
+    setFormularioData({
+      numero: departamento.numero,
+      piso: departamento.piso || 1,
+      dormitorios: departamento.dormitorios || 1,
+      banos: departamento.banos || 1,
+      area_m2: departamento.area_m2 || 0,
+      renta_mensual: departamento.renta_mensual || 0,
+      mantenimiento_mensual: departamento.mantenimiento_mensual || 0,
+      estado: departamento.estado,
+      descripcion: departamento.descripcion || "",
+      servicios: departamento.servicios || {
+        agua: false,
+        electricidad: false,
+        gas: false,
+        internet: false,
+        cable: false,
+        parqueadero: false,
+        balcon: false,
+        aire_acondicionado: false,
+        lavanderia: false,
+        gimnasio: false,
+        piscina: false,
+        seguridad: false
+      },
+      imagenes: departamento.imagenes || []
+    })
+    setShowEditarModal(true)
+  }
+
+  // Iniciar eliminación de departamento
+  const iniciarEliminacion = async (departamento: Departamento) => {
+    const confirmar = window.confirm(`¿Estás seguro de que quieres eliminar el departamento ${departamento.numero}?`)
+    
+    if (confirmar) {
+      // Eliminar directamente sin depender del state
+      await eliminarDepartamentoDirecto(departamento)
+    }
+  }
+
+  // Función simplificada para eliminar directamente
+  const eliminarDepartamentoDirecto = async (departamento: Departamento) => {
+    try {
+
+
+      const response = await fetch(`/api/departamentos/${departamento.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al eliminar departamento')
+      }
+
+      toast({
+        title: "¡Éxito!",
+        description: `Departamento ${departamento.numero} eliminado exitosamente`,
+      })
+
+      // Recargar lista
+      await cargarDepartamentos()
+      
+    } catch (error) {
+      console.error('Error eliminando departamento:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al eliminar departamento",
         variant: "destructive"
       })
     }
@@ -364,17 +560,43 @@ export default function DepartamentosPage() {
         }}
       >
         <div className="space-y-6">
-          {/* Header con botón */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div></div>
-            
-            <Dialog open={showFormulario} onOpenChange={setShowFormulario}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Nuevo Departamento
-                </Button>
-              </DialogTrigger>
+          {/* Header con botones */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4">
+            <div className="flex items-center gap-3">
+              {/* Botón PDF de todos los departamentos */}
+              <Button
+                onClick={async () => {
+                  try {
+                    // Generar PDF con la lista completa de departamentos
+                    await generarPDF.tablaDepartamentos(departamentos, 'departamentos-habitech.pdf')
+                    toast({
+                      title: "PDF Generado",
+                      description: `PDF con ${departamentos.length} departamentos generado exitosamente`,
+                      variant: "default"
+                    })
+                  } catch (error) {
+                    console.error('Error generando PDF:', error)
+                    toast({
+                      title: "Error",
+                      description: "No se pudo generar el PDF",
+                      variant: "destructive"
+                    })
+                  }
+                }}
+                variant="outline"
+                className="flex items-center gap-2 bg-[#007BFF] text-white hover:bg-[#0056b3] border-[#007BFF]"
+              >
+                <FileText className="h-4 w-4" />
+                Exportar PDF ({departamentos.length})
+              </Button>
+              
+              <Dialog open={showFormulario} onOpenChange={setShowFormulario}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Nuevo Departamento
+                  </Button>
+                </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Crear Nuevo Departamento</DialogTitle>
@@ -394,7 +616,7 @@ export default function DepartamentosPage() {
                       <Input
                         id="numero"
                         value={formularioData.numero}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           numero: e.target.value
                         }))}
@@ -410,7 +632,7 @@ export default function DepartamentosPage() {
                         type="number"
                         min="1"
                         value={formularioData.piso}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           piso: parseInt(e.target.value) || 1
                         }))}
@@ -427,7 +649,7 @@ export default function DepartamentosPage() {
                         type="number"
                         min="0"
                         value={formularioData.dormitorios}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           dormitorios: parseInt(e.target.value) || 0
                         }))}
@@ -442,7 +664,7 @@ export default function DepartamentosPage() {
                         type="number"
                         min="1"
                         value={formularioData.banos}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           banos: parseInt(e.target.value) || 1
                         }))}
@@ -458,7 +680,7 @@ export default function DepartamentosPage() {
                         min="0"
                         step="0.01"
                         value={formularioData.area_m2}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           area_m2: parseFloat(e.target.value) || 0
                         }))}
@@ -471,7 +693,7 @@ export default function DepartamentosPage() {
                     <Label htmlFor="estado">Estado del Departamento</Label>
                     <Select 
                       value={formularioData.estado} 
-                      onValueChange={(value) => setFormularioData(prev => ({
+                      onValueChange={(value: string) => setFormularioData(prev => ({
                         ...prev,
                         estado: value as any
                       }))}
@@ -493,7 +715,7 @@ export default function DepartamentosPage() {
                     <Textarea
                       id="descripcion"
                       value={formularioData.descripcion}
-                      onChange={(e) => setFormularioData(prev => ({
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormularioData(prev => ({
                         ...prev,
                         descripcion: e.target.value
                       }))}
@@ -516,7 +738,7 @@ export default function DepartamentosPage() {
                         min="0"
                         step="1000"
                         value={formularioData.renta_mensual}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           renta_mensual: parseFloat(e.target.value) || 0
                         }))}
@@ -533,7 +755,7 @@ export default function DepartamentosPage() {
                         min="0"
                         step="1000"
                         value={formularioData.mantenimiento_mensual}
-                        onChange={(e) => setFormularioData(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
                           ...prev,
                           mantenimiento_mensual: parseFloat(e.target.value) || 0
                         }))}
@@ -567,7 +789,7 @@ export default function DepartamentosPage() {
                           type="checkbox"
                           id={servicio.key}
                           checked={formularioData.servicios?.[servicio.key] || false}
-                          onChange={(e) => manejarServicio(servicio.key, e.target.checked)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => manejarServicio(servicio.key, e.target.checked)}
                           className="rounded border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor={servicio.key} className="flex items-center gap-2 cursor-pointer">
@@ -627,9 +849,9 @@ export default function DepartamentosPage() {
                   {formularioData.imagenes && formularioData.imagenes.length > 0 && (
                     <div className="bg-muted p-3 rounded-lg">
                       <p className="text-sm font-medium mb-2">Archivos seleccionados:</p>
-                      <ul className="text-xs space-y-1">
+                      <div className="text-xs space-y-1">
                         {formularioData.imagenes.map((nombre: any, index: number) => (
-                          <li key={index} className="flex items-center justify-between">
+                          <div key={index} className="flex items-center justify-between">
                             <span>{typeof nombre === 'string' ? nombre : `Imagen ${index + 1}`}</span>
                             <Button
                               type="button"
@@ -640,9 +862,9 @@ export default function DepartamentosPage() {
                             >
                               ×
                             </Button>
-                          </li>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -669,11 +891,237 @@ export default function DepartamentosPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
 
-        {/* Estadísticas */}
+          {/* Modal de Editar Departamento */}
+          <Dialog open={showEditarModal} onOpenChange={setShowEditarModal}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Editar Departamento {departamentoAEditar?.numero}</DialogTitle>
+                <DialogDescription>
+                  Modifique los datos del departamento
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={editarDepartamento} className="space-y-6">
+                {/* Reutilizar el mismo formulario que crear, pero con submit diferente */}
+                {/* Información Básica */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Información Básica</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="numero-edit">Número de Departamento *</Label>
+                      <Input
+                        id="numero-edit"
+                        value={formularioData.numero}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          numero: e.target.value
+                        }))}
+                        placeholder="ej: 101, A202, etc."
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="piso-edit">Piso *</Label>
+                      <Input
+                        id="piso-edit"
+                        type="number"
+                        min="1"
+                        value={formularioData.piso}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          piso: parseInt(e.target.value) || 1
+                        }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="dormitorios-edit">Dormitorios *</Label>
+                      <Input
+                        id="dormitorios-edit"
+                        type="number"
+                        min="1"
+                        value={formularioData.dormitorios}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          dormitorios: parseInt(e.target.value) || 1
+                        }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="banos-edit">Baños *</Label>
+                      <Input
+                        id="banos-edit"
+                        type="number"
+                        min="1"
+                        value={formularioData.banos}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          banos: parseInt(e.target.value) || 1
+                        }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="area-edit">Área (m²)</Label>
+                      <Input
+                        id="area-edit"
+                        type="number"
+                        min="20"
+                        step="0.01"
+                        value={formularioData.area_m2}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          area_m2: parseFloat(e.target.value) || 0
+                        }))}
+                        placeholder="ej: 65.5"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="renta-edit">Renta Mensual *</Label>
+                      <Input
+                        id="renta-edit"
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        value={formularioData.renta_mensual}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          renta_mensual: parseFloat(e.target.value) || 0
+                        }))}
+                        placeholder="ej: 1500.00"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="mantenimiento-edit">Mantenimiento Mensual</Label>
+                      <Input
+                        id="mantenimiento-edit"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formularioData.mantenimiento_mensual}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          mantenimiento_mensual: parseFloat(e.target.value) || 0
+                        }))}
+                        placeholder="ej: 200.00"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="estado-edit">Estado</Label>
+                      <Select 
+                        value={formularioData.estado} 
+                        onValueChange={(value: string) => setFormularioData(prev => ({
+                          ...prev, 
+                          estado: value as "disponible" | "ocupado" | "mantenimiento"
+                        }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="disponible">Disponible</SelectItem>
+                          <SelectItem value="ocupado">Ocupado</SelectItem>
+                          <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="descripcion-edit">Descripción</Label>
+                      <Textarea
+                        id="descripcion-edit"
+                        value={formularioData.descripcion}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormularioData(prev => ({
+                          ...prev,
+                          descripcion: e.target.value
+                        }))}
+                        placeholder="Descripción del departamento..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botones */}
+                <div className="flex gap-4 pt-4 border-t">
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Actualizar Departamento
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowEditarModal(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modal de Eliminar Departamento */}
+          {showEliminarModal && departamentoAEliminar && (
+            <AlertDialog open={showEliminarModal} onOpenChange={setShowEliminarModal}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-red-600">⚠️ ¿Eliminar Departamento?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminará permanentemente el departamento{' '}
+                    <strong className="text-red-700">{departamentoAEliminar?.numero}</strong> de la base de datos.
+                    {departamentoAEliminar?.descripcion && (
+                      <span className="block text-xs text-gray-600 mt-2">
+                        "{departamentoAEliminar.descripcion}"
+                      </span>
+                    )}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => {
+                    console.log('❌ Cancelando eliminación')
+                    setShowEliminarModal(false)
+                    setDepartamentoAEliminar(null)
+                  }}>
+                    Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault()
+                      console.log('✅ Confirmando eliminación')
+                      eliminarDepartamento()
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    🗑️ Sí, Eliminar Permanentemente
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+            </div>
+          </div>
+
+          {/* Estadísticas */}
         <StaggerAnimation delay={200} staggerDelay={100}>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
@@ -746,7 +1194,7 @@ export default function DepartamentosPage() {
                   <Input
                     placeholder="Buscar por número o descripción..."
                     value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBusqueda(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -791,10 +1239,10 @@ export default function DepartamentosPage() {
           </div>
         ) : (
           <StaggerAnimation delay={300} staggerDelay={50}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {departamentosFiltrados.map((departamento) => (
-                <Card key={departamento.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-2">
+                <Card key={departamento.id} className="hover:shadow-lg transition-shadow min-h-[320px] flex flex-col">
+                  <CardHeader className="pb-3 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Depto {departamento.numero}</CardTitle>
                       <Badge className={obtenerColorEstado(departamento.estado)}>
@@ -804,48 +1252,96 @@ export default function DepartamentosPage() {
                     <CardDescription>Piso {departamento.piso}</CardDescription>
                   </CardHeader>
                   
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Habitaciones:</span>
-                      <span>{departamento.dormitorios} dorm, {departamento.banos} baños</span>
-                    </div>
-                    
-                    {departamento.area_m2 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Área:</span>
-                        <span>{departamento.area_m2} m²</span>
+                  <CardContent className="pb-4 flex-grow flex flex-col">
+                    <div className="space-y-3 flex-grow">
+                      <div className="grid grid-cols-1 gap-2.5 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground min-w-fit">Habitaciones:</span>
+                          <span className="font-medium text-right">{departamento.dormitorios} dorm, {departamento.banos} baños</span>
+                        </div>
+                        
+                        {departamento.area_m2 && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground min-w-fit">Área:</span>
+                            <span className="font-medium text-right">{departamento.area_m2} m²</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground min-w-fit">Renta:</span>
+                          <span className="font-semibold text-green-600 text-right">{formatearMoneda(departamento.renta_mensual)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground min-w-fit">Mantenimiento:</span>
+                          <span className="font-medium text-right">{formatearMoneda(departamento.mantenimiento_mensual)}</span>
+                        </div>
                       </div>
-                    )}
-                    
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Renta:</span>
-                      <span className="font-semibold">{formatearMoneda(departamento.renta_mensual)}</span>
+                      
+                      {departamento.descripcion && (
+                        <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
+                          {departamento.descripcion}
+                        </p>
+                      )}
                     </div>
                     
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Mantenimiento:</span>
-                      <span>{formatearMoneda(departamento.mantenimiento_mensual)}</span>
-                    </div>
-                    
-                    {departamento.descripcion && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {departamento.descripcion}
-                      </p>
-                    )}
-                    
-                    <div className="flex gap-2 pt-2">
+                    <div className="grid grid-cols-2 gap-2 pt-3">
                       <Button 
                         variant="outline" 
-                        size="sm" 
-                        className="flex-1"
+                        size="sm"
                         onClick={() => verDetalle(departamento)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        Ver
+                        VER
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await generarPDF.departamento(departamento)
+                            toast({
+                              title: "PDF Generado",
+                              description: `Certificado del departamento ${departamento.numero} generado exitosamente`,
+                              variant: "default"
+                            })
+                          } catch (error) {
+                            console.error('Error generando PDF:', error)
+                            toast({
+                              title: "Error",
+                              description: "No se pudo generar el PDF",
+                              variant: "destructive"
+                            })
+                          }
+                        }}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        PDF
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => iniciarEdicion(departamento)}
+                      >
                         <Edit className="h-4 w-4 mr-1" />
-                        Editar
+                        EDITAR
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={async (e: React.MouseEvent) => {
+
+                          e.preventDefault()
+                          e.stopPropagation()
+                          console.log('🔴 ANTES de llamar iniciarEliminacion')
+                          await iniciarEliminacion(departamento)
+                          console.log('🔴 DESPUÉS de llamar iniciarEliminacion')
+                        }}
+                        type="button"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        ELIMINAR
                       </Button>
                     </div>
                   </CardContent>
@@ -875,7 +1371,6 @@ export default function DepartamentosPage() {
             </CardContent>
           </Card>
         )}
-        </div>
 
         {/* Modal de Detalle */}
         <DepartamentoDetalleModal
@@ -886,6 +1381,7 @@ export default function DepartamentosPage() {
             setDepartamentoSeleccionado(null)
           }}
         />
+        </div>
       </DashboardPageLayout>
     </RoleGuard>
   )

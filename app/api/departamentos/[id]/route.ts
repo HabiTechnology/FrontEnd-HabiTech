@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { departamentoValidationSchema } from '@/lib/security-validation';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('🔍 Obteniendo departamento por ID:', params.id);
+    const { id } = await params;
     
     const departamento = await sql`
       SELECT 
@@ -25,7 +26,7 @@ export async function GET(
         activo,
         creado_en
       FROM departamentos
-      WHERE id = ${params.id}
+      WHERE id = ${id}
     `;
 
     if (departamento.length === 0) {
@@ -52,13 +53,17 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('🔍 Actualizando departamento por ID:', params.id);
+    const { id } = await params;
     
     const body = await request.json();
     console.log('📝 Datos recibidos:', body);
+
+    // Validar datos
+    const datosValidados = departamentoValidationSchema.parse(body);
+    console.log('✅ Datos validados correctamente');
 
     const { 
       numero, 
@@ -71,9 +76,8 @@ export async function PUT(
       estado, 
       descripcion,
       servicios,
-      imagenes,
-      activo
-    } = body;
+      imagenes
+    } = datosValidados;
 
     // Actualizar departamento
     const departamentoActualizado = await sql`
@@ -89,9 +93,8 @@ export async function PUT(
         estado = COALESCE(${estado}, estado),
         descripcion = COALESCE(${descripcion}, descripcion),
         servicios = COALESCE(${servicios}, servicios),
-        imagenes = COALESCE(${imagenes}, imagenes),
-        activo = COALESCE(${activo}, activo)
-      WHERE id = ${params.id}
+        imagenes = COALESCE(${imagenes}, imagenes)
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -107,6 +110,14 @@ export async function PUT(
 
   } catch (error) {
     console.error('❌ Error actualizando departamento:', error);
+    
+    if (error instanceof Error && error.name === 'ZodError') {
+      return NextResponse.json(
+        { error: 'Datos de entrada inválidos', details: error.message },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
       { 
         error: 'Error interno del servidor', 
@@ -119,17 +130,17 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('🔍 Eliminando departamento por ID:', params.id);
+    const { id } = await params;
     
-    // Cambiar estado a "no_disponible" en lugar de eliminar físicamente
+    // Cambiar estado a inactivo en lugar de eliminar físicamente
     const departamentoEliminado = await sql`
       UPDATE departamentos 
       SET 
         activo = false
-      WHERE id = ${params.id}
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -140,7 +151,7 @@ export async function DELETE(
       );
     }
 
-    console.log('✅ Departamento eliminado exitosamente:', departamentoEliminado[0]);
+
     return NextResponse.json({ 
       message: 'Departamento marcado como no disponible', 
       departamento: departamentoEliminado[0] 

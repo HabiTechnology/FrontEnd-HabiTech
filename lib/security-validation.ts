@@ -104,7 +104,9 @@ export const departamentoValidationSchema = z.object({
   area_m2: z.number()
     .positive('El área debe ser positiva')
     .min(20, 'El área mínima es 20 m²')
-    .max(1000, 'El área máxima es 1000 m²'),
+    .max(1000, 'El área máxima es 1000 m²')
+    .nullable()
+    .optional(),
   renta_mensual: z.number()
     .positive('La renta debe ser positiva')
     .max(1000000, 'La renta no puede exceder $1,000,000'),
@@ -116,8 +118,8 @@ export const departamentoValidationSchema = z.object({
     .max(500, 'La descripción no puede exceder 500 caracteres')
     .optional()
     .transform((val: string | undefined) => val ? sanitizeHtml(val) : undefined),
-  servicios: z.array(z.string().max(50)).optional(),
-  imagenes: z.array(z.string().url('URL de imagen inválida')).optional(),
+  servicios: z.record(z.boolean()).optional(),
+  imagenes: z.array(z.string().min(1, 'Nombre de imagen requerido')).optional(),
   activo: z.boolean().optional().default(true)
 })
 

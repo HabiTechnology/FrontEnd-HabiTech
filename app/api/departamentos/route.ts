@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     // Validar parámetros de paginación
     const { page: validPage, limit: validLimit } = validatePaginationParams(page, limit);
     
-    console.log('📊 Parámetros validados:', { soloDisponibles, page: validPage, limit: validLimit });
+
     
     // Validar headers de autorización básica
     const authHeader = request.headers.get('authorization');
@@ -37,9 +37,9 @@ export async function GET(request: Request) {
       );
     }
     
-    console.log('🔗 DATABASE_URL existe:', !!process.env.DATABASE_URL);
+
     
-    // Query para obtener departamentos
+    // Query para obtener departamentos (solo activos)
     const departamentos = await sql`
       SELECT 
         id,
@@ -57,12 +57,11 @@ export async function GET(request: Request) {
         activo,
         creado_en
       FROM departamentos
-      ${soloDisponibles ? sql`WHERE estado = 'disponible'` : sql``}
+      WHERE activo = true ${soloDisponibles ? sql`AND estado = 'disponible'` : sql``}
       ORDER BY piso ASC, numero ASC
     `;
 
-    console.log('🏠 Departamentos encontrados:', departamentos.length);
-    console.log('🔎 Primer departamento:', departamentos[0]);
+
 
     // Devolver los datos directos de la tabla departamentos
     const departamentosFormateados = departamentos.map((departamento: any) => ({
@@ -77,12 +76,12 @@ export async function GET(request: Request) {
       estado: departamento.estado,
       descripcion: departamento.descripcion,
       servicios: departamento.servicios,
-      imagenes: departamento.imagenes,
+      
       activo: departamento.activo,
       creado_en: departamento.creado_en
     }));
 
-    console.log('✅ Departamentos formateados exitosamente');
+
     return NextResponse.json(departamentosFormateados);
 
   } catch (error) {
@@ -131,12 +130,13 @@ export async function POST(request: Request) {
       );
     }
     
-    console.log('📝 Datos recibidos para validación');
+    console.log('📝 Datos recibidos para validación:', JSON.stringify(body, null, 2));
     
     // Validar datos con schema de seguridad
     const validation = validateApiInput(body, departamentoValidationSchema);
     
     if (!validation.success) {
+      console.error('❌ Error de validación:', validation.error);
       return NextResponse.json(
         { 
           error: 'Datos inválidos', 
@@ -147,6 +147,7 @@ export async function POST(request: Request) {
       );
     }
     
+    console.log('✅ Validación exitosa, datos validados:', JSON.stringify(validation.data, null, 2));
     const validatedData = validation.data;
     
     // Extraer datos validados
@@ -165,43 +166,62 @@ export async function POST(request: Request) {
     } = validatedData;
 
     // Preparar datos para inserción con validación adicional
-    const serviciosJson = servicios && Array.isArray(servicios) ? JSON.stringify(servicios) : null;
+    const serviciosJson = servicios && typeof servicios === 'object' ? JSON.stringify(servicios) : null;
     const imagenesJson = imagenes && Array.isArray(imagenes) ? JSON.stringify(imagenes) : null;
 
     console.log('📊 Datos validados preparados para inserción');
+    console.log('🗃️ Inserción SQL con parámetros:', {
+      numero,
+      piso,
+      dormitorios,
+      banos,
+      area_m2,
+      renta_mensual,
+      mantenimiento_mensual,
+      estado,
+      descripcion,
+      serviciosJson,
+      imagenesJson
+    });
 
     // Crear departamento
-    const nuevoDepartamento = await sql`
-      INSERT INTO departamentos (
-        numero, 
-        piso, 
-        dormitorios, 
-        banos, 
-        area_m2, 
-        renta_mensual, 
-        mantenimiento_mensual, 
-        estado, 
-        descripcion,
-        servicios,
-        imagenes,
-        activo
-      )
-      VALUES (
-        ${numero}, 
-        ${piso}, 
-        ${dormitorios}, 
-        ${banos}, 
-        ${area_m2 || null}, 
-        ${renta_mensual}, 
-        ${mantenimiento_mensual}, 
-        ${estado || 'disponible'}, 
-        ${descripcion || null},
-        ${serviciosJson},
-        ${imagenesJson},
-        true
-      )
-      RETURNING *
-    `;
+    let nuevoDepartamento;
+    try {
+      nuevoDepartamento = await sql`
+        INSERT INTO departamentos (
+          numero, 
+          piso, 
+          dormitorios, 
+          banos, 
+          area_m2, 
+          renta_mensual, 
+          mantenimiento_mensual, 
+          estado, 
+          descripcion,
+          servicios,
+          imagenes,
+          activo
+        )
+        VALUES (
+          ${numero}, 
+          ${piso}, 
+          ${dormitorios}, 
+          ${banos}, 
+          ${area_m2 || null}, 
+          ${renta_mensual}, 
+          ${mantenimiento_mensual}, 
+          ${estado || 'disponible'}, 
+          ${descripcion || null},
+          ${serviciosJson},
+          ${imagenesJson},
+          true
+        )
+        RETURNING *
+      `;
+    } catch (sqlError) {
+      console.error('❌ Error en consulta SQL:', sqlError);
+      throw sqlError;
+    }
 
     console.log('✅ Departamento creado exitosamente:', nuevoDepartamento[0]);
     return NextResponse.json(nuevoDepartamento[0], { status: 201 });

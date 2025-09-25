@@ -1,10 +1,12 @@
 import React from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, X, Wifi, Car, Wind, Shield, Waves, Dumbbell, Droplets, Zap, Flame } from "lucide-react"
+import { CheckCircle, X, Wifi, Car, Wind, Shield, Waves, Dumbbell, Droplets, Zap, Flame, FileText, Download } from "lucide-react"
 import { Departamento } from "@/types/departamentos"
+import { generarPDF } from "@/lib/pdf-utils"
 
 interface DepartamentoDetalleModalProps {
   departamento: Departamento | null
@@ -75,16 +77,34 @@ export default function DepartamentoDetalleModal({
       >
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl">
-              Departamento {departamento.numero}
-            </DialogTitle>
-            <Badge className={obtenerColorEstado(departamento.estado)}>
-              {departamento.estado.toUpperCase()}
-            </Badge>
+            <div>
+              <DialogTitle className="text-2xl">
+                Departamento {departamento.numero}
+              </DialogTitle>
+              <DialogDescription>
+                Información completa del departamento
+              </DialogDescription>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={async () => {
+                  try {
+                    await generarPDF.departamento(departamento)
+                  } catch (error) {
+                    console.error('Error generando PDF:', error)
+                  }
+                }}
+                variant="outline"
+                className="flex items-center gap-2 bg-[#007BFF] text-white hover:bg-[#0056b3] border-[#007BFF]"
+              >
+                <FileText className="h-4 w-4" />
+                Generar PDF
+              </Button>
+              <Badge className={obtenerColorEstado(departamento.estado)}>
+                {departamento.estado.toUpperCase()}
+              </Badge>
+            </div>
           </div>
-          <DialogDescription>
-            Información completa del departamento
-          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
