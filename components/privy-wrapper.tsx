@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { PrivyProvider } from '@privy-io/react-auth'
 import { sepolia } from 'viem/chains'

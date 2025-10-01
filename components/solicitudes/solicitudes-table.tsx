@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -91,7 +91,7 @@ export default function SolicitudesTable() {
                 ...solicitud, 
                 estado: "Rechazada" as const, 
                 fecha_respuesta: new Date().toISOString().split('T')[0],
-                comentarios: `${solicitud.comentarios || ""}\n\nRazón de rechazo: ${razonRechazo}`
+                comentarios: `${solicitud.comentarios || ""}\n\nRazÃ³n de rechazo: ${razonRechazo}`
               }
             : solicitud
         )
@@ -116,7 +116,7 @@ export default function SolicitudesTable() {
       <CardHeader className="border-b border-border/30 pb-3">
         <CardTitle className="flex items-center gap-2.5 text-card-foreground">
           <Bullet variant="default" />
-          SOLICITUDES DE RENTA - GESTIÓN
+          SOLICITUDES DE RENTA - GESTIÃ“N
         </CardTitle>
         <div className="flex gap-2 mt-2">
           <Button size="sm" variant="outline">
@@ -136,7 +136,7 @@ export default function SolicitudesTable() {
                 <TableHead className="text-muted-foreground">ID</TableHead>
                 <TableHead className="text-muted-foreground">Solicitante</TableHead>
                 <TableHead className="text-muted-foreground">Email</TableHead>
-                <TableHead className="text-muted-foreground">Teléfono</TableHead>
+                <TableHead className="text-muted-foreground">TelÃ©fono</TableHead>
                 <TableHead className="text-muted-foreground">Dept. Solicitado</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 <TableHead className="text-muted-foreground">Presupuesto</TableHead>
@@ -245,21 +245,21 @@ export default function SolicitudesTable() {
                               <DialogHeader>
                                 <DialogTitle>Rechazar Solicitud</DialogTitle>
                                 <DialogDescription>
-                                  ¿Estás seguro de que deseas rechazar la solicitud de {solicitud.nombre} {solicitud.apellidoPaterno}?
-                                  Por favor, proporciona una razón para el rechazo.
+                                  Â¿EstÃ¡s seguro de que deseas rechazar la solicitud de {solicitud.nombre} {solicitud.apellidoPaterno}?
+                                  Por favor, proporciona una razÃ³n para el rechazo.
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
                                   <Label htmlFor="razon" className="text-right">
-                                    Razón:
+                                    RazÃ³n:
                                   </Label>
                                   <Textarea
                                     id="razon"
                                     value={razonRechazo}
                                     onChange={(e) => setRazonRechazo(e.target.value)}
                                     className="col-span-3"
-                                    placeholder="Explica la razón del rechazo..."
+                                    placeholder="Explica la razÃ³n del rechazo..."
                                     rows={3}
                                   />
                                 </div>
@@ -295,15 +295,15 @@ export default function SolicitudesTable() {
           <DialogHeader>
             <DialogTitle>Detalles Completos de la Solicitud</DialogTitle>
             <DialogDescription>
-              Información detallada del solicitante y documentación adjunta
+              InformaciÃ³n detallada del solicitante y documentaciÃ³n adjunta
             </DialogDescription>
           </DialogHeader>
           {solicitudDetalles && (
             <div className="space-y-6">
-              {/* Información Básica */}
+              {/* InformaciÃ³n BÃ¡sica */}
               <div className="space-y-3">
                 <h4 className="font-semibold text-foreground border-b border-border pb-1">
-                  Información Personal y Solicitud
+                  InformaciÃ³n Personal y Solicitud
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -317,7 +317,7 @@ export default function SolicitudesTable() {
                     <p className="text-foreground">{solicitudDetalles.email}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-muted-foreground">Teléfono:</span>
+                    <span className="font-medium text-muted-foreground">TelÃ©fono:</span>
                     <p className="text-foreground">{solicitudDetalles.telefono}</p>
                   </div>
                   <div>

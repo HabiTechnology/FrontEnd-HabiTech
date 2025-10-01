@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
@@ -37,14 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuthorization = () => {
       if (authenticated && user && wallets.length > 0) {
-        // Verificar si alguna de las wallets conectadas está autorizada
+        // Verificar si alguna de las wallets conectadas estÃ¡ autorizada
         const hasAuthorizedWallet = wallets.some(
           wallet => wallet.address.toLowerCase() === authorizedWallet
         )
         
         if (hasAuthorizedWallet) {
           setIsAuthorized(true)
-          // Guardar datos de sesión
+          // Guardar datos de sesiÃ³n
           sessionStorage.setItem('habitech_session_active', 'true')
           localStorage.setItem('habitech_authenticated', 'true')
           localStorage.setItem('habitech_user', JSON.stringify({
@@ -55,8 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }))
         } else {
           setIsAuthorized(false)
-          // Wallet no autorizada - mostrar mensaje y cerrar sesión
-          console.warn('Wallet no autorizada conectada')
+          // Wallet no autorizada - mostrar mensaje y cerrar sesiÃ³n
+
           setTimeout(() => {
             handleLogout()
           }, 2000)
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthorized(false)
       } else {
         setIsAuthorized(false)
-        // Limpiar datos de sesión
+        // Limpiar datos de sesiÃ³n
         sessionStorage.removeItem('habitech_session_active')
         localStorage.removeItem('habitech_authenticated')
         localStorage.removeItem('habitech_user')

@@ -1,4 +1,4 @@
-export interface ResidenteCompleto {
+﻿export interface ResidenteCompleto {
   id: number;
   usuario_id: number;
   departamento_id: number;

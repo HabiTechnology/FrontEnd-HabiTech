@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { usePrivy } from '@privy-io/react-auth'
 import { useHabiTechContract } from './use-habitech-contract'

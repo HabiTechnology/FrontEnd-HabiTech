@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -28,7 +28,7 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
 
   const getTipoDocumento = (tipo: DocumentoAdjunto["tipo"]) => {
     const tipos = {
-      "INE": "Identificación Oficial",
+      "INE": "IdentificaciÃ³n Oficial",
       "Comprobante_Ingresos": "Comprobante de Ingresos",
       "Referencias_Laborales": "Referencias Laborales",
       "Comprobante_Domicilio": "Comprobante de Domicilio",
@@ -60,7 +60,7 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
 
   return (
     <div className="space-y-6">
-      {/* Sección de Documentos */}
+      {/* SecciÃ³n de Documentos */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
             Documentos Adjuntos ({documentos.length})
           </CardTitle>
           <CardDescription>
-            Documentos subidos por el solicitante para verificación
+            Documentos subidos por el solicitante para verificaciÃ³n
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -89,9 +89,9 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
                       <h4 className="font-medium text-foreground truncate">{doc.nombre}</h4>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>{getTipoDocumento(doc.tipo)}</span>
-                        <span>•</span>
-                        <span>{formatFileSize(doc.tamaño)}</span>
-                        <span>•</span>
+                        <span>â€¢</span>
+                        <span>{formatFileSize(doc.tamaÃ±o)}</span>
+                        <span>â€¢</span>
                         <span>{doc.fecha_subida}</span>
                       </div>
                     </div>
@@ -139,7 +139,7 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
         </CardContent>
       </Card>
 
-      {/* Sección de Referencias */}
+      {/* SecciÃ³n de Referencias */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
               {selectedDoc?.nombre}
             </DialogTitle>
             <DialogDescription>
-              {selectedDoc && getTipoDocumento(selectedDoc.tipo)} - {selectedDoc && formatFileSize(selectedDoc.tamaño)}
+              {selectedDoc && getTipoDocumento(selectedDoc.tipo)} - {selectedDoc && formatFileSize(selectedDoc.tamaÃ±o)}
             </DialogDescription>
           </DialogHeader>
           
@@ -245,20 +245,20 @@ export default function DocumentosViewer({ documentos = [], referencias = [] }: 
                 <div>
                   <h3 className="text-lg font-medium mb-2">Vista Previa de PDF</h3>
                   <p className="text-muted-foreground mb-4">
-                    Simulación de documento: {selectedDoc.nombre}
+                    SimulaciÃ³n de documento: {selectedDoc.nombre}
                   </p>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <p><strong>Tipo:</strong> {getTipoDocumento(selectedDoc.tipo)}</p>
-                    <p><strong>Tamaño:</strong> {formatFileSize(selectedDoc.tamaño)}</p>
+                    <p><strong>TamaÃ±o:</strong> {formatFileSize(selectedDoc.tamaÃ±o)}</p>
                     <p><strong>Subido:</strong> {selectedDoc.fecha_subida}</p>
                     <p><strong>Estado:</strong> 
                       <Badge className={selectedDoc.verificado ? "ml-2 text-green-600 border-green-600" : "ml-2 text-yellow-600 border-yellow-600"}>
-                        {selectedDoc.verificado ? "Verificado" : "Pendiente de verificación"}
+                        {selectedDoc.verificado ? "Verificado" : "Pendiente de verificaciÃ³n"}
                       </Badge>
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground mt-4">
-                    * Esta es una simulación. En un sistema real aquí se mostraría el PDF real.
+                    * Esta es una simulaciÃ³n. En un sistema real aquÃ­ se mostrarÃ­a el PDF real.
                   </p>
                 </div>
                 <div className="flex gap-2 justify-center">

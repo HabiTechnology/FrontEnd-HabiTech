@@ -1,4 +1,4 @@
-import type React from "react"
+﻿import type React from "react"
 import { Roboto_Mono } from "next/font/google"
 import "./globals.css"
 import type { Metadata } from "next"
@@ -24,10 +24,10 @@ const isV0 = process.env["VERCEL_URL"]?.includes("vusercontent.net") ?? false
 
 export const metadata: Metadata = {
   title: {
-    template: "%s – HABITECH",
+    template: "%s â€“ HABITECH",
     default: "HABITECH",
   },
-  description: "Gestión Inteligente, Convivencia Inteligente - Sistema de administración residencial.",
+  description: "GestiÃ³n Inteligente, Convivencia Inteligente - Sistema de administraciÃ³n residencial.",
   generator: 'v0.app',
   icons: {
     icon: '/favicon.ico',

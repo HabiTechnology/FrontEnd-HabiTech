@@ -1,4 +1,4 @@
-import DashboardStat from "@/components/dashboard/stat"
+﻿import DashboardStat from "@/components/dashboard/stat"
 import { mockSolicitudStats } from "@/data/solicitudes-mock"
 import UsersIcon from "@/components/icons/users"
 import ProcessorIcon from "@/components/icons/proccesor"
@@ -19,7 +19,7 @@ export default function SolicitudesStats() {
     {
       label: "PENDIENTES",
       value: mockSolicitudStats.pendientes.toString(),
-      description: "Esperando revisión",
+      description: "Esperando revisiÃ³n",
       icon: ProcessorIcon,
       tag: "URGENTE",
       intent: "negative" as const,

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useAuth } from "@/lib/auth-context"
 
@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Acceso Denegado</h2>
             <p className="text-white/70 text-sm leading-relaxed">
-              No tienes permisos para acceder a esta área. Solo usuarios autorizados pueden ingresar al sistema.
+              No tienes permisos para acceder a esta Ã¡rea. Solo usuarios autorizados pueden ingresar al sistema.
             </p>
           </div>
           

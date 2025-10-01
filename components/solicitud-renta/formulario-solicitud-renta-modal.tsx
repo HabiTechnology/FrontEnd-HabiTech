@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -77,7 +77,7 @@ export default function FormularioSolicitudRentaModal({
           setError('Error al cargar departamentos disponibles')
         }
       } catch (error) {
-        setError('Error de conexión al cargar departamentos')
+        setError('Error de conexiÃ³n al cargar departamentos')
       } finally {
         setLoadingDepartamentos(false)
       }
@@ -106,7 +106,7 @@ export default function FormularioSolicitudRentaModal({
     setSuccess('')
 
     try {
-      // Validaciones básicas
+      // Validaciones bÃ¡sicas
       if (!formData.departamento_id) {
         throw new Error('Debe seleccionar un departamento')
       }
@@ -116,11 +116,11 @@ export default function FormularioSolicitudRentaModal({
       }
 
       if (!formData.correo_solicitante.trim()) {
-        throw new Error('El correo electrónico es requerido')
+        throw new Error('El correo electrÃ³nico es requerido')
       }
 
       if (!formData.telefono_solicitante.trim()) {
-        throw new Error('El teléfono es requerido')
+        throw new Error('El telÃ©fono es requerido')
       }
 
       if (!formData.documento_solicitante.trim()) {
@@ -132,7 +132,7 @@ export default function FormularioSolicitudRentaModal({
       }
 
       if (!formData.ocupacion.trim()) {
-        throw new Error('La ocupación es requerida')
+        throw new Error('La ocupaciÃ³n es requerida')
       }
 
       const response = await fetch('/api/solicitudes-renta', {
@@ -145,9 +145,9 @@ export default function FormularioSolicitudRentaModal({
 
       if (response.ok) {
         const result = await response.json()
-        setSuccess('¡Solicitud enviada exitosamente! Nos pondremos en contacto contigo pronto.')
+        setSuccess('Â¡Solicitud enviada exitosamente! Nos pondremos en contacto contigo pronto.')
         
-        // Llamar callback de éxito después de 2 segundos
+        // Llamar callback de Ã©xito despuÃ©s de 2 segundos
         setTimeout(() => {
           onSuccess?.()
         }, 2000)
@@ -199,7 +199,7 @@ export default function FormularioSolicitudRentaModal({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Selección de Departamento */}
+        {/* SelecciÃ³n de Departamento */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export default function FormularioSolicitudRentaModal({
                           Depto {dept.numero} - Piso {dept.piso}
                         </span>
                         <span className="text-sm text-gray-500 ml-4">
-                          {dept.dormitorios} hab, {dept.banos} baños - ${dept.renta_mensual.toLocaleString()}/mes
+                          {dept.dormitorios} hab, {dept.banos} baÃ±os - ${dept.renta_mensual.toLocaleString()}/mes
                         </span>
                       </div>
                     </SelectItem>
@@ -242,12 +242,12 @@ export default function FormularioSolicitudRentaModal({
                       <p className="font-medium">{departamentoSeleccionado.dormitorios}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Baños:</span>
+                      <span className="text-gray-600">BaÃ±os:</span>
                       <p className="font-medium">{departamentoSeleccionado.banos}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Área:</span>
-                      <p className="font-medium">{departamentoSeleccionado.area_m2} m²</p>
+                      <span className="text-gray-600">Ãrea:</span>
+                      <p className="font-medium">{departamentoSeleccionado.area_m2} mÂ²</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Renta:</span>
@@ -260,12 +260,12 @@ export default function FormularioSolicitudRentaModal({
           </CardContent>
         </Card>
 
-        {/* Información Personal */}
+        {/* InformaciÃ³n Personal */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Información Personal
+              InformaciÃ³n Personal
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -276,7 +276,7 @@ export default function FormularioSolicitudRentaModal({
                   id="nombre"
                   value={formData.nombre_solicitante}
                   onChange={(e) => handleInputChange('nombre_solicitante', e.target.value)}
-                  placeholder="Juan Pérez"
+                  placeholder="Juan PÃ©rez"
                   required
                 />
               </div>
@@ -291,7 +291,7 @@ export default function FormularioSolicitudRentaModal({
                 />
               </div>
               <div>
-                <Label htmlFor="correo">Correo Electrónico *</Label>
+                <Label htmlFor="correo">Correo ElectrÃ³nico *</Label>
                 <Input
                   id="correo"
                   type="email"
@@ -302,7 +302,7 @@ export default function FormularioSolicitudRentaModal({
                 />
               </div>
               <div>
-                <Label htmlFor="telefono">Teléfono *</Label>
+                <Label htmlFor="telefono">TelÃ©fono *</Label>
                 <Input
                   id="telefono"
                   value={formData.telefono_solicitante}
@@ -315,18 +315,18 @@ export default function FormularioSolicitudRentaModal({
           </CardContent>
         </Card>
 
-        {/* Información Laboral y Económica */}
+        {/* InformaciÃ³n Laboral y EconÃ³mica */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="h-5 w-5" />
-              Información Laboral y Económica
+              InformaciÃ³n Laboral y EconÃ³mica
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="ocupacion">Ocupación *</Label>
+                <Label htmlFor="ocupacion">OcupaciÃ³n *</Label>
                 <Input
                   id="ocupacion"
                   value={formData.ocupacion}
@@ -348,7 +348,7 @@ export default function FormularioSolicitudRentaModal({
                 />
               </div>
               <div>
-                <Label htmlFor="familia">Tamaño de la Familia *</Label>
+                <Label htmlFor="familia">TamaÃ±o de la Familia *</Label>
                 <Select
                   value={formData.tamano_familia.toString()}
                   onValueChange={(value) => handleInputChange('tamano_familia', parseInt(value))}
@@ -419,7 +419,7 @@ export default function FormularioSolicitudRentaModal({
                   checked={formData.documentos?.cedula || false}
                   onCheckedChange={(checked) => handleDocumentosChange('cedula', !!checked)}
                 />
-                <Label htmlFor="cedula">Cédula de Ciudadanía</Label>
+                <Label htmlFor="cedula">CÃ©dula de CiudadanÃ­a</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -458,14 +458,14 @@ export default function FormularioSolicitudRentaModal({
             <Textarea
               value={formData.mensaje || ''}
               onChange={(e) => handleInputChange('mensaje', e.target.value)}
-              placeholder="Cuéntanos algo más sobre ti o tu situación..."
+              placeholder="CuÃ©ntanos algo mÃ¡s sobre ti o tu situaciÃ³n..."
               className="resize-none"
               rows={4}
             />
           </CardContent>
         </Card>
 
-        {/* Botones de Acción */}
+        {/* Botones de AcciÃ³n */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             type="button"

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -14,12 +14,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     const checkAuth = () => {
-      // Siempre verificar autenticación fresca (no persistir en recargas)
+      // Siempre verificar autenticaciÃ³n fresca (no persistir en recargas)
       const authenticated = localStorage.getItem('habitech_authenticated')
       const sessionActive = sessionStorage.getItem('habitech_session_active')
       const userStr = localStorage.getItem('habitech_user')
       
-      // Si no hay sesión activa (recarga de página), redirigir al login
+      // Si no hay sesiÃ³n activa (recarga de pÃ¡gina), redirigir al login
       if (!sessionActive || authenticated !== 'true') {
         setIsAuthenticated(false)
         setIsAuthorized(false)

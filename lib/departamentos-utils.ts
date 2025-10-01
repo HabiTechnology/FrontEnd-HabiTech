@@ -25,7 +25,6 @@ export async function actualizarEstadoDepartamento(departamentoId: number) {
       WHERE id = ${departamentoId}
     `
 
-    console.log(`✅ Departamento ${departamentoId} actualizado a estado: ${nuevoEstado}`)
     
     return {
       departamentoId,
@@ -34,7 +33,7 @@ export async function actualizarEstadoDepartamento(departamentoId: number) {
     }
 
   } catch (error) {
-    console.error('❌ Error actualizando estado de departamento:', error)
+
     throw error
   }
 }
@@ -85,7 +84,6 @@ export async function asignarResidenteADepartamento(
       WHERE id = ${departamentoId}
     `
 
-    console.log(`✅ Residente ${residenteId} asignado al departamento ${departamentoId}`)
     
     return {
       residenteId,
@@ -94,7 +92,7 @@ export async function asignarResidenteADepartamento(
     }
 
   } catch (error) {
-    console.error('❌ Error en asignación:', error)
+
     throw error
   }
 }
@@ -116,7 +114,6 @@ export async function liberarDepartamento(departamentoId: number) {
       WHERE id = ${departamentoId}
     `
 
-    console.log(`✅ Departamento ${departamentoId} liberado`)
     
     return {
       departamentoId,
@@ -125,7 +122,7 @@ export async function liberarDepartamento(departamentoId: number) {
     }
 
   } catch (error) {
-    console.error('❌ Error liberando departamento:', error)
+
     throw error
   }
 }
@@ -164,7 +161,7 @@ export async function obtenerDepartamentoConResidente(departamentoId: number) {
     }
 
   } catch (error) {
-    console.error('❌ Error obteniendo departamento con residente:', error)
+
     throw error
   }
 }
@@ -172,7 +169,7 @@ export async function obtenerDepartamentoConResidente(departamentoId: number) {
 // Función para sincronizar todos los estados de departamentos
 export async function sincronizarEstadosDepartamentos() {
   try {
-    console.log('🔄 Sincronizando estados de departamentos...')
+
     
     // Obtener todos los departamentos activos
     const departamentos = await sql`
@@ -184,7 +181,6 @@ export async function sincronizarEstadosDepartamentos() {
       await actualizarEstadoDepartamento(dept.id)
     }
 
-    console.log(`✅ ${departamentos.length} departamentos sincronizados`)
     
     return {
       departamentosSincronizados: departamentos.length,
@@ -192,7 +188,7 @@ export async function sincronizarEstadosDepartamentos() {
     }
 
   } catch (error) {
-    console.error('❌ Error en sincronización:', error)
+
     throw error
   }
 }

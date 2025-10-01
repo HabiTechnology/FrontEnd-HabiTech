@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -109,9 +109,9 @@ export default function TiendaCatalogo() {
     })
     setShowNewProductDialog(false)
     
-    // Notificación de éxito
+    // NotificaciÃ³n de Ã©xito
     setTimeout(() => {
-      alert(`✅ Producto "${nuevoProducto.nombre}" agregado exitosamente`)
+      alert(`âœ… Producto "${nuevoProducto.nombre}" agregado exitosamente`)
     }, 300)
   }
 
@@ -123,7 +123,7 @@ export default function TiendaCatalogo() {
             <div>
               <CardTitle className="flex items-center gap-2.5 text-card-foreground">
                 <Bullet variant="default" />
-                GESTIÓN DE INVENTARIO
+                GESTIÃ“N DE INVENTARIO
               </CardTitle>
               <CardDescription>
                 Administra los productos disponibles en el edificio usando HabiCoins
@@ -154,7 +154,7 @@ export default function TiendaCatalogo() {
               <Select value={filtroCategoria} onValueChange={(value) => setFiltroCategoria(value as ProductoCategoria | "Todas")}>
                 <SelectTrigger>
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por categoría" />
+                  <SelectValue placeholder="Filtrar por categorÃ­a" />
                 </SelectTrigger>
                 <SelectContent>
                   {categorias.map((categoria) => (
@@ -256,7 +256,7 @@ export default function TiendaCatalogo() {
               </h3>
               <p className="text-muted-foreground">
                 {searchTerm || filtroCategoria !== "Todas" 
-                  ? "Intenta ajustar los filtros de búsqueda" 
+                  ? "Intenta ajustar los filtros de bÃºsqueda" 
                   : "No hay productos disponibles en este momento"}
               </p>
             </div>
@@ -270,7 +270,7 @@ export default function TiendaCatalogo() {
           <DialogHeader>
             <DialogTitle>Detalles del Producto</DialogTitle>
             <DialogDescription>
-              Información completa del producto en inventario
+              InformaciÃ³n completa del producto en inventario
             </DialogDescription>
           </DialogHeader>
           
@@ -282,7 +282,7 @@ export default function TiendaCatalogo() {
                   <p className="text-sm">{selectedProduct.nombre}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Categoría</Label>
+                  <Label className="text-sm font-medium">CategorÃ­a</Label>
                   <Badge className={`${getCategoriaColor(selectedProduct.categoria)} text-white`}>
                     {selectedProduct.categoria}
                   </Badge>
@@ -306,7 +306,7 @@ export default function TiendaCatalogo() {
               </div>
               
               <div>
-                <Label className="text-sm font-medium">Descripción</Label>
+                <Label className="text-sm font-medium">DescripciÃ³n</Label>
                 <p className="text-sm mt-1">{selectedProduct.descripcion}</p>
               </div>
 
@@ -359,13 +359,13 @@ export default function TiendaCatalogo() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="categoria">Categoría *</Label>
+                <Label htmlFor="categoria">CategorÃ­a *</Label>
                 <Select 
                   value={newProduct.categoria} 
                   onValueChange={(value) => setNewProduct(prev => ({ ...prev, categoria: value as ProductoCategoria }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
+                    <SelectValue placeholder="Seleccionar categorÃ­a" />
                   </SelectTrigger>
                   <SelectContent>
                     {categorias.filter(cat => cat !== "Todas").map((categoria) => (
@@ -432,12 +432,12 @@ export default function TiendaCatalogo() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descripcion">Descripción</Label>
+              <Label htmlFor="descripcion">DescripciÃ³n</Label>
               <Textarea
                 id="descripcion"
                 value={newProduct.descripcion}
                 onChange={(e) => setNewProduct(prev => ({ ...prev, descripcion: e.target.value }))}
-                placeholder="Descripción detallada del producto..."
+                placeholder="DescripciÃ³n detallada del producto..."
                 rows={3}
               />
             </div>
@@ -454,7 +454,7 @@ export default function TiendaCatalogo() {
                 )}
               </div>
               <p className="text-sm text-muted-foreground mb-2">
-                {newProduct.descripcion || "Descripción del producto"}
+                {newProduct.descripcion || "DescripciÃ³n del producto"}
               </p>
               <div className="flex gap-4 text-sm">
                 <span><strong>Precio:</strong> {newProduct.precio_coins} HC</span>

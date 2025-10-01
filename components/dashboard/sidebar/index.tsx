@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
@@ -37,15 +37,16 @@ import BellIcon from "@/components/icons/bell"
 import Image from "next/image"
 import { useIsV0 } from "@/lib/v0-context"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, Shield } from "lucide-react"
+import { Moon, Sun, Shield, Wallet, TrendingUp } from "lucide-react"
 import UsersIcon from "@/components/icons/users"
 
 // This is sample data for the sidebar
 const navItems = [
   {
     title: "INICIO",
-    url: "/dashboard",
+    url: "/",
     icon: HomeIcon,
+    hasToggle: true, // Indica que este item tiene toggle
   },
   {
     title: "DEPARTAMENTOS",
@@ -95,13 +96,26 @@ const data = {
 export function DashboardSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   const isV0 = useIsV0()
   const [isDark, setIsDark] = React.useState(true)
+  const [showFinanciero, setShowFinanciero] = React.useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { logout } = useAuth()
 
+  // Sincronizar estado con la ruta actual
+  React.useEffect(() => {
+    setShowFinanciero(pathname === "/financiero")
+  }, [pathname])
+
   const toggleDarkMode = () => {
     setIsDark(!isDark)
     document.documentElement.classList.toggle("dark")
+  }
+
+  const handleInicioClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const newPath = showFinanciero ? "/" : "/financiero"
+    setShowFinanciero(!showFinanciero)
+    router.push(newPath)
   }
 
   const handleLogout = async () => {
@@ -151,15 +165,33 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
                       className="sidebar-item"
                     >
                       <AnimatedButton variant="hover">
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActiveRoute(item.url)}
-                        >
-                          <a href={item.url}>
-                            <item.icon className="size-5" />
-                            <span>{item.title}</span>
-                          </a>
-                        </SidebarMenuButton>
+                        {(item as any).hasToggle ? (
+                          <SidebarMenuButton
+                            isActive={isActiveRoute(item.url) || isActiveRoute("/financiero")}
+                            onClick={handleInicioClick}
+                            className="group"
+                          >
+                            {showFinanciero ? (
+                              <Wallet className="size-5 text-green-600" />
+                            ) : (
+                              <item.icon className="size-5" />
+                            )}
+                            <span>{showFinanciero ? "FINANCIERO" : item.title}</span>
+                            <SidebarMenuBadge className="ml-auto opacity-60 group-hover:opacity-100 transition-opacity">
+                              <TrendingUp className="size-3" />
+                            </SidebarMenuBadge>
+                          </SidebarMenuButton>
+                        ) : (
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActiveRoute(item.url)}
+                          >
+                            <a href={item.url}>
+                              <item.icon className="size-5" />
+                              <span>{item.title}</span>
+                            </a>
+                          </SidebarMenuButton>
+                        )}
                       </AnimatedButton>
                     </SidebarMenuItem>
                   ))}

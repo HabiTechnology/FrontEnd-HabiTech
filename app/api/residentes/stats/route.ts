@@ -3,8 +3,7 @@ import { sql } from '@/lib/db';
 
 export async function GET() {
   try {
-    console.log('🔍 Iniciando GET residentes stats...');
-    console.log('🔗 DATABASE_URL existe:', !!process.env.DATABASE_URL);
+
 
     // Consultas para obtener estadísticas
     const [
@@ -43,12 +42,11 @@ export async function GET() {
       familiares: parseInt(familiares[0]?.total || 0)
     };
 
-    console.log('📊 Estadísticas calculadas:', stats);
 
     return NextResponse.json(stats);
 
   } catch (error) {
-    console.error('Error obteniendo estadísticas de residentes:', error);
+
     
     // Devolver datos por defecto en caso de error
     return NextResponse.json({

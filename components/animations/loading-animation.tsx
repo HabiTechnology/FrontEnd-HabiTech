@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef } from 'react'
 import anime from 'animejs/lib/anime.es.js'
@@ -9,7 +9,7 @@ export default function LoadingAnimation() {
 
   useEffect(() => {
     if (loaderRef.current) {
-      // Animación del spinner principal
+      // AnimaciÃ³n del spinner principal
       anime({
         targets: loaderRef.current,
         rotate: '1turn',
@@ -20,7 +20,7 @@ export default function LoadingAnimation() {
     }
 
     if (dotsRef.current) {
-      // Animación de los puntos
+      // AnimaciÃ³n de los puntos
       anime({
         targets: dotsRef.current.children,
         scale: [1, 1.3, 1],
@@ -45,7 +45,7 @@ export default function LoadingAnimation() {
           <div className="absolute inset-0 h-12 w-12 border-2 border-primary/10 rounded-full mx-auto animate-ping" />
         </div>
         
-        {/* Texto con animación */}
+        {/* Texto con animaciÃ³n */}
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Cargando HabiTech

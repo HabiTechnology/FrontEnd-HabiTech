@@ -1,16 +1,14 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import mockDataJson from "@/mock.json"
 import { Bullet } from "@/components/ui/bullet"
-import type { MockData, TimePeriod } from "@/types/dashboard"
 import AnimatedButton from "@/components/animations/animated-button"
 import FloatingElement from "@/components/animations/floating-element"
 
-const mockData = mockDataJson as MockData
+type TimePeriod = "semana" | "mes" | "año"
 
 type ChartDataPoint = {
   date: string
@@ -35,10 +33,38 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export default function DashboardChart() {
-  const [activeTab, setActiveTab] = React.useState<TimePeriod>("week")
+  const [activeTab, setActiveTab] = React.useState<TimePeriod>("semana")
+  const [chartData, setChartData] = React.useState<ChartDataPoint[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(`/api/dashboard/chart?periodo=${activeTab}`)
+        const data = await response.json()
+        
+        // Transformar los datos al formato esperado por el gráfico
+        const transformed: ChartDataPoint[] = data.labels.map((label: string, index: number) => ({
+          date: label,
+          residentes: data.datasets.residentes[index] || 0,
+          visitantes: data.datasets.visitantes[index] || 0,
+          ingresos: data.datasets.ingresos[index] || 0,
+        }))
+        
+        setChartData(transformed)
+      } catch (error) {
+        console.error("Error fetching chart data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchChartData()
+  }, [activeTab])
 
   const handleTabChange = (value: string) => {
-    if (value === "week" || value === "month" || value === "year") {
+    if (value === "semana" || value === "mes" || value === "año") {
       setActiveTab(value as TimePeriod)
     }
   }
@@ -160,13 +186,13 @@ export default function DashboardChart() {
         <div className="flex items-center justify-between mb-4 max-md:contents card-divider">
           <TabsList className="max-md:w-full">
             <AnimatedButton variant="hover">
-              <TabsTrigger value="week">SEMANA</TabsTrigger>
+              <TabsTrigger value="semana">SEMANA</TabsTrigger>
             </AnimatedButton>
             <AnimatedButton variant="hover">
-              <TabsTrigger value="month">MES</TabsTrigger>
+              <TabsTrigger value="mes">MES</TabsTrigger>
             </AnimatedButton>
             <AnimatedButton variant="hover">
-              <TabsTrigger value="year">AÑO</TabsTrigger>
+              <TabsTrigger value="año">AÑO</TabsTrigger>
             </AnimatedButton>
           </TabsList>
           <div className="flex items-center gap-6 max-md:order-1">
@@ -175,14 +201,26 @@ export default function DashboardChart() {
             ))}
           </div>
         </div>
-        <TabsContent value="week" className="space-y-4">
-          {renderChart(mockData.chartData.week)}
+        <TabsContent value="semana" className="space-y-4">
+          {loading ? (
+            <div className="h-[400px] w-full animate-pulse bg-muted rounded" />
+          ) : (
+            renderChart(chartData)
+          )}
         </TabsContent>
-        <TabsContent value="month" className="space-y-4">
-          {renderChart(mockData.chartData.month)}
+        <TabsContent value="mes" className="space-y-4">
+          {loading ? (
+            <div className="h-[400px] w-full animate-pulse bg-muted rounded" />
+          ) : (
+            renderChart(chartData)
+          )}
         </TabsContent>
-        <TabsContent value="year" className="space-y-4">
-          {renderChart(mockData.chartData.year)}
+        <TabsContent value="año" className="space-y-4">
+          {loading ? (
+            <div className="h-[400px] w-full animate-pulse bg-muted rounded" />
+          ) : (
+            renderChart(chartData)
+          )}
         </TabsContent>
       </Tabs>
     </div>

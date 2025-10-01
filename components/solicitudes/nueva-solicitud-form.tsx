@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -40,11 +40,11 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
     if (!formData.nombre.trim()) newErrors.nombre = "El nombre es requerido"
     if (!formData.apellidoPaterno.trim()) newErrors.apellidoPaterno = "El apellido paterno es requerido"
     if (!formData.email.trim()) newErrors.email = "El email es requerido"
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email inválido"
-    if (!formData.telefono.trim()) newErrors.telefono = "El teléfono es requerido"
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email invÃ¡lido"
+    if (!formData.telefono.trim()) newErrors.telefono = "El telÃ©fono es requerido"
     if (!formData.tipo_solicitud) newErrors.tipo_solicitud = "El tipo de solicitud es requerido"
-    if (formData.presupuesto_min <= 0) newErrors.presupuesto_min = "El presupuesto mínimo debe ser mayor a 0"
-    if (formData.presupuesto_max <= formData.presupuesto_min) newErrors.presupuesto_max = "El presupuesto máximo debe ser mayor al mínimo"
+    if (formData.presupuesto_min <= 0) newErrors.presupuesto_min = "El presupuesto mÃ­nimo debe ser mayor a 0"
+    if (formData.presupuesto_max <= formData.presupuesto_min) newErrors.presupuesto_max = "El presupuesto mÃ¡ximo debe ser mayor al mÃ­nimo"
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -59,8 +59,8 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
       ...formData,
       estado: "Pendiente",
       fecha_solicitud: new Date().toISOString().split('T')[0],
-      documentos_completos: Math.random() > 0.3, // Simulación
-      referencias_verificadas: Math.random() > 0.5, // Simulación
+      documentos_completos: Math.random() > 0.3, // SimulaciÃ³n
+      referencias_verificadas: Math.random() > 0.5, // SimulaciÃ³n
     }
 
     onSubmit(nuevaSolicitud)
@@ -103,11 +103,11 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Información Personal */}
+          {/* InformaciÃ³n Personal */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              <h3 className="font-semibold">Información Personal</h3>
+              <h3 className="font-semibold">InformaciÃ³n Personal</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -116,7 +116,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                   id="nombre"
                   value={formData.nombre}
                   onChange={(e) => handleInputChange("nombre", e.target.value)}
-                  placeholder="Ej: María"
+                  placeholder="Ej: MarÃ­a"
                   className={errors.nombre ? "border-red-500" : ""}
                 />
                 {errors.nombre && <p className="text-sm text-red-500 mt-1">{errors.nombre}</p>}
@@ -127,7 +127,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                   id="apellidoPaterno"
                   value={formData.apellidoPaterno}
                   onChange={(e) => handleInputChange("apellidoPaterno", e.target.value)}
-                  placeholder="Ej: González"
+                  placeholder="Ej: GonzÃ¡lez"
                   className={errors.apellidoPaterno ? "border-red-500" : ""}
                 />
                 {errors.apellidoPaterno && <p className="text-sm text-red-500 mt-1">{errors.apellidoPaterno}</p>}
@@ -138,7 +138,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                   id="apellidoMaterno"
                   value={formData.apellidoMaterno}
                   onChange={(e) => handleInputChange("apellidoMaterno", e.target.value)}
-                  placeholder="Ej: Pérez"
+                  placeholder="Ej: PÃ©rez"
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                 {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
               </div>
               <div>
-                <Label htmlFor="telefono">Teléfono *</Label>
+                <Label htmlFor="telefono">TelÃ©fono *</Label>
                 <Input
                   id="telefono"
                   value={formData.telefono}
@@ -228,7 +228,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="presupuesto_min">Presupuesto Mínimo *</Label>
+                <Label htmlFor="presupuesto_min">Presupuesto MÃ­nimo *</Label>
                 <Input
                   id="presupuesto_min"
                   type="number"
@@ -240,7 +240,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                 {errors.presupuesto_min && <p className="text-sm text-red-500 mt-1">{errors.presupuesto_min}</p>}
               </div>
               <div>
-                <Label htmlFor="presupuesto_max">Presupuesto Máximo *</Label>
+                <Label htmlFor="presupuesto_max">Presupuesto MÃ¡ximo *</Label>
                 <Input
                   id="presupuesto_max"
                   type="number"
@@ -263,7 +263,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                   max="850"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Entre 300-850 (se genera automáticamente si no se especifica)
+                  Entre 300-850 (se genera automÃ¡ticamente si no se especifica)
                 </p>
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function NuevaSolicitudForm({ onSubmit }: NuevaSolicitudFormProps
                 id="comentarios"
                 value={formData.comentarios}
                 onChange={(e) => handleInputChange("comentarios", e.target.value)}
-                placeholder="Información adicional sobre la solicitud, preferencias especiales, etc."
+                placeholder="InformaciÃ³n adicional sobre la solicitud, preferencias especiales, etc."
                 rows={3}
               />
             </div>

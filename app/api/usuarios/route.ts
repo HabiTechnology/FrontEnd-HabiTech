@@ -3,14 +3,13 @@ import { sql } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
-    console.log('🔍 Conectando a base de datos para obtener usuarios...');
+
     
     // Obtener parámetros de consulta
     const { searchParams } = new URL(request.url);
     const soloActivos = searchParams.get('activos') === 'true';
     
-    console.log('📊 Parámetros:', { soloActivos });
-    console.log('🔗 DATABASE_URL existe:', !!process.env.DATABASE_URL);
+
     
     // Query para obtener usuarios
     const usuarios = await sql`
@@ -31,8 +30,7 @@ export async function GET(request: Request) {
       ORDER BY creado_en DESC, id ASC
     `;
 
-    console.log('👥 Usuarios encontrados:', usuarios.length);
-    console.log('🔎 Primer usuario:', usuarios[0]);
+
 
     // Devolver los datos directos de la tabla usuarios
     const usuariosFormateados = usuarios.map((usuario: any) => ({
@@ -49,11 +47,10 @@ export async function GET(request: Request) {
       actualizado_en: usuario.actualizado_en
     }));
 
-    console.log('✅ Usuarios formateados exitosamente');
     return NextResponse.json(usuariosFormateados);
 
   } catch (error) {
-    console.error('❌ Error obteniendo usuarios:', error);
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor', 
@@ -66,10 +63,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    console.log('🔍 Creando nuevo usuario...');
+
     
     const body = await request.json();
-    console.log('📝 Datos recibidos:', body);
 
     const { correo, hash_contrasena, nombre, apellido, telefono, numero_documento, imagen_perfil, rol_id } = body;
 
@@ -108,11 +104,10 @@ export async function POST(request: Request) {
       RETURNING *
     `;
 
-    console.log('✅ Usuario creado exitosamente:', nuevoUsuario[0]);
     return NextResponse.json(nuevoUsuario[0], { status: 201 });
 
   } catch (error) {
-    console.error('❌ Error creando usuario:', error);
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor', 

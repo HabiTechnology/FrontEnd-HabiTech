@@ -6,7 +6,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { accion, residente_id, departamento_id } = body
 
-    console.log('🏠 Procesando asignación de departamento...', { accion, residente_id, departamento_id })
 
     switch (accion) {
       case 'asignar':
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('❌ Error en asignación de departamento:', error)
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor',

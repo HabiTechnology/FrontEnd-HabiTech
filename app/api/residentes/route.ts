@@ -1,16 +1,15 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
-    console.log('🔍 Conectando a base de datos real...');
+
     
-    // Obtener parámetros de consulta
+    // Obtener par�metros de consulta
     const { searchParams } = new URL(request.url);
     const soloActivos = searchParams.get('activos') === 'true';
     
-    console.log('📊 Parámetros:', { soloActivos });
-    console.log('🔗 DATABASE_URL existe:', !!process.env.DATABASE_URL);
+
     
     // Query con JOINs para obtener datos completos de usuarios y departamentos
     const residentes = await sql`
@@ -47,19 +46,16 @@ export async function GET(request: Request) {
       ${soloActivos ? sql`WHERE r.activo = true` : sql``}
       ORDER BY r.fecha_ingreso DESC, r.id ASC
     `;
+;
 
-    console.log('📋 Residentes encontrados:', residentes.length);
-    console.log('🔎 Primer residente completo:', JSON.stringify(residentes[0], null, 2));
-
-    // Verificar qué campos vienen del JOIN
+    // Verificar qu� campos vienen del JOIN
     if (residentes.length > 0) {
       const primerResidente = residentes[0];
-      console.log('🔍 Campos disponibles:', Object.keys(primerResidente));
-      console.log('📧 usuario_nombre:', primerResidente.usuario_nombre);
-      console.log('🏠 departamento_numero:', primerResidente.departamento_numero);
+;
+
     }
 
-    // Devolver los datos con información completa de usuarios y departamentos
+    // Devolver los datos con informaci�n completa de usuarios y departamentos
     const residentesFormateados = residentes.map((residente: any) => ({
       id: residente.id,
       usuario_id: residente.usuario_id,
@@ -72,7 +68,7 @@ export async function GET(request: Request) {
       es_principal: residente.es_principal,
       activo: residente.activo,
       creado_en: residente.creado_en,
-      // Información del usuario (solo si existe)
+      // Informaci�n del usuario (solo si existe)
       usuario: residente.usuario_nombre ? {
         nombre: residente.usuario_nombre,
         apellido: residente.usuario_apellido,
@@ -81,7 +77,7 @@ export async function GET(request: Request) {
         numero_documento: residente.usuario_documento,
         imagen_perfil: residente.usuario_imagen
       } : null,
-      // Información del departamento (solo si existe)
+      // Informaci�n del departamento (solo si existe)
       departamento: residente.departamento_numero ? {
         numero: residente.departamento_numero,
         piso: residente.departamento_piso,
@@ -93,11 +89,10 @@ export async function GET(request: Request) {
       } : null
     }));
 
-    console.log('✅ Datos formateados exitosamente');
     return NextResponse.json(residentesFormateados);
 
   } catch (error) {
-    console.error('❌ Error obteniendo residentes:', error);
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor', 

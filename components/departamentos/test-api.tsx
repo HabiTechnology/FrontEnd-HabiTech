@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,7 @@ export default function TestDepartamentosAPI() {
     } catch (error) {
       setResultado({
         status: 'error',
-        error: 'Error de conexión',
+        error: 'Error de conexiÃ³n',
         details: error instanceof Error ? error.message : 'Error desconocido'
       })
     } finally {
@@ -42,7 +42,7 @@ export default function TestDepartamentosAPI() {
   const probarCreacion = async () => {
     setLoading(true)
     try {
-      console.log('🧪 Probando creación con datos:', formularioSimple)
+
       
       const response = await fetch('/api/departamentos', {
         method: 'POST',
@@ -63,7 +63,7 @@ export default function TestDepartamentosAPI() {
     } catch (error) {
       setResultado({
         status: 'error',
-        error: 'Error en creación',
+        error: 'Error en creaciÃ³n',
         details: error instanceof Error ? error.message : 'Error desconocido'
       })
     } finally {
@@ -73,15 +73,15 @@ export default function TestDepartamentosAPI() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">🧪 Test - API Departamentos</h1>
+      <h1 className="text-3xl font-bold mb-6">ðŸ§ª Test - API Departamentos</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Test de Conexión */}
+        {/* Test de ConexiÃ³n */}
         <Card>
           <CardHeader>
-            <CardTitle>1. Test de Conexión</CardTitle>
+            <CardTitle>1. Test de ConexiÃ³n</CardTitle>
             <CardDescription>
-              Verifica la conexión con la base de datos
+              Verifica la conexiÃ³n con la base de datos
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,15 +90,15 @@ export default function TestDepartamentosAPI() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Probando...' : 'Probar Conexión'}
+              {loading ? 'Probando...' : 'Probar ConexiÃ³n'}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Test de Creación */}
+        {/* Test de CreaciÃ³n */}
         <Card>
           <CardHeader>
-            <CardTitle>2. Test de Creación</CardTitle>
+            <CardTitle>2. Test de CreaciÃ³n</CardTitle>
             <CardDescription>
               Prueba crear un departamento simple
             </CardDescription>
@@ -106,7 +106,7 @@ export default function TestDepartamentosAPI() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label htmlFor="numero">Número</Label>
+                <Label htmlFor="numero">NÃºmero</Label>
                 <Input
                   id="numero"
                   value={formularioSimple.numero}

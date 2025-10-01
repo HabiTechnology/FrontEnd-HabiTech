@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, ReactNode } from 'react'
 
@@ -21,7 +21,7 @@ export default function StaggerAnimation({
         const { animate, stagger } = await import('animejs')
         
         if (containerRef.current) {
-          // Animación escalonada para múltiples elementos
+          // AnimaciÃ³n escalonada para mÃºltiples elementos
           animate(containerRef.current.children, {
             opacity: [0, 1],
             translateY: [40, 0],
@@ -32,7 +32,7 @@ export default function StaggerAnimation({
           })
         }
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
 

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useRef, ReactNode } from 'react'
 
@@ -27,7 +27,7 @@ export default function AnimatedButton({
           easing: 'easeOutElastic(1, .8)'
         })
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
     onClick?.()
@@ -44,7 +44,7 @@ export default function AnimatedButton({
           easing: 'easeOutQuad'
         })
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
   }
@@ -60,7 +60,7 @@ export default function AnimatedButton({
           easing: 'easeOutQuad'
         })
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
   }

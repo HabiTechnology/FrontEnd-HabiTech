@@ -1,79 +1,131 @@
+﻿"use client"
+
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import DashboardCard from "@/components/dashboard/card"
-import type { RebelRanking } from "@/types/dashboard"
-import Image from "next/image"
 import { cn } from "@/lib/utils"
 
-interface RebelsRankingProps {
-  rebels: RebelRanking[]
+interface RankingItem {
+  posicion: number
+  apartamento: string
+  familia: string
+  renta: number
+  eficiencia: number
+  estadoPagos: string
+  nuevosIngresos: number
 }
 
-export default function RebelsRanking({ rebels }: RebelsRankingProps) {
+export default function RebelsRanking() {
+  const [ranking, setRanking] = useState<RankingItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [nuevosCount, setNuevosCount] = useState(0)
+
+  useEffect(() => {
+    const fetchRanking = async () => {
+      try {
+        const response = await fetch("/api/dashboard/ranking")
+        const data = await response.json()
+        setRanking(data.ranking || [])
+        // Contar cuántos tienen nuevos ingresos
+        const count = data.ranking?.reduce((sum: number, item: RankingItem) => sum + (item.nuevosIngresos > 0 ? 1 : 0), 0) || 0
+        setNuevosCount(count)
+      } catch (error) {
+        console.error("Error fetching ranking:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRanking()
+    // Actualizar cada 5 minutos
+    const interval = setInterval(fetchRanking, 300000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) {
+    return (
+      <DashboardCard title="EFICIENCIA POR PISO" intent="default">
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse bg-muted h-16 rounded" />
+          ))}
+        </div>
+      </DashboardCard>
+    )
+  }
+
   return (
     <DashboardCard
       title="EFICIENCIA POR PISO"
       intent="default"
-      addon={<Badge variant="outline-warning">2 NUEVOS</Badge>}
+      addon={nuevosCount > 0 ? <Badge variant="outline-warning">{nuevosCount} NUEVOS</Badge> : undefined}
     >
       <div className="space-y-4">
-        {rebels.map((rebel) => (
-          <div key={rebel.id} className="flex items-center justify-between message-divider first:border-t-0 first:pt-0 first:mt-0">
-            <div className="flex items-center gap-1 w-full">
-              <div
-                className={cn(
-                  "flex items-center justify-center rounded text-sm font-bold px-1.5 mr-1 md:mr-2",
-                  rebel.featured
-                    ? "h-10 bg-primary text-primary-foreground"
-                    : "h-8 bg-secondary text-secondary-foreground",
-                )}
-              >
-                {rebel.id}
-              </div>
-              <div
-                className={cn(
-                  "rounded-lg overflow-hidden bg-muted",
-                  rebel.featured ? "size-14 md:size-16" : "size-10 md:size-12",
-                )}
-              >
-                {rebel.avatar ? (
-                  <Image
-                    src={rebel.avatar || "/placeholder.svg"}
-                    alt={rebel.name}
-                    width={120}
-                    height={120}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-muted" />
-                )}
-              </div>
-              <div
-                className={cn(
-                  "flex flex-1 h-full items-center justify-between py-2 px-2.5 rounded",
-                  rebel.featured && "bg-accent",
-                )}
-              >
-                <div className="flex flex-col flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-2">
-                      <span
-                        className={cn("font-display", rebel.featured ? "text-xl md:text-2xl" : "text-lg md:text-xl")}
-                      >
-                        {rebel.name}
-                      </span>
-                      <span className="text-muted-foreground text-xs md:text-sm">{rebel.handle}</span>
-                    </div>
-                    <Badge variant={rebel.featured ? "default" : "secondary"}>{rebel.points}% EFICIENCIA</Badge>
-                  </div>
-                  {rebel.subtitle && <span className="text-sm text-muted-foreground italic">{rebel.subtitle}</span>}
-                  {rebel.streak && !rebel.featured && (
-                    <span className="text-sm text-muted-foreground italic">{rebel.streak}</span>
+        {ranking.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No hay datos de ranking disponibles
+          </p>
+        ) : (
+          ranking.map((item) => (
+            <div key={item.posicion} className="flex items-center justify-between message-divider first:border-t-0 first:pt-0 first:mt-0">
+              <div className="flex items-center gap-1 w-full">
+                <div
+                  className={cn(
+                    "flex items-center justify-center rounded text-sm font-bold px-1.5 mr-1 md:mr-2",
+                    item.posicion === 1
+                      ? "h-10 bg-primary text-primary-foreground"
+                      : "h-8 bg-secondary text-secondary-foreground",
                   )}
+                >
+                  {item.posicion}
+                </div>
+                <div
+                  className={cn(
+                    "rounded-lg overflow-hidden bg-muted flex items-center justify-center",
+                    item.posicion === 1 ? "size-14 md:size-16" : "size-10 md:size-12",
+                  )}
+                >
+                  <div className="text-xl font-bold text-primary">{item.apartamento}</div>
+                </div>
+                <div
+                  className="flex flex-col justify-center gap-0.5 px-2 md:px-3 truncate flex-1"
+                >
+                  <h3
+                    className={cn(
+                      "truncate",
+                      item.posicion === 1
+                        ? "text-base md:text-lg font-bold text-foreground"
+                        : "text-sm md:text-base font-semibold text-foreground",
+                    )}
+                  >
+                    FAMILIA {item.familia.split(' ')[1]?.toUpperCase() || item.familia.toUpperCase()}
+                  </h3>
+                  <p
+                    className={cn(
+                      "truncate",
+                      item.posicion === 1
+                        ? "text-xs md:text-sm font-medium text-muted-foreground"
+                        : "text-xs text-muted-foreground",
+                    )}
+                  >
+                    APT {item.apartamento} - ${item.renta.toLocaleString()}/mes
+                    <span className="hidden sm:inline"> - <span className="text-success">{item.estadoPagos}</span></span>
+                  </p>
+                </div>
+                <div
+                  className={cn(
+                    "rounded-md text-center leading-tight px-1 md:px-3 py-1 font-mono text-foreground",
+                    item.posicion === 1
+                      ? "text-base md:text-xl font-bold bg-primary/20"
+                      : "text-xs md:text-sm font-semibold bg-secondary",
+                  )}
+                >
+                  {item.eficiencia}% EFICIENCIA
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </DashboardCard>
   )

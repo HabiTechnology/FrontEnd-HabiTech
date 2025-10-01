@@ -103,20 +103,19 @@ export default function ResidentesTableSimple() {
   const fetchResidentes = async () => {
     try {
       setLoading(true)
-      console.log('🔍 Obteniendo residentes...')
+
       const response = await fetch('/api/residentes')
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Datos recibidos:', data)
-        console.log('🔎 Primer residente:', data[0])
+
         setResidentes(data)
         setError(null)
       } else {
-        console.error('❌ Error en respuesta:', response.status)
+
         setError('Error al cargar residentes')
       }
     } catch (error) {
-      console.error('❌ Error:', error)
+
       setError('Error de conexión')
     } finally {
       setLoading(false)
@@ -152,11 +151,11 @@ export default function ResidentesTableSimple() {
         alert('Residente eliminado exitosamente')
       } else {
         const errorData = await response.json()
-        console.error('Error eliminando residente:', errorData)
+
         alert(errorData.error || 'Error al eliminar el residente')
       }
     } catch (error) {
-      console.error('Error de red:', error)
+
       alert('Error de conexión. Por favor, intenta de nuevo.')
     }
   }
@@ -167,17 +166,17 @@ export default function ResidentesTableSimple() {
       setShowDetailsModal(true)
       setResidenteDetallado(null)
       
-      console.log('🔍 Obteniendo detalles para residente:', residente.id)
+
       
       // Obtener información detallada solo de residentes
       const response = await fetch(`/api/residentes/detalles/${residente.id}`)
       if (response.ok) {
         const detalles = await response.json()
-        console.log('✅ Detalles obtenidos:', detalles)
+
         setResidenteDetallado(detalles)
       } else {
         const errorData = await response.json()
-        console.error('❌ Error del servidor:', errorData)
+
         // Si falla, usar los datos básicos que ya tenemos
         setResidenteDetallado({
           ...residente,
@@ -185,7 +184,7 @@ export default function ResidentesTableSimple() {
         })
       }
     } catch (error) {
-      console.error('Error:', error)
+
       // Si falla, usar los datos básicos que ya tenemos
       setResidenteDetallado({
         ...residente,

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
@@ -28,8 +28,8 @@ export default function ResidentesPage() {
     <PageTransition>
       <DashboardPageLayout
         header={{
-          title: "Gestión de Residentes",
-          description: "Administración y seguimiento de residentes del edificio",
+          title: "GestiÃ³n de Residentes",
+          description: "AdministraciÃ³n y seguimiento de residentes del edificio",
           icon: UsersIcon,
         }}
       >

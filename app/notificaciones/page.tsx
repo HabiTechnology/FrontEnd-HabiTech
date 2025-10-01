@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
@@ -23,7 +23,7 @@ export default function NotificacionesPage() {
       <DashboardPageLayout
         header={{
           title: "Centro de Notificaciones",
-          description: "Gestión y seguimiento de notificaciones del edificio",
+          description: "GestiÃ³n y seguimiento de notificaciones del edificio",
           icon: BellIcon,
         }}
       >

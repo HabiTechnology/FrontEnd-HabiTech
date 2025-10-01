@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useAuth } from '@/lib/auth-context-simple-fixed'
 import { useRouter } from 'next/navigation'
@@ -73,7 +73,7 @@ export function RoleGuard({
     )
   }
 
-  // Error de autenticación
+  // Error de autenticaciÃ³n
   if (error || userRole === 'error') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -111,7 +111,7 @@ export function RoleGuard({
                 Acceso no autorizado
               </h3>
               <p className="text-sm text-muted-foreground">
-                Tu wallet no tiene permisos para acceder a esta sección.
+                Tu wallet no tiene permisos para acceder a esta secciÃ³n.
               </p>
               <p className="text-xs text-muted-foreground">
                 Rol actual: {userRole || 'No definido'}
@@ -135,7 +135,7 @@ export function RoleGuard({
   return <>{children}</>
 }
 
-// Componente específico para admins
+// Componente especÃ­fico para admins
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   return (
     <RoleGuard allowedRoles={['admin']}>
@@ -144,7 +144,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Componente para mostrar información de role en desarrollo
+// Componente para mostrar informaciÃ³n de role en desarrollo
 export function RoleDebugInfo() {
   const { userRole, userInfo, isAdmin, isResident, isUnauthorized, isContractConnected } = useAuth()
   
@@ -155,13 +155,13 @@ export function RoleDebugInfo() {
 
   return (
     <div className="fixed bottom-4 right-4 p-3 bg-black/90 text-white text-xs rounded-lg z-50 max-w-xs">
-      <div className="font-bold mb-2">🔍 Debug Info</div>
+      <div className="font-bold mb-2">ðŸ” Debug Info</div>
       
       {/* Estado del Contrato */}
       <div className="mb-2 border-b border-gray-600 pb-2">
-        <div className="font-semibold">📋 Contrato:</div>
-        <div>Conectado: {isContractConnected ? '✅' : '❌'}</div>
-        <div>Modo: {isUsingContract ? '🔗 Blockchain' : '🎭 Demo'}</div>
+        <div className="font-semibold">ðŸ“‹ Contrato:</div>
+        <div>Conectado: {isContractConnected ? 'âœ…' : 'âŒ'}</div>
+        <div>Modo: {isUsingContract ? 'ðŸ”— Blockchain' : 'ðŸŽ­ Demo'}</div>
         {contractAddress && (
           <div>Addr: {contractAddress.slice(0, 8)}...</div>
         )}
@@ -169,11 +169,11 @@ export function RoleDebugInfo() {
 
       {/* Estado del Usuario */}
       <div>
-        <div className="font-semibold">👤 Usuario:</div>
+        <div className="font-semibold">ðŸ‘¤ Usuario:</div>
         <div>Role: {userRole || 'none'}</div>
-        <div>Admin: {isAdmin ? '✅' : '❌'}</div>
-        <div>Resident: {isResident ? '✅' : '❌'}</div>
-        <div>Unauthorized: {isUnauthorized ? '❌' : '✅'}</div>
+        <div>Admin: {isAdmin ? 'âœ…' : 'âŒ'}</div>
+        <div>Resident: {isResident ? 'âœ…' : 'âŒ'}</div>
+        <div>Unauthorized: {isUnauthorized ? 'âŒ' : 'âœ…'}</div>
         {userInfo && <div>Wallet: {userInfo.wallet?.slice(0, 6)}...</div>}
       </div>
     </div>

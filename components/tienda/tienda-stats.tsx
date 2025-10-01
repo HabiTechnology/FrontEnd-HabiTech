@@ -1,4 +1,4 @@
-import DashboardStat from "@/components/dashboard/stat"
+﻿import DashboardStat from "@/components/dashboard/stat"
 import { mockTiendaStats } from "@/data/tienda-mock"
 import { DollarSign, Package, AlertTriangle } from "lucide-react"
 
@@ -15,8 +15,8 @@ export default function TiendaStats() {
     },
     {
       label: "PRODUCTOS SIN STOCK",
-      value: "8", // Productos que no están disponibles
-      description: "Requieren reposición",
+      value: "8", // Productos que no estÃ¡n disponibles
+      description: "Requieren reposiciÃ³n",
       icon: AlertTriangle,
       tag: "URGENTE",
       intent: "negative" as const,

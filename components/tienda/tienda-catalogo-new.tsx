@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -74,7 +74,7 @@ export default function TiendaCatalogo() {
         <CardHeader className="border-b border-border/30 pb-3">
           <CardTitle className="flex items-center gap-2.5 text-card-foreground">
             <Bullet variant="default" />
-            GESTIÓN DE INVENTARIO
+            GESTIÃ“N DE INVENTARIO
           </CardTitle>
           <CardDescription>
             Administra los productos disponibles en el edificio usando HabiCoins
@@ -99,7 +99,7 @@ export default function TiendaCatalogo() {
               <Select value={filtroCategoria} onValueChange={(value) => setFiltroCategoria(value as ProductoCategoria | "Todas")}>
                 <SelectTrigger>
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por categoría" />
+                  <SelectValue placeholder="Filtrar por categorÃ­a" />
                 </SelectTrigger>
                 <SelectContent>
                   {categorias.map((categoria) => (
@@ -201,7 +201,7 @@ export default function TiendaCatalogo() {
               </h3>
               <p className="text-muted-foreground">
                 {searchTerm || filtroCategoria !== "Todas" 
-                  ? "Intenta ajustar los filtros de búsqueda" 
+                  ? "Intenta ajustar los filtros de bÃºsqueda" 
                   : "No hay productos disponibles en este momento"}
               </p>
             </div>
@@ -215,7 +215,7 @@ export default function TiendaCatalogo() {
           <DialogHeader>
             <DialogTitle>Detalles del Producto</DialogTitle>
             <DialogDescription>
-              Información completa del producto en inventario
+              InformaciÃ³n completa del producto en inventario
             </DialogDescription>
           </DialogHeader>
           
@@ -227,7 +227,7 @@ export default function TiendaCatalogo() {
                   <p className="text-sm">{selectedProduct.nombre}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Categoría</Label>
+                  <Label className="text-sm font-medium">CategorÃ­a</Label>
                   <Badge className={`${getCategoriaColor(selectedProduct.categoria)} text-white`}>
                     {selectedProduct.categoria}
                   </Badge>
@@ -251,7 +251,7 @@ export default function TiendaCatalogo() {
               </div>
               
               <div>
-                <Label className="text-sm font-medium">Descripción</Label>
+                <Label className="text-sm font-medium">DescripciÃ³n</Label>
                 <p className="text-sm mt-1">{selectedProduct.descripcion}</p>
               </div>
 

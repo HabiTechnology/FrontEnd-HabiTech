@@ -1,4 +1,4 @@
-export const formatTime = (timestamp: string) => {
+﻿export const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",

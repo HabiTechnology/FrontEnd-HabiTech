@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Rutas que requieren autenticación
 const protectedRoutes = [
+  '/', // Dashboard principal
   '/dashboard',
+  '/financiero',
   '/admin',
   '/departamentos',
   '/residentes',
@@ -106,23 +108,29 @@ export function middleware(request: NextRequest) {
     }
   }
   
+  // Verificar si hay tokens de sesión básicos
+  const hasSession = request.cookies.get('privy-session') || 
+                    request.cookies.get('privy-token') ||
+                    request.headers.get('authorization')
+
   // Verificación básica de sesión para rutas protegidas
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(route => {
+    // Para la ruta raíz, solo coincidir exactamente
+    if (route === '/' && pathname === '/') return true
+    // Para otras rutas, usar startsWith pero no coincidir con raíz
+    if (route !== '/' && pathname.startsWith(route)) return true
+    return false
+  })
   const isProtectedApi = protectedApiRoutes.some(route => pathname.startsWith(route))
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
   
   // Redirigir a login si no está autenticado (solo para rutas de página, no API)
-  if (isProtectedRoute && !isPublicRoute) {
-    // Verificar si hay tokens de sesión básicos
-    const hasSession = request.cookies.get('privy-session') || 
-                      request.cookies.get('privy-token') ||
-                      request.headers.get('authorization')
-    
-    if (!hasSession) {
-      const loginUrl = new URL('/login', request.url)
+  if (isProtectedRoute && !isPublicRoute && !hasSession) {
+    const loginUrl = new URL('/login', request.url)
+    if (pathname !== '/' && pathname !== '/dashboard') {
       loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
     }
+    return NextResponse.redirect(loginUrl)
   }
   
   // Para rutas API protegidas, verificar autenticación

@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import type { ChatConversation } from "@/types/chat";
 import { mockChatData } from "@/data/chat-mock";
@@ -35,7 +35,7 @@ export default function ChatExpanded({
           onClick={onGoBack}
           className="text-white hover:bg-gray-800 h-8 w-8 p-0"
         >
-          −
+          âˆ’
         </Button>
       </div>
 

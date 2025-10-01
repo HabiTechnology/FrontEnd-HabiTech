@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -35,10 +35,10 @@ export default function LoginPage() {
   } = useAuth()
   const router = useRouter()
 
-  // Limpiar sesión si hay usuario no autorizado al cargar la página
+  // Limpiar sesiÃ³n si hay usuario no autorizado al cargar la pÃ¡gina
   useEffect(() => {
     if (isUnauthorized || (isAuthenticated && userRole === 'unauthorized')) {
-      console.log('Limpiando sesión de usuario no autorizado en login')
+
       logout()
     }
   }, [isUnauthorized, isAuthenticated, userRole, logout])
@@ -46,11 +46,11 @@ export default function LoginPage() {
   // Redirigir si ya está autenticado y autorizado
   useEffect(() => {
     if (isAuthenticated && (userRole === 'admin' || userRole === 'resident')) {
-      router.push("/dashboard")
+      router.push("/")
     }
   }, [isAuthenticated, userRole, router])
 
-  // Mostrar errores de autenticación
+  // Mostrar errores de autenticaciÃ³n
   useEffect(() => {
     if (authError) {
       setError(authError)
@@ -62,12 +62,12 @@ export default function LoginPage() {
     try {
       await login()
     } catch (error: any) {
-      console.error("Error during login:", error)
-      setError("Error al conectar con la wallet. Inténtalo de nuevo.")
+
+      setError("Error al conectar con la wallet. IntÃ©ntalo de nuevo.")
     }
   }
 
-  // Renderizar estado de rol cuando está autenticado pero no autorizado
+  // Renderizar estado de rol cuando estÃ¡ autenticado pero no autorizado
   const renderRoleStatus = () => {
     if (!isAuthenticated) return null
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
         <Alert className="mb-4 border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
           <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
           <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-            Tu wallet no está registrada en el sistema. Contacta al administrador para obtener acceso.
+            Tu wallet no estÃ¡ registrada en el sistema. Contacta al administrador para obtener acceso.
           </AlertDescription>
         </Alert>
       )
@@ -98,7 +98,7 @@ export default function LoginPage() {
         <Alert className="mb-4 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
           <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
           <AlertDescription className="text-green-800 dark:text-green-200">
-            ✅ Acceso de Administrador verificado. Redirigiendo...
+            âœ… Acceso de Administrador verificado. Redirigiendo...
           </AlertDescription>
         </Alert>
       )
@@ -109,7 +109,7 @@ export default function LoginPage() {
         <Alert className="mb-4 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
           <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <AlertDescription className="text-blue-800 dark:text-blue-200">
-            ✅ Acceso de Residente verificado. Redirigiendo...
+            âœ… Acceso de Residente verificado. Redirigiendo...
           </AlertDescription>
         </Alert>
       )
@@ -251,7 +251,7 @@ export default function LoginPage() {
               </CardTitle>
               <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent animate-expand" />
               <CardDescription className="text-lg text-muted-foreground font-light animate-slideUp tracking-wide">
-                Gestión Inteligente • Convivencia Inteligente
+                GestiÃ³n Inteligente â€¢ Convivencia Inteligente
               </CardDescription>
             </div>
           </CardHeader>
@@ -289,7 +289,7 @@ export default function LoginPage() {
                 <div className="flex items-center gap-4 py-1">
                   <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/40 to-primary/40" />
                   <span className="px-4 py-2 text-muted-foreground text-xs bg-muted/50 rounded-full border border-primary/20 font-light tracking-wide">
-                    Método Recomendado
+                    MÃ©todo Recomendado
                   </span>
                   <div className="flex-1 h-px bg-gradient-to-l from-transparent via-primary/40 to-primary/40" />
                 </div>
@@ -322,7 +322,7 @@ export default function LoginPage() {
                 onClick={() => setShowSolicitudRenta(true)}
                 className="text-muted-foreground hover:text-foreground hover:bg-muted/20 text-xs font-light px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-transparent hover:border-border tracking-wide max-w-full"
               >
-                ¿Nuevo residente? Solicita departamento
+                Â¿Nuevo residente? Solicita departamento
               </Button>
             </div>
           </CardContent>

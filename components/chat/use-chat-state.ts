@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import type { ChatState, ChatMessage, ChatConversation } from "@/types/chat";
 import { mockChatData } from "@/data/chat-mock";
 

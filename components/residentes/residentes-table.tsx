@@ -94,7 +94,7 @@ export default function ResidentesTable() {
       const data = await response.json()
       setResidentes(data)
     } catch (err) {
-      console.error('Error fetching residentes:', err)
+
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
       setLoading(false)
@@ -124,7 +124,7 @@ export default function ResidentesTable() {
       await fetchResidentes()
       alert('Residente eliminado exitosamente')
     } catch (err) {
-      console.error('Error eliminando residente:', err)
+
       alert('Error eliminando residente: ' + (err instanceof Error ? err.message : 'Error desconocido'))
     }
   }
@@ -135,22 +135,22 @@ export default function ResidentesTable() {
       setShowDetailsModal(true)
       setResidenteDetallado(null) // Limpiar datos anteriores
       
-      console.log('🔍 Obteniendo detalles para residente:', residente.id)
+
       
       // Obtener información detallada solo de residentes
       const response = await fetch(`/api/residentes/detalles/${residente.id}`)
       if (response.ok) {
         const detalles = await response.json()
-        console.log('✅ Detalles obtenidos:', detalles)
+
         setResidenteDetallado({...detalles, actualizado_en: detalles.actualizado_en || null})
       } else {
         const errorData = await response.json()
-        console.error('❌ Error del servidor:', errorData)
+
         // Si falla, usar los datos básicos que ya tenemos
         setResidenteDetallado({...residente, actualizado_en: null})
       }
     } catch (error) {
-      console.error('❌ Error de red:', error)
+
       // Mantener el modal abierto con información básica
       setResidenteDetallado({...residente, actualizado_en: null})
     }

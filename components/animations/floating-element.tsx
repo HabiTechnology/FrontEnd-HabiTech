@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, ReactNode } from 'react'
 
@@ -21,7 +21,7 @@ export default function FloatingElement({
         const { animate } = await import('animejs')
         
         if (elementRef.current) {
-          // Animación flotante continua
+          // AnimaciÃ³n flotante continua
           animate(elementRef.current, {
             translateY: [0, -intensity, 0],
             duration: duration,
@@ -31,7 +31,7 @@ export default function FloatingElement({
           })
         }
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
 

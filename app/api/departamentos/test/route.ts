@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Probando conexión a la base de datos...')
+
     
-    // Probar conexión básica
+    // Probar conexiÃ³n bÃ¡sica
     const testQuery = await sql`SELECT 1 as test`
-    console.log('✅ Conexión básica exitosa:', testQuery)
+
     
     // Verificar tabla departamentos
     const tableCheck = await sql`
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       WHERE table_schema = 'public' 
       AND table_name = 'departamentos'
     `
-    console.log('📊 Verificación de tabla departamentos:', tableCheck)
+
     
     // Verificar columnas de la tabla
     const columnsCheck = await sql`
@@ -26,15 +26,15 @@ export async function GET(request: NextRequest) {
       AND table_name = 'departamentos'
       ORDER BY ordinal_position
     `
-    console.log('📋 Columnas de la tabla departamentos:', columnsCheck)
+
     
     // Contar registros existentes
     const countQuery = await sql`SELECT COUNT(*) as total FROM departamentos`
-    console.log('📈 Total de departamentos:', countQuery)
+
     
     return NextResponse.json({
       status: 'success',
-      message: 'Conexión a base de datos exitosa',
+      message: 'ConexiÃ³n a base de datos exitosa',
       data: {
         conexion: 'OK',
         tabla_existe: tableCheck.length > 0,
@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Error en prueba de conexión:', error)
+
     return NextResponse.json(
       { 
         status: 'error',
-        error: 'Error de conexión a la base de datos',
+        error: 'Error de conexiÃ³n a la base de datos',
         details: error instanceof Error ? error.message : 'Error desconocido'
       },
       { status: 500 }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from 'react'
 import { useHabiTechContract } from '@/hooks/use-habitech-contract'
@@ -58,7 +58,7 @@ export default function ContractAdmin() {
       }
       setUsers(allUsers);
     } catch (error) {
-      console.error('Error cargando datos:', error);
+
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export default function ContractAdmin() {
       await contract.read.getUserName([userAddress as `0x${string}`]);
       await contract.read.getStats();
     } catch (error) {
-      console.error('❌ Error probando funciones:', error);
+
     }
   };
 
@@ -140,7 +140,7 @@ export default function ContractAdmin() {
                   setLoading(true);
                   try {
                     const tx = await addAdmin(newUserAddress, newUserName);
-                    alert('Transacción enviada: ' + tx);
+                    alert('TransacciÃ³n enviada: ' + tx);
                     setNewUserAddress('');
                     setNewUserName('');
                     await loadContractData();
@@ -152,7 +152,7 @@ export default function ContractAdmin() {
                 }}
               >
                 <div>
-                  <Label htmlFor="admin-address">Dirección (wallet) del nuevo admin</Label>
+                  <Label htmlFor="admin-address">DirecciÃ³n (wallet) del nuevo admin</Label>
                   <Input
                     id="admin-address"
                     type="text"
@@ -198,7 +198,7 @@ export default function ContractAdmin() {
                   setLoading(true);
                   try {
                     const tx = await addResident(newUserAddress, newUserName);
-                    alert('Transacción enviada: ' + tx);
+                    alert('TransacciÃ³n enviada: ' + tx);
                     setNewUserAddress('');
                     setNewUserName('');
                     await loadContractData();
@@ -210,7 +210,7 @@ export default function ContractAdmin() {
                 }}
               >
                 <div>
-                  <Label htmlFor="resident-address">Dirección (wallet) del nuevo residente</Label>
+                  <Label htmlFor="resident-address">DirecciÃ³n (wallet) del nuevo residente</Label>
                   <Input
                     id="resident-address"
                     type="text"
@@ -272,7 +272,7 @@ export default function ContractAdmin() {
                             size="sm"
                             onClick={async () => {
                               if (!isContractConnected) return alert('Debes conectar tu wallet');
-                              if (!window.confirm('¿Seguro que deseas eliminar este usuario?')) return;
+                              if (!window.confirm('Â¿Seguro que deseas eliminar este usuario?')) return;
                               setLoading(true);
                               try {
                                 await removeUser(user.address);

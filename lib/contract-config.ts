@@ -1,4 +1,4 @@
-// Contract Configuration
+﻿// Contract Configuration
 export const CONTRACT_CONFIG = {
   // Contract addresses (update after deployment)
   HABITECH_ACCESS: process.env.NEXT_PUBLIC_HABITECH_ACCESS_CONTRACT || '0x0000000000000000000000000000000000000000',
@@ -67,6 +67,6 @@ export function isDevelopment(): boolean {
 // Logging helper
 export function contractLog(message: string, data?: any) {
   if (isDevelopment()) {
-    console.log(`[Contract] ${message}`, data || '')
+
   }
 }

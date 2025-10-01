@@ -1,4 +1,4 @@
-export interface ChatUser {
+﻿export interface ChatUser {
   id: string;
   name: string;
   username: string;

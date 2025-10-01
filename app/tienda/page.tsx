@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import dynamic from "next/dynamic"
 import DashboardPageLayout from "@/components/dashboard/layout"
@@ -20,7 +20,7 @@ export default function TiendaPage() {
     <PageTransition>
       <DashboardPageLayout
         header={{
-          title: "Gestión de Inventario",
+          title: "GestiÃ³n de Inventario",
           description: "Administra el stock del edificio con HabiCoins",
           icon: ShoppingCartIcon,
         }}

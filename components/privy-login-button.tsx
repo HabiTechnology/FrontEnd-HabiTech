@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { usePrivy } from '@privy-io/react-auth'
 import { Button } from '@/components/ui/button'
@@ -21,7 +21,7 @@ export function PrivyLoginButton() {
     try {
       await login()
     } catch (error) {
-      console.error('Error durante el login con Privy:', error)
+
     }
   }
 

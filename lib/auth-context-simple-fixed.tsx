@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { createContext, useContext, ReactNode } from 'react'
 import { useAuth as useAuthIntegrated, UserRole } from '@/hooks/use-auth-integrated'
@@ -16,10 +16,10 @@ interface AuthContextType {
   isResident: boolean
   isUnauthorized: boolean
   isContractConnected: boolean  // Nuevo campo
-  address: string | null  // Compatibilidad con código existente
-  user: any  // Compatibilidad con código existente
-  isAuthorized: boolean  // Compatibilidad con código existente
-  isLoading: boolean  // Compatibilidad con código existente
+  address: string | null  // Compatibilidad con cÃ³digo existente
+  user: any  // Compatibilidad con cÃ³digo existente
+  isAuthorized: boolean  // Compatibilidad con cÃ³digo existente
+  isLoading: boolean  // Compatibilidad con cÃ³digo existente
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)

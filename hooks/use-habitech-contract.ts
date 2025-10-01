@@ -189,7 +189,6 @@ export function useHabiTechContract() {
   const checkUserRole = async (address: string) => {
     if (!address || !contract) return null
 
-    console.log('🔍 Verificando rol en blockchain para:', address)
 
     try {
       const [isAdmin, isResident] = await Promise.all([
@@ -198,19 +197,19 @@ export function useHabiTechContract() {
       ])
 
       if (isAdmin) {
-        console.log('✅ Usuario autorizado como ADMIN')
+
         return 'admin'
       }
       if (isResident) {
-        console.log('✅ Usuario autorizado como RESIDENT')
+
         return 'resident'
       }
       
-      console.log('❌ Usuario NO AUTORIZADO en el contrato')
+
       return 'unauthorized'
       
     } catch (error) {
-      console.error('💥 Error consultando contrato:', error)
+
       return 'error'
     }
   }
@@ -230,7 +229,7 @@ export function useHabiTechContract() {
         userType: 1
       }
     } catch (error) {
-      console.error('Error obteniendo nombre de usuario:', error)
+
       return {
         wallet: address,
         name: 'Usuario',
@@ -257,11 +256,10 @@ export function useHabiTechContract() {
         totalResidents: stats[1]
       }
     } catch (error) {
-      console.error('Error obteniendo estadísticas:', error)
+
       return null
     }
   }
-
 
 
   return {

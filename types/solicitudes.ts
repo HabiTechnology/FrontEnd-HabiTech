@@ -1,10 +1,10 @@
-export interface DocumentoAdjunto {
+﻿export interface DocumentoAdjunto {
   id: string
   nombre: string
   tipo: "INE" | "Comprobante_Ingresos" | "Referencias_Laborales" | "Comprobante_Domicilio" | "Estados_Cuenta" | "Otros"
   url: string
   fecha_subida: string
-  tamaño: number // en bytes
+  tamaÃ±o: number // en bytes
   verificado: boolean
 }
 

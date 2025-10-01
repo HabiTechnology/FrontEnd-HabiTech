@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useAuth } from "@/lib/auth-context-simple-fixed"
 import { useRouter } from "next/navigation"
@@ -13,14 +13,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter()
 
   useEffect(() => {
-    // Si no está autenticado y no está cargando, redirigir al login
+    // Si no estÃ¡ autenticado y no estÃ¡ cargando, redirigir al login
     if (!isLoading && !isAuthenticated) {
       router.push('/login')
     }
   }, [isAuthenticated, isLoading, router])
 
   if (isLoading) {
-    const contractStatus = isContractConnected ? '🔗 Consultando blockchain...' : '🎭 Modo demo activo...'
+    const contractStatus = isContractConnected ? 'ðŸ”— Consultando blockchain...' : 'ðŸŽ­ Modo demo activo...'
     
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1A2E49] via-[#007BFF] to-[#1A2E49]">
@@ -34,12 +34,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  // Si hay error de autorización, mostrar mensaje y botón para reconectar
+  // Si hay error de autorizaciÃ³n, mostrar mensaje y botÃ³n para reconectar
   if (error && error.includes('no tiene permisos')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1A2E49] via-[#007BFF] to-[#1A2E49]">
         <div className="text-center max-w-md">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <div className="text-red-400 text-6xl mb-4">âš ï¸</div>
           <h2 className="text-2xl text-white font-bold mb-4">Wallet no autorizada</h2>
           <p className="text-white/80 mb-6">{error}</p>
           <button 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -73,7 +73,7 @@ export default function FormularioSolicitudRenta() {
           setError('Error al cargar departamentos disponibles')
         }
       } catch (error) {
-        setError('Error de conexión al cargar departamentos')
+        setError('Error de conexiÃ³n al cargar departamentos')
       } finally {
         setLoadingDepartamentos(false)
       }
@@ -157,7 +157,7 @@ export default function FormularioSolicitudRenta() {
     setSuccess('')
 
     try {
-      // Validaciones básicas
+      // Validaciones bÃ¡sicas
       if (!formData.departamento_id) {
         throw new Error('Debe seleccionar un departamento')
       }
@@ -167,11 +167,11 @@ export default function FormularioSolicitudRenta() {
       }
 
       if (!formData.correo_solicitante.trim()) {
-        throw new Error('El correo electrónico es requerido')
+        throw new Error('El correo electrÃ³nico es requerido')
       }
 
       if (!formData.telefono_solicitante.trim()) {
-        throw new Error('El teléfono es requerido')
+        throw new Error('El telÃ©fono es requerido')
       }
 
       if (!formData.documento_solicitante.trim()) {
@@ -183,7 +183,7 @@ export default function FormularioSolicitudRenta() {
       }
 
       if (!formData.ocupacion.trim()) {
-        throw new Error('La ocupación es requerida')
+        throw new Error('La ocupaciÃ³n es requerida')
       }
 
       const response = await fetch('/api/solicitudes-renta', {
@@ -196,9 +196,9 @@ export default function FormularioSolicitudRenta() {
 
       if (response.ok) {
         const result = await response.json()
-        setSuccess('¡Solicitud enviada exitosamente! Nos pondremos en contacto contigo pronto.')
+        setSuccess('Â¡Solicitud enviada exitosamente! Nos pondremos en contacto contigo pronto.')
         
-        // Redirigir después de 3 segundos
+        // Redirigir despuÃ©s de 3 segundos
         setTimeout(() => {
           router.push('/login')
         }, 3000)
@@ -253,7 +253,7 @@ export default function FormularioSolicitudRenta() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Selección de Departamento */}
+          {/* SelecciÃ³n de Departamento */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function FormularioSolicitudRenta() {
                             Depto {dept.numero} - Piso {dept.piso}
                           </span>
                           <span className="text-sm text-gray-500 ml-4">
-                            {dept.dormitorios} hab, {dept.banos} baños - ${dept.renta_mensual.toLocaleString()}/mes
+                            {dept.dormitorios} hab, {dept.banos} baÃ±os - ${dept.renta_mensual.toLocaleString()}/mes
                           </span>
                         </div>
                       </SelectItem>
@@ -299,12 +299,12 @@ export default function FormularioSolicitudRenta() {
                         <p className="font-medium">{departamentoSeleccionado.dormitorios}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Baños:</span>
+                        <span className="text-gray-600">BaÃ±os:</span>
                         <p className="font-medium">{departamentoSeleccionado.banos}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Área:</span>
-                        <p className="font-medium">{departamentoSeleccionado.area_m2} m²</p>
+                        <span className="text-gray-600">Ãrea:</span>
+                        <p className="font-medium">{departamentoSeleccionado.area_m2} mÂ²</p>
                       </div>
                       <div>
                         <span className="text-gray-600">Renta:</span>
@@ -313,7 +313,7 @@ export default function FormularioSolicitudRenta() {
                     </div>
                     {departamentoSeleccionado.descripcion && (
                       <div className="mt-3">
-                        <span className="text-gray-600">Descripción:</span>
+                        <span className="text-gray-600">DescripciÃ³n:</span>
                         <p className="text-sm">{departamentoSeleccionado.descripcion}</p>
                       </div>
                     )}
@@ -323,15 +323,15 @@ export default function FormularioSolicitudRenta() {
             </CardContent>
           </Card>
 
-          {/* Información Personal */}
+          {/* InformaciÃ³n Personal */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Información Personal
+                InformaciÃ³n Personal
               </CardTitle>
               <CardDescription>
-                Datos básicos del solicitante
+                Datos bÃ¡sicos del solicitante
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -342,7 +342,7 @@ export default function FormularioSolicitudRenta() {
                     id="nombre"
                     value={formData.nombre_solicitante}
                     onChange={(e) => handleInputChange('nombre_solicitante', e.target.value)}
-                    placeholder="Juan Pérez"
+                    placeholder="Juan PÃ©rez"
                     required
                   />
                 </div>
@@ -357,7 +357,7 @@ export default function FormularioSolicitudRenta() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="correo">Correo Electrónico *</Label>
+                  <Label htmlFor="correo">Correo ElectrÃ³nico *</Label>
                   <Input
                     id="correo"
                     type="email"
@@ -368,7 +368,7 @@ export default function FormularioSolicitudRenta() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="telefono">Teléfono *</Label>
+                  <Label htmlFor="telefono">TelÃ©fono *</Label>
                   <Input
                     id="telefono"
                     value={formData.telefono_solicitante}
@@ -381,21 +381,21 @@ export default function FormularioSolicitudRenta() {
             </CardContent>
           </Card>
 
-          {/* Información Laboral y Económica */}
+          {/* InformaciÃ³n Laboral y EconÃ³mica */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5" />
-                Información Laboral y Económica
+                InformaciÃ³n Laboral y EconÃ³mica
               </CardTitle>
               <CardDescription>
-                Detalles sobre tu situación laboral e ingresos
+                Detalles sobre tu situaciÃ³n laboral e ingresos
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ocupacion">Ocupación *</Label>
+                  <Label htmlFor="ocupacion">OcupaciÃ³n *</Label>
                   <Input
                     id="ocupacion"
                     value={formData.ocupacion}
@@ -417,7 +417,7 @@ export default function FormularioSolicitudRenta() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="familia">Tamaño de la Familia *</Label>
+                  <Label htmlFor="familia">TamaÃ±o de la Familia *</Label>
                   <Select
                     value={formData.tamano_familia.toString()}
                     onValueChange={(value) => handleInputChange('tamano_familia', parseInt(value))}
@@ -446,7 +446,7 @@ export default function FormularioSolicitudRenta() {
                 Mascotas
               </CardTitle>
               <CardDescription>
-                Información sobre mascotas (si las tienes)
+                InformaciÃ³n sobre mascotas (si las tienes)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -507,11 +507,11 @@ export default function FormularioSolicitudRenta() {
                       <Input
                         value={ref.nombre}
                         onChange={(e) => actualizarReferenciaPersoanl(index, 'nombre', e.target.value)}
-                        placeholder="María García"
+                        placeholder="MarÃ­a GarcÃ­a"
                       />
                     </div>
                     <div>
-                      <Label>Teléfono</Label>
+                      <Label>TelÃ©fono</Label>
                       <Input
                         value={ref.telefono}
                         onChange={(e) => actualizarReferenciaPersoanl(index, 'telefono', e.target.value)}
@@ -519,7 +519,7 @@ export default function FormularioSolicitudRenta() {
                       />
                     </div>
                     <div>
-                      <Label>Relación</Label>
+                      <Label>RelaciÃ³n</Label>
                       <Input
                         value={ref.relacion}
                         onChange={(e) => actualizarReferenciaPersoanl(index, 'relacion', e.target.value)}
@@ -582,11 +582,11 @@ export default function FormularioSolicitudRenta() {
                       <Input
                         value={ref.nombre_contacto}
                         onChange={(e) => actualizarReferenciaLaboral(index, 'nombre_contacto', e.target.value)}
-                        placeholder="Ana Rodríguez"
+                        placeholder="Ana RodrÃ­guez"
                       />
                     </div>
                     <div>
-                      <Label>Teléfono</Label>
+                      <Label>TelÃ©fono</Label>
                       <Input
                         value={ref.telefono}
                         onChange={(e) => actualizarReferenciaLaboral(index, 'telefono', e.target.value)}
@@ -625,7 +625,7 @@ export default function FormularioSolicitudRenta() {
                 Documentos Disponibles
               </CardTitle>
               <CardDescription>
-                Indica qué documentos tienes disponibles para entregar
+                Indica quÃ© documentos tienes disponibles para entregar
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -636,7 +636,7 @@ export default function FormularioSolicitudRenta() {
                     checked={formData.documentos?.cedula || false}
                     onCheckedChange={(checked) => handleDocumentosChange('cedula', !!checked)}
                   />
-                  <Label htmlFor="cedula">Cédula de Ciudadanía</Label>
+                  <Label htmlFor="cedula">CÃ©dula de CiudadanÃ­a</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -671,21 +671,21 @@ export default function FormularioSolicitudRenta() {
             <CardHeader>
               <CardTitle>Mensaje Adicional</CardTitle>
               <CardDescription>
-                Información adicional que consideres importante
+                InformaciÃ³n adicional que consideres importante
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={formData.mensaje || ''}
                 onChange={(e) => handleInputChange('mensaje', e.target.value)}
-                placeholder="Cuéntanos algo más sobre ti o tu situación..."
+                placeholder="CuÃ©ntanos algo mÃ¡s sobre ti o tu situaciÃ³n..."
                 className="resize-none"
                 rows={4}
               />
             </CardContent>
           </Card>
 
-          {/* Botones de Acción */}
+          {/* Botones de AcciÃ³n */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               type="button"

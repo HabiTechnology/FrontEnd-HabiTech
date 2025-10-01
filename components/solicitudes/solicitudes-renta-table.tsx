@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -37,7 +37,7 @@ interface SolicitudRentaExtendida extends SolicitudRenta {
   }
 }
 
-// Función para formatear fechas
+// FunciÃ³n para formatear fechas
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('es-CO', {
     year: 'numeric',
@@ -71,7 +71,7 @@ export default function SolicitudesRentaTable() {
         setError('Error al cargar las solicitudes')
       }
     } catch (error) {
-      setError('Error de conexión')
+      setError('Error de conexiÃ³n')
     } finally {
       setLoading(false)
     }
@@ -103,7 +103,7 @@ export default function SolicitudesRentaTable() {
         setError(errorData.error || 'Error al actualizar el estado')
       }
     } catch (error) {
-      setError('Error de conexión al actualizar')
+      setError('Error de conexiÃ³n al actualizar')
     } finally {
       setUpdatingStatus(null)
     }
@@ -155,7 +155,7 @@ export default function SolicitudesRentaTable() {
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
               <SelectItem value="pendiente">Pendientes</SelectItem>
-              <SelectItem value="en_revision">En Revisión</SelectItem>
+              <SelectItem value="en_revision">En RevisiÃ³n</SelectItem>
               <SelectItem value="aprobada">Aprobadas</SelectItem>
               <SelectItem value="rechazada">Rechazadas</SelectItem>
             </SelectContent>
@@ -179,7 +179,7 @@ export default function SolicitudesRentaTable() {
         </Alert>
       )}
 
-      {/* Estadísticas rápidas */}
+      {/* EstadÃ­sticas rÃ¡pidas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(estadoColors).map(([estado, colorClass]) => {
           const count = solicitudes.filter(s => s.estado === estado).length
@@ -250,7 +250,7 @@ export default function SolicitudesRentaTable() {
                                 Depto {solicitud.departamento.numero}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Piso {solicitud.departamento.piso} • {solicitud.departamento.dormitorios} hab
+                                Piso {solicitud.departamento.piso} â€¢ {solicitud.departamento.dormitorios} hab
                               </div>
                               <div className="text-sm font-medium text-green-600">
                                 {formatCurrency(solicitud.departamento.renta_mensual)}
@@ -406,10 +406,10 @@ function SolicitudDetail({
       </DialogHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Información Personal */}
+        {/* InformaciÃ³n Personal */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Información Personal</CardTitle>
+            <CardTitle className="text-lg">InformaciÃ³n Personal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -426,14 +426,14 @@ function SolicitudDetail({
                 <p className="font-medium">{solicitud.correo_solicitante}</p>
               </div>
               <div>
-                <Label className="text-sm text-gray-600">Teléfono</Label>
+                <Label className="text-sm text-gray-600">TelÃ©fono</Label>
                 <p className="font-medium">{solicitud.telefono_solicitante}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Información del Departamento */}
+        {/* InformaciÃ³n del Departamento */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Departamento Solicitado</CardTitle>
@@ -442,7 +442,7 @@ function SolicitudDetail({
             {solicitud.departamento ? (
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Número:</span>
+                  <span className="text-gray-600">NÃºmero:</span>
                   <span className="font-medium">{solicitud.departamento.numero}</span>
                 </div>
                 <div className="flex justify-between">
@@ -454,7 +454,7 @@ function SolicitudDetail({
                   <span className="font-medium">{solicitud.departamento.dormitorios}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Baños:</span>
+                  <span className="text-gray-600">BaÃ±os:</span>
                   <span className="font-medium">{solicitud.departamento.banos}</span>
                 </div>
                 <div className="flex justify-between">
@@ -465,19 +465,19 @@ function SolicitudDetail({
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500">Información del departamento no disponible</p>
+              <p className="text-gray-500">InformaciÃ³n del departamento no disponible</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Información Económica */}
+        {/* InformaciÃ³n EconÃ³mica */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Información Económica</CardTitle>
+            <CardTitle className="text-lg">InformaciÃ³n EconÃ³mica</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-600">Ocupación:</span>
+              <span className="text-gray-600">OcupaciÃ³n:</span>
               <span className="font-medium">{solicitud.ocupacion}</span>
             </div>
             <div className="flex justify-between">
@@ -487,12 +487,12 @@ function SolicitudDetail({
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Tamaño Familia:</span>
+              <span className="text-gray-600">TamaÃ±o Familia:</span>
               <span className="font-medium">{solicitud.tamano_familia} persona{solicitud.tamano_familia !== 1 ? 's' : ''}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Mascotas:</span>
-              <span className="font-medium">{solicitud.mascotas ? 'Sí' : 'No'}</span>
+              <span className="font-medium">{solicitud.mascotas ? 'SÃ­' : 'No'}</span>
             </div>
             {solicitud.mascotas && solicitud.detalles_mascotas && (
               <div>
@@ -536,7 +536,7 @@ function SolicitudDetail({
                   {solicitud.documentos.cedula && (
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      Cédula de Ciudadanía
+                      CÃ©dula de CiudadanÃ­a
                     </div>
                   )}
                   {solicitud.documentos.comprobante_ingresos && (
@@ -603,7 +603,7 @@ function SolicitudDetail({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pendiente">Pendiente</SelectItem>
-                  <SelectItem value="en_revision">En Revisión</SelectItem>
+                  <SelectItem value="en_revision">En RevisiÃ³n</SelectItem>
                   <SelectItem value="aprobada">Aprobada</SelectItem>
                   <SelectItem value="rechazada">Rechazada</SelectItem>
                 </SelectContent>
@@ -616,7 +616,7 @@ function SolicitudDetail({
             <Textarea
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
-              placeholder="Agregar observaciones sobre la decisión..."
+              placeholder="Agregar observaciones sobre la decisiÃ³n..."
               rows={3}
             />
           </div>

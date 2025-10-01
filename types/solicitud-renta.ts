@@ -1,4 +1,4 @@
-export interface SolicitudRenta {
+﻿export interface SolicitudRenta {
   id: number
   departamento_id: number
   nombre_solicitante: string

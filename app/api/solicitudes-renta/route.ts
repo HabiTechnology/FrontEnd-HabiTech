@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = (page - 1) * limit
 
-    console.log('🔍 Obteniendo solicitudes de renta...')
 
     let query = sql`
       SELECT 
@@ -80,7 +79,6 @@ export async function GET(request: NextRequest) {
     
     const total = parseInt(countResult[0].total)
 
-    console.log('✅ Solicitudes obtenidas:', result.length)
 
     return NextResponse.json({
       solicitudes: result,
@@ -93,7 +91,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Error al obtener solicitudes:', error)
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor',
@@ -108,7 +106,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    console.log('📝 Creando nueva solicitud de renta...')
 
     // Validaciones básicas
     const requiredFields = [
@@ -162,7 +159,6 @@ export async function POST(request: NextRequest) {
       ) RETURNING *
     `
 
-    console.log('✅ Solicitud creada exitosamente:', result[0].id)
 
     return NextResponse.json(
       { 
@@ -173,7 +169,7 @@ export async function POST(request: NextRequest) {
     )
 
   } catch (error) {
-    console.error('❌ Error al crear solicitud:', error)
+
     return NextResponse.json(
       { 
         error: 'Error interno del servidor',

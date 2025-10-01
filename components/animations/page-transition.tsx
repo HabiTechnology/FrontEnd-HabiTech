@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, ReactNode } from 'react'
 
@@ -16,7 +16,7 @@ export default function PageTransition({ children, delay = 0 }: PageTransitionPr
         const { animate } = await import('animejs')
         
         if (containerRef.current) {
-          // Animación de entrada de página
+          // AnimaciÃ³n de entrada de pÃ¡gina
           animate(containerRef.current, {
             opacity: [0, 1],
             translateY: [30, 0],
@@ -26,7 +26,7 @@ export default function PageTransition({ children, delay = 0 }: PageTransitionPr
           })
         }
       } catch (error) {
-        console.error('Failed to load anime.js:', error)
+
       }
     }
 

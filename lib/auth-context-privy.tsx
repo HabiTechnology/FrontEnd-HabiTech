@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Obtener dirección de wallet principal
+  // Obtener direcciÃ³n de wallet principal
   const address = wallets.length > 0 ? wallets[0].address : null
 
   const handleLogout = useCallback(() => {
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await login()
     } catch (error) {
-      console.error('Error durante login:', error)
+
       throw error
     }
   }, [login])
@@ -54,10 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false)
 
     if (authenticated && user && wallets.length > 0) {
-      // Para el demo, cualquier wallet conectada está autorizada
+      // Para el demo, cualquier wallet conectada estÃ¡ autorizada
       setIsAuthorized(true)
       
-      // Guardar datos de sesión
+      // Guardar datos de sesiÃ³n
       sessionStorage.setItem('habitech_session_active', 'true')
       localStorage.setItem('habitech_authenticated', 'true')
       localStorage.setItem('habitech_user', JSON.stringify({
