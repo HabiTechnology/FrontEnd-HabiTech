@@ -2,71 +2,64 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Notification } from "@/types/dashboard";
+import type { Notificacion } from "@/types/notifications";
+import { Bell, CheckCircle, AlertCircle, Info, DollarSign, Wrench, FileText, Settings } from "lucide-react";
 
 interface NotificationItemProps {
-  notification: Notification;
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
+  notification: Notificacion;
+  onMarkAsRead: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-export default function NotificationItem({
-  notification,
-  onMarkAsRead,
-  onDelete,
-}: NotificationItemProps) {
+export default function NotificationItem({ notification, onMarkAsRead, onDelete }: NotificationItemProps) {
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
 
-    if (minutes < 60) {
-      return `${minutes}m ago`;
-    } else if (hours < 24) {
-      return `${hours}h ago`;
-    } else {
-      return date.toLocaleDateString();
+    if (minutes < 1) return "Ahora";
+    else if (minutes < 60) return `${minutes}min`;
+    else if (hours < 24) return `${hours}h`;
+    else if (days < 7) return `${days}d`;
+    else return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+  };
+
+  const getTypeIcon = (tipo: string) => {
+    switch (tipo) {
+      case "exito": return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "advertencia": return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      case "error": return <AlertCircle className="h-4 w-4 text-red-600" />;
+      case "pago": return <DollarSign className="h-4 w-4 text-blue-600" />;
+      case "mantenimiento": return <Wrench className="h-4 w-4 text-orange-600" />;
+      case "solicitud": return <FileText className="h-4 w-4 text-purple-600" />;
+      case "sistema": return <Settings className="h-4 w-4 text-gray-600" />;
+      default: return <Info className="h-4 w-4 text-blue-600" />;
     }
   };
 
-  const getTypeColor = (type: Notification["type"]) => {
-    switch (type) {
-      case "success":
-        return "status-success-habitech";
-      case "warning":
-        return "status-warning-habitech";
-      case "error":
-        return "status-error-habitech";
-      default:
-        return "accent-gradient-habitech";
-    }
+  const getTypeColor = (tipo: string) => {
+    const colors: Record<string, string> = {
+      exito: "bg-green-500", advertencia: "bg-yellow-500", error: "bg-red-500",
+      pago: "bg-blue-500", mantenimiento: "bg-orange-500", solicitud: "bg-purple-500",
+      sistema: "bg-gray-500"
+    };
+    return colors[tipo] || "bg-blue-500";
   };
 
-  const getPriorityBadge = (priority: Notification["priority"]) => {
-    switch (priority) {
-      case "high":
-        return (
-          <Badge variant="destructive" className="text-xs">
-            HIGH
-          </Badge>
-        );
-      case "medium":
-        return (
-          <Badge variant="secondary" className="text-xs">
-            MED
-          </Badge>
-        );
-      default:
-        return null;
-    }
+  const getTipoBadge = (tipo: string) => {
+    const labels: Record<string, string> = {
+      info: "Info", exito: "Éxito", advertencia: "Aviso", error: "Error",
+      pago: "Pago", mantenimiento: "Mantenimiento", solicitud: "Solicitud", sistema: "Sistema"
+    };
+    return labels[tipo] || tipo;
   };
 
   const handleNotificationClick = () => {
-    if (!notification.read) {
-      onMarkAsRead(notification.id);
-    }
+    if (!notification.leido) onMarkAsRead(notification.id);
+    if (notification.url_accion) window.location.href = notification.url_accion;
   };
 
   const handleClearClick = (e: React.MouseEvent) => {
@@ -75,57 +68,23 @@ export default function NotificationItem({
   };
 
   return (
-    <div
-      className={cn(
-        "notification-habitech group p-3 rounded-lg border transition-all duration-200 hover:shadow-sm hover-habitech",
-        !notification.read && "cursor-pointer",
-        notification.read
-          ? "bg-background/50 border-border/30 opacity-75"
-          : "bg-background border-border shadow-sm"
-      )}
-      onClick={handleNotificationClick}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "w-2 h-2 rounded-full mt-2 flex-shrink-0",
-            getTypeColor(notification.type)
-          )}
-        />
-
+    <div className={cn("notification-habitech group p-2.5 rounded-lg border transition-all duration-200 hover:shadow-sm hover-habitech", !notification.leido && "cursor-pointer", notification.leido ? "bg-background/50 border-border/30 opacity-75" : "bg-background border-border shadow-sm")} onClick={handleNotificationClick}>
+      <div className="flex items-start gap-2.5">
+        <div className="flex-shrink-0 mt-0.5">{getTypeIcon(notification.tipo)}</div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start justify-between gap-2 mb-1">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <h4
-                    className={cn(
-                      "text-sm font-medium truncate",
-                      !notification.read && "font-semibold"
-                    )}
-                  >
-                    {notification.title}
-                  </h4>
-                  {getPriorityBadge(notification.priority)}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearClick}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 text-muted-foreground hover:text-destructive shrink-0"
-                >
-                  clear
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground line-clamp-2">
-                {notification.message}
-              </p>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-muted-foreground">
-                  {formatTimestamp(notification.timestamp)}
-                </span>
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className={cn("text-sm truncate", !notification.leido && "font-semibold")}>{notification.titulo}</h4>
+                <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 uppercase">{getTipoBadge(notification.tipo)}</Badge>
               </div>
             </div>
+            <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={handleClearClick}><span className="sr-only">Eliminar</span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></Button>
+          </div>
+          <p className={cn("text-xs mb-1.5 line-clamp-2", notification.leido ? "text-muted-foreground" : "text-foreground")}>{notification.mensaje}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">{formatTimestamp(notification.creado_en)}</span>
+            {!notification.leido && <div className={cn("w-1.5 h-1.5 rounded-full", getTypeColor(notification.tipo))} />}
           </div>
         </div>
       </div>

@@ -230,7 +230,7 @@ export default function FinancialDashboard() {
       }}
     >
       {/* Selector de Período */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mb-4">
         <Tabs value={periodo} onValueChange={(v) => setPeriodo(v as any)}>
           <TabsList>
             <TabsTrigger value="mes">Este Mes</TabsTrigger>
@@ -241,7 +241,7 @@ export default function FinancialDashboard() {
       </div>
 
       {/* Cards de Resumen */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
@@ -309,15 +309,15 @@ export default function FinancialDashboard() {
       </div>
 
       {/* Gráficos de Análisis */}
-      <div className="grid gap-6 md:grid-cols-2 mb-6">
+      <div className="grid gap-4 md:grid-cols-2 mb-4">
         {/* Gráfico de Tendencias */}
         <Card>
-          <CardHeader>
-            <CardTitle>Tendencia de Ingresos vs Gastos</CardTitle>
-            <CardDescription>Últimos 12 meses</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Tendencia de Ingresos vs Gastos</CardTitle>
+            <CardDescription className="text-xs">Últimos 12 meses</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={tendencias}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mes_corto" />
@@ -345,12 +345,12 @@ export default function FinancialDashboard() {
 
         {/* Gráfico de Distribución de Gastos */}
         <Card>
-          <CardHeader>
-            <CardTitle>Distribución de Gastos</CardTitle>
-            <CardDescription>Período actual</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Distribución de Gastos</CardTitle>
+            <CardDescription className="text-xs">Período actual</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={gastosDesglose}
@@ -374,12 +374,12 @@ export default function FinancialDashboard() {
 
         {/* Gráfico de Ingresos por Tipo */}
         <Card>
-          <CardHeader>
-            <CardTitle>Ingresos por Tipo de Pago</CardTitle>
-            <CardDescription>Período actual</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Ingresos por Tipo de Pago</CardTitle>
+            <CardDescription className="text-xs">Período actual</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={ingresosDesglose}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -394,11 +394,11 @@ export default function FinancialDashboard() {
 
         {/* Detalle de Gastos */}
         <Card>
-          <CardHeader>
-            <CardTitle>Detalle de Gastos</CardTitle>
-            <CardDescription>Período actual</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Detalle de Gastos</CardTitle>
+            <CardDescription className="text-xs">Período actual</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 pt-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Wrench className="h-4 w-4 text-orange-600" />
@@ -438,12 +438,12 @@ export default function FinancialDashboard() {
 
       {/* Tabla de Todos los Pagos */}
       <Card>
-        <CardHeader>
-          <CardTitle>Registro de Pagos</CardTitle>
-          <CardDescription>Todos los pagos del edificio</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Registro de Pagos</CardTitle>
+          <CardDescription className="text-xs">Todos los pagos del edificio</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-auto" style={{ maxHeight: '600px' }}>
+        <CardContent className="pt-0">
+          <div className="rounded-md border overflow-auto" style={{ maxHeight: '500px' }}>
             <Table>
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>

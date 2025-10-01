@@ -41,7 +41,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           <div className="col-span-3 hidden lg:block">
             <div className="space-y-gap py-sides min-h-screen max-h-screen sticky top-0 overflow-clip">
               <Widget widgetData={mockData.widgetData} />
-              <Notifications initialNotifications={mockData.notifications} />
+              <Notifications usuarioId={1} />
               <Chat />
             </div>
           </div>
