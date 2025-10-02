@@ -91,10 +91,9 @@ export default function DashboardFinanciero() {
         }}
       >
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {loading ? (
           <>
-            <div className="animate-pulse bg-muted h-32 rounded" />
             <div className="animate-pulse bg-muted h-32 rounded" />
             <div className="animate-pulse bg-muted h-32 rounded" />
             <div className="animate-pulse bg-muted h-32 rounded" />
@@ -109,14 +108,6 @@ export default function DashboardFinanciero() {
               tag={`${stats.ingresos.porcentaje_cambio}%`}
               intent={stats.ingresos.tendencia === "up" ? "positive" : "negative"}
               direction={stats.ingresos.tendencia}
-            />
-            <DashboardStat
-              label="PAGOS PENDIENTES"
-              value={`$${stats.ingresos.pendientes.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}
-              description={`${stats.ingresos.pagos_pendientes} PAGOS POR CONFIRMAR`}
-              icon={TrendingDown}
-              tag={`${stats.ingresos.pagos_atrasados} ATRASADOS`}
-              intent={stats.ingresos.pagos_atrasados > 0 ? "negative" : "neutral"}
             />
             <DashboardStat
               label="GASTOS OPERATIVOS"
@@ -143,123 +134,168 @@ export default function DashboardFinanciero() {
         )}
       </div>
 
-      {/* Desglose por Tipo de Pago */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Ingresos por Tipo</CardTitle>
-            <CardDescription>Distribución de pagos del mes actual</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-12 bg-muted rounded" />
-                <div className="h-12 bg-muted rounded" />
-                <div className="h-12 bg-muted rounded" />
-              </div>
-            ) : stats && stats.por_tipo.length > 0 ? (
-              <div className="space-y-4">
-                {stats.por_tipo.map((tipo) => (
-                  <div key={tipo.tipo} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium capitalize">{tipo.tipo.replace('_', ' ')}</p>
-                      <p className="text-sm text-muted-foreground">{tipo.cantidad} pagos</p>
-                    </div>
-                    <p className="text-lg font-bold text-green-600">
-                      ${tipo.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">No hay datos disponibles</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumen de Pagos</CardTitle>
-            <CardDescription>Estado de los pagos del mes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-12 bg-muted rounded" />
-                <div className="h-12 bg-muted rounded" />
-                <div className="h-12 bg-muted rounded" />
-              </div>
-            ) : stats ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 dark:bg-green-950/20">
-                  <div>
-                    <p className="font-medium text-green-700 dark:text-green-400">Pagos Completados</p>
-                    <p className="text-sm text-muted-foreground">{stats.ingresos.pagos_completados} transacciones</p>
-                  </div>
-                  <p className="text-lg font-bold text-green-600">
-                    ${stats.ingresos.confirmados.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
-                  <div>
-                    <p className="font-medium text-yellow-700 dark:text-yellow-400">Pagos Pendientes</p>
-                    <p className="text-sm text-muted-foreground">{stats.ingresos.pagos_pendientes} transacciones</p>
-                  </div>
-                  <p className="text-lg font-bold text-yellow-600">
-                    ${stats.ingresos.pendientes.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-
-                {stats.ingresos.pagos_atrasados > 0 && (
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-red-50 dark:bg-red-950/20">
-                    <div>
-                      <p className="font-medium text-red-700 dark:text-red-400">Pagos Atrasados</p>
-                      <p className="text-sm text-muted-foreground">{stats.ingresos.pagos_atrasados} transacciones</p>
-                    </div>
-                    <p className="text-lg font-bold text-red-600">¡URGENTE!</p>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Historial de Ingresos */}
-      <Card>
+      {/* Diagrama de Bloques con Datos de Base de Datos */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Historial de Ingresos</CardTitle>
-          <CardDescription>Últimos 30 días de actividad financiera</CardDescription>
+          <CardTitle>📊 Análisis Financiero Detallado</CardTitle>
+          <CardDescription>Métricas clave de ingresos y gastos del edificio</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="animate-pulse h-48 bg-muted rounded" />
-          ) : stats && stats.historial.length > 0 ? (
-            <div className="overflow-x-auto">
-              <div className="flex gap-2 pb-4">
-                {stats.historial.slice(0, 15).reverse().map((dia) => {
-                  const maxIngresos = Math.max(...stats.historial.map(h => h.ingresos))
-                  const altura = dia.ingresos > 0 ? (dia.ingresos / maxIngresos) * 150 : 10
+            <div className="animate-pulse space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-32 bg-muted rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ) : stats ? (
+            <div className="space-y-6">
+              {/* Bloque 1: Distribución de Ingresos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {stats.por_tipo.map((tipo) => {
+                  const iconColors: Record<string, string> = {
+                    renta: 'text-blue-500 bg-blue-500/10',
+                    mantenimiento: 'text-green-500 bg-green-500/10',
+                    multa: 'text-red-500 bg-red-500/10',
+                    deposito: 'text-purple-500 bg-purple-500/10',
+                  }
                   
                   return (
-                    <div key={dia.fecha} className="flex flex-col items-center gap-2">
-                      <div 
-                        className="w-12 bg-orange-500 rounded-t hover:bg-orange-600 transition-colors cursor-pointer"
-                        style={{ height: `${altura}px` }}
-                        title={`${dia.fecha}: $${dia.ingresos.toLocaleString('es-MX')}`}
-                      />
-                      <span className="text-xs text-muted-foreground rotate-45 origin-top-left">
-                        {new Date(dia.fecha).getDate()}
-                      </span>
+                    <div 
+                      key={tipo.tipo}
+                      className="relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:scale-105"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`p-2 rounded-full ${iconColors[tipo.tipo] || 'text-gray-500 bg-gray-500/10'}`}>
+                          <Wallet className="h-4 w-4" />
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {tipo.cantidad} pagos
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground capitalize mb-1">
+                        {tipo.tipo.replace('_', ' ')}
+                      </p>
+                      <p className="text-2xl font-bold text-foreground">
+                        ${(tipo.total / 1000).toFixed(1)}k
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ${tipo.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      </p>
                     </div>
                   )
                 })}
               </div>
+
+              {/* Bloque 2: Estado de Pagos */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="relative overflow-hidden rounded-lg border p-4 shadow-sm bg-gradient-to-br from-green-500/10 to-green-500/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-full bg-green-500/20">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Completados</p>
+                      <p className="text-xs text-muted-foreground">{stats.ingresos.pagos_completados} transacciones</p>
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-green-600">
+                    ${(stats.ingresos.confirmados / 1000).toFixed(1)}k
+                  </p>
+                </div>
+
+                <div className="relative overflow-hidden rounded-lg border p-4 shadow-sm bg-gradient-to-br from-yellow-500/10 to-yellow-500/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-full bg-yellow-500/20">
+                      <svg className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Pendientes</p>
+                      <p className="text-xs text-muted-foreground">{stats.ingresos.pagos_pendientes} transacciones</p>
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-yellow-600">
+                    ${(stats.ingresos.pendientes / 1000).toFixed(1)}k
+                  </p>
+                </div>
+
+                {stats.ingresos.pagos_atrasados > 0 && (
+                  <div className="relative overflow-hidden rounded-lg border p-4 shadow-sm bg-gradient-to-br from-red-500/10 to-red-500/5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-full bg-red-500/20 animate-pulse">
+                        <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Atrasados</p>
+                        <p className="text-xs text-muted-foreground">{stats.ingresos.pagos_atrasados} transacciones</p>
+                      </div>
+                    </div>
+                    <p className="text-3xl font-bold text-red-600">
+                      ¡URGENTE!
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Bloque 3: Métricas Mensuales */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative overflow-hidden rounded-lg border p-6 shadow-sm bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 rounded-full bg-blue-500/20">
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Ingreso Mensual Esperado</p>
+                  <p className="text-4xl font-bold text-blue-600 mb-1">
+                    ${(stats.ingresos.total_mes / 1000).toFixed(1)}k
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    De departamentos ocupados
+                  </p>
+                </div>
+
+                <div className="relative overflow-hidden rounded-lg border p-6 shadow-sm bg-gradient-to-br from-orange-500/10 to-orange-600/5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 rounded-full bg-orange-500/20">
+                      <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Balance del Mes</p>
+                  <p className={`text-4xl font-bold mb-1 ${stats.balance.neto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${(Math.abs(stats.balance.neto) / 1000).toFixed(1)}k
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.balance.neto >= 0 ? 'Superávit' : 'Déficit'}
+                  </p>
+                </div>
+              </div>
             </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">No hay historial disponible</p>
-          )}
+          ) : null}
+        </CardContent>
+      </Card>
+
+      {/* Total General de Pagos */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-orange-500" />
+            Total Acumulado en Base de Datos
+          </CardTitle>
+          <CardDescription>Suma de todos los pagos registrados históricos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TotalPagosGeneral />
         </CardContent>
       </Card>
 
@@ -269,5 +305,71 @@ export default function DashboardFinanciero() {
       </div>
     </DashboardPageLayout>
     </RoleGuard>
+  )
+}
+
+// Componente para mostrar total general
+function TotalPagosGeneral() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchTotal = async () => {
+      try {
+        const response = await fetch("/api/dashboard/total-pagos")
+        const result = await response.json()
+        setData(result)
+      } catch (error) {
+        console.error("Error fetching total pagos:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTotal()
+  }, [])
+
+  if (loading) {
+    return <div className="h-32 animate-pulse bg-muted rounded" />
+  }
+
+  if (!data) {
+    return <p className="text-center text-muted-foreground">Error al cargar datos</p>
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="text-center p-4 border rounded-lg bg-card">
+        <p className="text-sm text-muted-foreground mb-2">Total General</p>
+        <p className="text-3xl font-bold text-orange-500">
+          ${data.total_general.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">{data.cantidad_pagos} pagos</p>
+      </div>
+      
+      <div className="text-center p-4 border rounded-lg bg-card">
+        <p className="text-sm text-muted-foreground mb-2">Pagados</p>
+        <p className="text-3xl font-bold text-green-500">
+          ${data.total_pagados.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_completados} pagos</p>
+      </div>
+      
+      <div className="text-center p-4 border rounded-lg bg-card">
+        <p className="text-sm text-muted-foreground mb-2">Pendientes</p>
+        <p className="text-3xl font-bold text-yellow-500">
+          ${data.total_pendientes.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_pendientes} pagos</p>
+      </div>
+      
+      <div className="text-center p-4 border rounded-lg bg-card">
+        <p className="text-sm text-muted-foreground mb-2">Atrasados</p>
+        <p className="text-3xl font-bold text-red-500">
+          ${data.total_atrasados.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_atrasados} pagos</p>
+      </div>
+    </div>
   )
 }

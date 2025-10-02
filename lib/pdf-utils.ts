@@ -13,6 +13,8 @@ export * from './pdf';
 export { generarPDF } from './pdf';
 export type { ResidenteParaPDF } from './pdf/pdf-base';
 export type { DepartamentoParaPDF } from './pdf/pdf-departamento';
+export type { PagoParaFactura } from './pdf/pdf-factura';
+export { generarFacturaPDF, previewFacturaPDF, descargarFacturaPDF } from './pdf/pdf-factura';
 
 // ===============================================
 // 🔄 FUNCIONES DE RETROCOMPATIBILIDAD

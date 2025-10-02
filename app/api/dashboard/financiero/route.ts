@@ -7,7 +7,16 @@ export async function GET() {
   try {
     console.log("💰 Obteniendo estadísticas financieras...");
 
-    // Ingresos del mes actual
+    // Ingresos esperados del mes basados en departamentos ocupados
+    const ingresosEsperados = await sql`
+      SELECT 
+        COALESCE(SUM(renta_mensual + mantenimiento_mensual), 0) as total_mensual_esperado,
+        COUNT(*) as total_ocupados
+      FROM departamentos
+      WHERE estado = 'ocupado' AND activo = true
+    `;
+
+    // Ingresos del mes actual (pagos reales)
     const ingresosMes = await sql`
       SELECT 
         COALESCE(SUM(monto), 0) as total_ingresos,
@@ -65,32 +74,35 @@ export async function GET() {
         AND EXTRACT(YEAR FROM creado_en) = EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL '1 month')
     `;
 
-    const ingresosActuales = Number(ingresosMes[0].ingresos_confirmados);
+    // Usar ingresos esperados de departamentos ocupados como base
+    const ingresosMensualesEsperados = Number(ingresosEsperados[0].total_mensual_esperado);
+    const ingresosConfirmados = Number(ingresosMes[0].ingresos_confirmados);
     const ingresosPrevios = Number(mesAnterior[0].ingresos_mes_anterior);
-    const diferencia = ingresosActuales - ingresosPrevios;
+    const diferencia = ingresosMensualesEsperados - ingresosPrevios;
     const porcentajeCambio = ingresosPrevios > 0 
       ? Math.round((diferencia / ingresosPrevios) * 100)
       : 100;
 
     const stats = {
       ingresos: {
-        total_mes: ingresosActuales,
+        total_mes: ingresosMensualesEsperados, // Usar ingresos esperados de departamentos ocupados
         pendientes: Number(ingresosMes[0].ingresos_pendientes),
-        confirmados: ingresosActuales,
+        confirmados: ingresosConfirmados,
         total_pagos: Number(ingresosMes[0].total_pagos),
         pagos_completados: Number(ingresosMes[0].pagos_completados),
         pagos_pendientes: Number(ingresosMes[0].pagos_pendientes),
         pagos_atrasados: Number(ingresosMes[0].pagos_atrasados),
         tendencia: diferencia >= 0 ? 'up' : 'down',
-        porcentaje_cambio: Math.abs(porcentajeCambio)
+        porcentaje_cambio: Math.abs(porcentajeCambio),
+        departamentos_ocupados: Number(ingresosEsperados[0].total_ocupados)
       },
       gastos: {
         salarios_personal: Number(gastos[0].total_salarios),
         personal_activo: Number(gastos[0].personal_activo)
       },
       balance: {
-        neto: ingresosActuales - Number(gastos[0].total_salarios),
-        ingresos: ingresosActuales,
+        neto: ingresosMensualesEsperados - Number(gastos[0].total_salarios),
+        ingresos: ingresosMensualesEsperados,
         gastos: Number(gastos[0].total_salarios)
       },
       por_tipo: porTipo.map(t => ({
