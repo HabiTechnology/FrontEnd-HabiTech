@@ -36,8 +36,15 @@ export async function GET(
       );
     }
 
-    console.log('✅ Departamento encontrado:', departamento[0]);
-    return NextResponse.json(departamento[0]);
+    // Formatear datos asegurando que los valores numéricos sean números
+    const departamentoFormateado = {
+      ...departamento[0],
+      renta_mensual: Number(departamento[0].renta_mensual) || 0,
+      mantenimiento_mensual: Number(departamento[0].mantenimiento_mensual) || 0,
+    };
+
+    console.log('✅ Departamento encontrado:', departamentoFormateado);
+    return NextResponse.json(departamentoFormateado);
 
   } catch (error) {
     console.error('❌ Error obteniendo departamento:', error);

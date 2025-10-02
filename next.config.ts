@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // UTF-8 para todo el contenido
+          {
+            key: 'Content-Type',
+            value: 'text/html; charset=utf-8'
+          },
           // HTTPS Strict Transport Security
           {
             key: 'Strict-Transport-Security',

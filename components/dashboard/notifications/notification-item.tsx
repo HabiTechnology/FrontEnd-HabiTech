@@ -29,30 +29,30 @@ export default function NotificationItem({ notification, onMarkAsRead, onDelete 
 
   const getTypeIcon = (tipo: string) => {
     switch (tipo) {
-      case "exito": return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "advertencia": return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case "error": return <AlertCircle className="h-4 w-4 text-red-600" />;
-      case "pago": return <DollarSign className="h-4 w-4 text-blue-600" />;
-      case "mantenimiento": return <Wrench className="h-4 w-4 text-orange-600" />;
-      case "solicitud": return <FileText className="h-4 w-4 text-purple-600" />;
+      case "pago": return <DollarSign className="h-4 w-4 text-emerald-600" />;
+      case "anuncio": return <Info className="h-4 w-4 text-cyan-600" />;
       case "sistema": return <Settings className="h-4 w-4 text-gray-600" />;
+      case "chat": return <Info className="h-4 w-4 text-purple-600" />;
       default: return <Info className="h-4 w-4 text-blue-600" />;
     }
   };
 
   const getTypeColor = (tipo: string) => {
     const colors: Record<string, string> = {
-      exito: "bg-green-500", advertencia: "bg-yellow-500", error: "bg-red-500",
-      pago: "bg-blue-500", mantenimiento: "bg-orange-500", solicitud: "bg-purple-500",
-      sistema: "bg-gray-500"
+      pago: "bg-emerald-500",
+      anuncio: "bg-cyan-500",
+      sistema: "bg-gray-500",
+      chat: "bg-purple-500"
     };
     return colors[tipo] || "bg-blue-500";
   };
 
   const getTipoBadge = (tipo: string) => {
     const labels: Record<string, string> = {
-      info: "Info", exito: "Éxito", advertencia: "Aviso", error: "Error",
-      pago: "Pago", mantenimiento: "Mantenimiento", solicitud: "Solicitud", sistema: "Sistema"
+      pago: "Pago",
+      anuncio: "Anuncio",
+      sistema: "Sistema",
+      chat: "Chat"
     };
     return labels[tipo] || tipo;
   };
@@ -83,7 +83,15 @@ export default function NotificationItem({ notification, onMarkAsRead, onDelete 
           </div>
           <p className={cn("text-xs mb-1.5 line-clamp-2", notification.leido ? "text-muted-foreground" : "text-foreground")}>{notification.mensaje}</p>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{formatTimestamp(notification.creado_en)}</span>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-muted-foreground">{formatTimestamp(notification.creado_en)}</span>
+              {(notification as any).nombre && (
+                <span className="text-xs text-muted-foreground/70">
+                  📬 {(notification as any).nombre} {(notification as any).apellido} 
+                  {(notification as any).departamento_numero && ` · Depto ${(notification as any).departamento_numero}`}
+                </span>
+              )}
+            </div>
             {!notification.leido && <div className={cn("w-1.5 h-1.5 rounded-full", getTypeColor(notification.tipo))} />}
           </div>
         </div>

@@ -1,12 +1,8 @@
 export type TipoNotificacion = 
-  | 'info'
-  | 'exito'
-  | 'advertencia'
-  | 'error'
   | 'pago'
-  | 'mantenimiento'
-  | 'solicitud'
+  | 'anuncio'
   | 'sistema'
+  | 'chat';
 
 export interface Notificacion {
   id: number
@@ -25,6 +21,10 @@ export interface Notificacion {
 export interface NotificacionConUsuario extends Notificacion {
   usuario_nombre?: string
   usuario_correo?: string
+  nombre?: string
+  apellido?: string
+  departamento_numero?: string
+  departamento_piso?: number
 }
 
 export interface NotificacionesResumen {

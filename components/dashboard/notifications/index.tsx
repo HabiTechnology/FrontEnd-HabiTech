@@ -15,7 +15,6 @@ interface NotificationsProps {
 
 export default function Notifications({ usuarioId = 1 }: NotificationsProps) {
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
-  const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,20 +26,27 @@ export default function Notifications({ usuarioId = 1 }: NotificationsProps) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`/api/notificaciones?usuario_id=${usuarioId}&limite=20`);
+      console.log("🔍 Fetching ALL notifications from database");
+      const response = await fetch(`/api/notificaciones/todas?limite=20`);
+      console.log("📡 Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error response:", errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log("✅ Notificaciones recibidas:", data);
       setNotifications(data.notificaciones || []);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("❌ Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const unreadCount = notifications.filter((n) => !n.leido).length;
-  const displayedNotifications = showAll
-    ? notifications
-    : notifications.slice(0, 3);
 
   const markAsRead = async (id: number) => {
     try {
@@ -121,54 +127,47 @@ export default function Notifications({ usuarioId = 1 }: NotificationsProps) {
       </CardHeader>
 
       <CardContent className="bg-accent p-1.5 overflow-hidden">
-        <div className="space-y-2">
-          <AnimatePresence initial={false} mode="popLayout">
-            {displayedNotifications.map((notification) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                key={notification.id}
-              >
-                <NotificationItem
-                  notification={notification}
-                  onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
-                />
-              </motion.div>
-            ))}
-
-            {notifications.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground">
-                  No hay notificaciones
-                </p>
-              </div>
-            )}
-
-            {notifications.length > 3 && (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className="w-full"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAll(!showAll)}
-                  className="w-full"
+        {notifications.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">
+              No hay notificaciones
+            </p>
+          </div>
+        ) : (
+          <div 
+            className="space-y-2 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin scrollbar-thumb-orange-500/50 scrollbar-track-transparent hover:scrollbar-thumb-orange-500/70"
+            style={{ 
+              maxHeight: 'calc(3 * 120px)', // Aproximadamente 3 notificaciones
+              minHeight: '120px'
+            }}
+          >
+            <AnimatePresence initial={false} mode="popLayout">
+              {notifications.map((notification) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  key={notification.id}
                 >
-                  {showAll ? "Mostrar menos" : `Ver todas (${notifications.length})`}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  <NotificationItem
+                    notification={notification}
+                    onMarkAsRead={markAsRead}
+                    onDelete={deleteNotification}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+        {notifications.length > 3 && (
+          <div className="mt-2 pt-2 border-t border-border/50">
+            <p className="text-xs text-center text-muted-foreground">
+              {notifications.length} notificaciones totales • Scroll para ver más ↕️
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -540,13 +540,20 @@ export default function DepartamentosPage() {
   ]
 
   // Estadísticas
+  const departamentosOcupados = departamentos.filter(d => d.estado === 'ocupado')
+  
   const estadisticas = {
     total: departamentos.length,
     disponibles: departamentos.filter(d => d.estado === 'disponible').length,
-    ocupados: departamentos.filter(d => d.estado === 'ocupado').length,
+    ocupados: departamentosOcupados.length,
     mantenimiento: departamentos.filter(d => d.estado === 'mantenimiento').length,
-    rentaPromedio: departamentos.length > 0 
-      ? Math.round(departamentos.reduce((sum, d) => sum + d.renta_mensual, 0) / departamentos.length)
+    rentaPromedio: departamentosOcupados.length > 0 
+      ? Math.round(
+          departamentosOcupados.reduce((sum, d) => {
+            const totalMensual = (Number(d.renta_mensual) || 0) + (Number(d.mantenimiento_mensual) || 0)
+            return sum + totalMensual
+          }, 0)
+        )
       : 0
   }
 
@@ -1175,7 +1182,7 @@ export default function DepartamentosPage() {
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Renta Prom.</p>
+                    <p className="text-sm text-muted-foreground">Renta Total Mensual</p>
                     <p className="text-lg font-bold">{formatearMoneda(estadisticas.rentaPromedio)}</p>
                   </div>
                 </div>

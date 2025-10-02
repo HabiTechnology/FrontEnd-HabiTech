@@ -167,7 +167,9 @@ export default function DepartamentoDetalleModal({
               <div className="flex justify-between">
                 <span className="text-muted-foreground font-medium">Total Mensual:</span>
                 <span className="font-bold text-lg">
-                  {formatearMoneda(departamento.renta_mensual + departamento.mantenimiento_mensual)}
+                  {formatearMoneda(
+                    (Number(departamento.renta_mensual) || 0) + (Number(departamento.mantenimiento_mensual) || 0)
+                  )}
                 </span>
               </div>
             </CardContent>

@@ -1,4 +1,4 @@
-﻿import type React from "react"
+import type React from "react"
 import { Roboto_Mono } from "next/font/google"
 import "./globals.css"
 import type { Metadata } from "next"
@@ -24,15 +24,19 @@ const isV0 = process.env["VERCEL_URL"]?.includes("vusercontent.net") ?? false
 
 export const metadata: Metadata = {
   title: {
-    template: "%s â€“ HABITECH",
+    template: "%s — HABITECH",
     default: "HABITECH",
   },
-  description: "GestiÃ³n Inteligente, Convivencia Inteligente - Sistema de administraciÃ³n residencial.",
+  description: "Gestión Inteligente, Convivencia Inteligente - Sistema de administración residencial.",
   generator: 'v0.app',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
     apple: '/favicon.ico',
+  },
+  openGraph: {
+    locale: 'es_MX',
+    type: 'website',
   },
 }
 
@@ -42,8 +46,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="es-MX" className="dark">
       <head>
+        <meta charSet="UTF-8" />
+        <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="preload" href="/fonts/Rebels-Fett.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://apitaller.onrender.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

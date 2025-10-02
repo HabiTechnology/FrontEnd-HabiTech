@@ -12,17 +12,57 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Notificacion, NotificacionesResumen } from "@/types/notifications"
 import NotificationItem from "@/components/dashboard/notifications/notification-item"
-import { Bell, CheckCircle2, Trash2, RefreshCw } from "lucide-react"
+import CreateNotificationModal from "@/components/notifications/create-notification-modal"
+import { Bell, CheckCircle2, Trash2, RefreshCw, Plus, User } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+interface Residente {
+  id: number
+  usuario_id: number
+  nombre: string
+  apellido: string
+  correo: string
+  telefono: string
+  departamento_numero: string
+  departamento_piso: number
+  tipo_relacion: string
+}
 
 export default function NotificacionesPage() {
   const [resumen, setResumen] = useState<NotificacionesResumen | null>(null)
   const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState<'todas' | 'no_leidas' | 'leidas'>('todas')
-  const usuarioId = 1 // En producción, obtenerlo del contexto de autenticación
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [residentes, setResidentes] = useState<Residente[]>([])
+  const [residentesLoading, setResidentesLoading] = useState(true)
+  const [usuarioId, setUsuarioId] = useState<number>(1) // Usuario seleccionado actualmente
+
+  useEffect(() => {
+    fetchResidentes()
+  }, [])
 
   useEffect(() => {
     fetchNotificaciones()
-  }, [])
+  }, [usuarioId])
+
+  const fetchResidentes = async () => {
+    try {
+      setResidentesLoading(true)
+      const response = await fetch('/api/residentes/lista')
+      const data = await response.json()
+      setResidentes(data.residentes || [])
+    } catch (error) {
+      console.error("Error fetching residentes:", error)
+    } finally {
+      setResidentesLoading(false)
+    }
+  }
 
   const fetchNotificaciones = async () => {
     try {
@@ -140,8 +180,12 @@ export default function NotificacionesPage() {
                 <CardTitle className="text-sm font-medium">Acciones</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button size="sm" onClick={marcarTodasComoLeidas} disabled={!resumen?.no_leidas}>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => setShowCreateModal(true)} className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  Crear Notificación
+                </Button>
+                <Button size="sm" variant="secondary" onClick={marcarTodasComoLeidas} disabled={!resumen?.no_leidas}>
                   Marcar todas
                 </Button>
                 <Button size="sm" variant="outline" onClick={fetchNotificaciones}>
@@ -150,6 +194,50 @@ export default function NotificacionesPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Selector de Residente */}
+          <Card className="mb-10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Seleccionar Residente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {residentesLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span className="text-sm">Cargando residentes...</span>
+                </div>
+              ) : (
+                <Select
+                  value={usuarioId.toString()}
+                  onValueChange={(value) => setUsuarioId(parseInt(value))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona un residente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {residentes.map((residente) => (
+                      <SelectItem
+                        key={residente.usuario_id}
+                        value={residente.usuario_id.toString()}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {residente.nombre} {residente.apellido}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Piso {residente.departamento_piso}, Depto {residente.departamento_numero} ({residente.tipo_relacion})
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Filtros */}
           <Tabs value={filtro} onValueChange={(v) => setFiltro(v as any)} className="mb-4">
@@ -163,12 +251,12 @@ export default function NotificacionesPage() {
           {/* Lista de Notificaciones */}
           <Card>
             <CardHeader>
-              <CardTitle>Notificaciones</CardTitle>
-              <CardDescription>
+              <CardTitle className="mt-1 mb-5">Notificaciones</CardTitle>
+                <CardDescription className="mt-0 mb-1">
                 {filtro === 'todas' && 'Todas tus notificaciones'}
                 {filtro === 'no_leidas' && 'Notificaciones pendientes de leer'}
                 {filtro === 'leidas' && 'Notificaciones ya leídas'}
-              </CardDescription>
+                </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -199,6 +287,15 @@ export default function NotificacionesPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Modal de Crear Notificación */}
+        <CreateNotificationModal
+          open={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            fetchNotificaciones()
+          }}
+        />
       </DashboardPageLayout>
     </PageTransition>
   )
