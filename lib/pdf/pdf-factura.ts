@@ -262,7 +262,7 @@ export const generarFacturaPDF = async (pago: PagoParaFactura): Promise<jsPDF> =
   doc.setTextColor(255, 255, 255);
   doc.text('TOTAL:', pageWidth - 85, yPos + 3);
   const total = pago.monto + iva;
-  doc.text(`$${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`, pageWidth - 20, yPos + 3, { align: 'right' });
+  doc.text(`$${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} $`, pageWidth - 20, yPos + 3, { align: 'right' });
 
   yPos += 20;
 
