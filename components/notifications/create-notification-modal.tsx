@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Bell, DollarSign, Info, Settings, MessageCircle, Loader2, Building2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Bell, DollarSign, Info, Settings, MessageCircle, Loader2, Building2, Mail, AlertCircle } from "lucide-react";
 import type { TipoNotificacion } from "@/types/notifications";
+import { useToast } from "@/hooks/use-toast";
 
 interface Residente {
   id: number;
@@ -38,6 +40,7 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
   const [tipo, setTipo] = useState<TipoNotificacion>("sistema");
   const [titulo, setTitulo] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const { toast } = useToast();
 
   const tiposInfo = {
     pago: { label: "Pago", icon: DollarSign, color: "text-emerald-600" },
@@ -70,12 +73,20 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
     e.preventDefault();
     
     if (!titulo.trim() || !mensaje.trim()) {
-      alert("Por favor completa todos los campos");
+      toast({
+        title: "❌ Error",
+        description: "Por favor completa todos los campos",
+        variant: "destructive",
+      });
       return;
     }
 
     if (destinatario === "uno" && !usuarioId) {
-      alert("Por favor ingresa el ID del usuario");
+      toast({
+        title: "❌ Error",
+        description: "Por favor selecciona un residente",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -96,7 +107,21 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
         }
 
         const data = await response.json();
-        alert(`✅ Notificaciones enviadas a ${data.count} residentes`);
+        
+        // Mensaje diferente si es anuncio (incluye info de emails)
+        if (tipo === "anuncio") {
+          toast({
+            title: "✅ Anuncio Enviado",
+            description: `Notificaciones enviadas a ${data.count} residentes. ${data.emailResults ? `Emails: ${data.emailResults.sent} enviados, ${data.emailResults.failed} fallidos.` : ''}`,
+            duration: 5000,
+          });
+        } else {
+          toast({
+            title: "✅ Notificaciones Enviadas",
+            description: `Se enviaron ${data.count} notificaciones a todos los residentes`,
+            duration: 3000,
+          });
+        }
       } else {
         // Enviar a un usuario específico
         const response = await fetch("/api/notificaciones", {
@@ -120,7 +145,21 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
 
         const data = await response.json();
         const residenteSeleccionado = residentes.find(r => r.usuario_id === parseInt(usuarioId));
-        alert(`✅ Notificación enviada a ${residenteSeleccionado?.nombre || 'usuario'} ${residenteSeleccionado?.apellido || ''}`);
+        
+        // Mensaje diferente si es anuncio (incluye info de email)
+        if (tipo === "anuncio") {
+          toast({
+            title: "✅ Anuncio Enviado",
+            description: `Notificación y email enviado a ${residenteSeleccionado?.nombre || 'usuario'} ${residenteSeleccionado?.apellido || ''}`,
+            duration: 4000,
+          });
+        } else {
+          toast({
+            title: "✅ Notificación Enviada",
+            description: `Enviada a ${residenteSeleccionado?.nombre || 'usuario'} ${residenteSeleccionado?.apellido || ''}`,
+            duration: 3000,
+          });
+        }
       }
 
       // Resetear formulario
@@ -134,7 +173,11 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
       onClose();
     } catch (error) {
       console.error("Error:", error);
-      alert(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      toast({
+        title: "❌ Error",
+        description: error instanceof Error ? error.message : 'Error desconocido',
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -248,6 +291,16 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Cr
               </SelectContent>
             </Select>
           </div>
+
+          {/* Alerta cuando se selecciona "Anuncio" */}
+          {tipo === "anuncio" && (
+            <Alert className="border-[#007BFF] bg-[#007BFF]/10 dark:bg-[#007BFF]/20">
+              <Mail className="h-4 w-4 text-[#007BFF] dark:text-[#60A5FA]" />
+              <AlertDescription className="text-sm text-[#1A2E49] dark:text-gray-200">
+                <strong className="text-[#007BFF] dark:text-[#60A5FA]">📧 Email automático:</strong> Este anuncio se enviará también por correo electrónico {destinatario === "todos" ? "a todos los residentes activos" : "al residente seleccionado"}.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Título */}
           <div className="space-y-2">

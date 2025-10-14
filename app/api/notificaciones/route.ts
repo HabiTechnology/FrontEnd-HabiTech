@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
+import { sendAnuncioEmail } from "@/lib/email-service"
 
 export const dynamic = "force-dynamic"
 
@@ -7,6 +8,11 @@ const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET(request: NextRequest) {
   try {
+    // Verificar conexión a BD
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL no está configurada en las variables de entorno");
+    }
+
     const { searchParams } = new URL(request.url)
     const usuarioId = searchParams.get("usuario_id")
     const soloNoLeidas = searchParams.get("solo_no_leidas") === "true"
@@ -16,54 +22,71 @@ export async function GET(request: NextRequest) {
 
     let notificaciones: any[]
 
-    if (usuarioId && soloNoLeidas) {
-      notificaciones = await sql`
-        SELECT 
-          n.*,
-          u.nombre as usuario_nombre,
-          u.correo as usuario_correo
-        FROM notificaciones n
-        LEFT JOIN usuarios u ON n.usuario_id = u.id
-        WHERE n.usuario_id = ${parseInt(usuarioId)}
-          AND n.leido = false
-        ORDER BY n.creado_en DESC
-        LIMIT ${limite}
-      `
-    } else if (usuarioId) {
-      notificaciones = await sql`
-        SELECT 
-          n.*,
-          u.nombre as usuario_nombre,
-          u.correo as usuario_correo
-        FROM notificaciones n
-        LEFT JOIN usuarios u ON n.usuario_id = u.id
-        WHERE n.usuario_id = ${parseInt(usuarioId)}
-        ORDER BY n.creado_en DESC
-        LIMIT ${limite}
-      `
-    } else if (soloNoLeidas) {
-      notificaciones = await sql`
-        SELECT 
-          n.*,
-          u.nombre as usuario_nombre,
-          u.correo as usuario_correo
-        FROM notificaciones n
-        LEFT JOIN usuarios u ON n.usuario_id = u.id
-        WHERE n.leido = false
-        ORDER BY n.creado_en DESC
-        LIMIT ${limite}
-      `
-    } else {
-      notificaciones = await sql`
-        SELECT 
-          n.*,
-          u.nombre as usuario_nombre,
-          u.correo as usuario_correo
-        FROM notificaciones n
-        LEFT JOIN usuarios u ON n.usuario_id = u.id
-        ORDER BY n.creado_en DESC
-        LIMIT ${limite}
-      `
+    try {
+      if (usuarioId && soloNoLeidas) {
+        notificaciones = await sql`
+          SELECT 
+            n.*,
+            u.nombre as usuario_nombre,
+            u.correo as usuario_correo
+          FROM notificaciones n
+          LEFT JOIN usuarios u ON n.usuario_id = u.id
+          WHERE n.usuario_id = ${parseInt(usuarioId)}
+            AND n.leido = false
+          ORDER BY n.creado_en DESC
+          LIMIT ${limite}
+        `
+      } else if (usuarioId) {
+        notificaciones = await sql`
+          SELECT 
+            n.*,
+            u.nombre as usuario_nombre,
+            u.correo as usuario_correo
+          FROM notificaciones n
+          LEFT JOIN usuarios u ON n.usuario_id = u.id
+          WHERE n.usuario_id = ${parseInt(usuarioId)}
+          ORDER BY n.creado_en DESC
+          LIMIT ${limite}
+        `
+      } else if (soloNoLeidas) {
+        notificaciones = await sql`
+          SELECT 
+            n.*,
+            u.nombre as usuario_nombre,
+            u.correo as usuario_correo
+          FROM notificaciones n
+          LEFT JOIN usuarios u ON n.usuario_id = u.id
+          WHERE n.leido = false
+          ORDER BY n.creado_en DESC
+          LIMIT ${limite}
+        `
+      } else {
+        notificaciones = await sql`
+          SELECT 
+            n.*,
+            u.nombre as usuario_nombre,
+            u.correo as usuario_correo
+          FROM notificaciones n
+          LEFT JOIN usuarios u ON n.usuario_id = u.id
+          ORDER BY n.creado_en DESC
+          LIMIT ${limite}
+        `
+      }
+    } catch (dbError: any) {
+      console.error("❌ Error en query de base de datos:", dbError.message)
+      
+      // Si las tablas no existen, devolver datos vacíos en lugar de error
+      if (dbError.message.includes("does not exist") || dbError.message.includes("relation")) {
+        console.warn("⚠️ Tabla 'notificaciones' o 'usuarios' no existe, devolviendo datos vacíos")
+        return NextResponse.json({
+          total: 0,
+          no_leidas: 0,
+          por_tipo: [],
+          notificaciones: []
+        })
+      }
+      
+      throw dbError
     }
 
     console.log(`✅ Found ${notificaciones.length} notificaciones`)
@@ -131,6 +154,42 @@ export async function POST(request: NextRequest) {
     `
 
     console.log("✅ Notificacion created:", result[0])
+
+    // Si es un anuncio, enviar también por email
+    if (tipo === "anuncio") {
+      try {
+        // Obtener información del usuario (email y nombre)
+        const usuario = await sql`
+          SELECT u.correo, u.nombre, u.apellido
+          FROM usuarios u
+          WHERE u.id = ${usuario_id}
+        `
+
+        if (usuario.length > 0 && usuario[0].correo) {
+          const nombreCompleto = `${usuario[0].nombre || ""} ${usuario[0].apellido || ""}`.trim() || "Residente"
+          
+          console.log(`📧 Enviando email de anuncio a ${usuario[0].correo}`)
+          
+          const emailResult = await sendAnuncioEmail(
+            usuario[0].correo,
+            nombreCompleto,
+            titulo,
+            mensaje
+          )
+
+          if (emailResult.success) {
+            console.log(`✅ Email enviado exitosamente a ${usuario[0].correo}`)
+          } else {
+            console.warn(`⚠️ No se pudo enviar email a ${usuario[0].correo}:`, emailResult.error)
+          }
+        } else {
+          console.warn(`⚠️ Usuario ${usuario_id} no tiene correo registrado`)
+        }
+      } catch (emailError: any) {
+        // No fallar la creación de notificación si falla el email
+        console.error("❌ Error enviando email de anuncio:", emailError)
+      }
+    }
 
     return NextResponse.json(result[0], { status: 201 })
   } catch (error: any) {

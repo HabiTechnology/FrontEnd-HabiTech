@@ -333,8 +333,12 @@ function TotalPagosGeneral() {
     return <div className="h-32 animate-pulse bg-muted rounded" />
   }
 
-  if (!data) {
-    return <p className="text-center text-muted-foreground">Error al cargar datos</p>
+  if (!data || !data.total_general) {
+    return (
+      <div className="text-center p-4 border rounded-lg bg-card">
+        <p className="text-muted-foreground">No hay datos financieros disponibles</p>
+      </div>
+    )
   }
 
   return (
@@ -342,33 +346,33 @@ function TotalPagosGeneral() {
       <div className="text-center p-4 border rounded-lg bg-card">
         <p className="text-sm text-muted-foreground mb-2">Total General</p>
         <p className="text-3xl font-bold text-orange-500">
-          ${data.total_general.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          ${(data.total_general || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{data.cantidad_pagos} pagos</p>
+        <p className="text-xs text-muted-foreground mt-1">{data.cantidad_pagos || 0} pagos</p>
       </div>
       
       <div className="text-center p-4 border rounded-lg bg-card">
         <p className="text-sm text-muted-foreground mb-2">Pagados</p>
         <p className="text-3xl font-bold text-green-500">
-          ${data.total_pagados.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          ${(data.total_pagados || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{data.pagos_completados} pagos</p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_completados || 0} pagos</p>
       </div>
       
       <div className="text-center p-4 border rounded-lg bg-card">
         <p className="text-sm text-muted-foreground mb-2">Pendientes</p>
         <p className="text-3xl font-bold text-yellow-500">
-          ${data.total_pendientes.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          ${(data.total_pendientes || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{data.pagos_pendientes} pagos</p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_pendientes || 0} pagos</p>
       </div>
       
       <div className="text-center p-4 border rounded-lg bg-card">
         <p className="text-sm text-muted-foreground mb-2">Atrasados</p>
         <p className="text-3xl font-bold text-red-500">
-          ${data.total_atrasados.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          ${(data.total_atrasados || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{data.pagos_atrasados} pagos</p>
+        <p className="text-xs text-muted-foreground mt-1">{data.pagos_atrasados || 0} pagos</p>
       </div>
     </div>
   )

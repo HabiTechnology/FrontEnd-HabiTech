@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { sendAnuncioEmailBulk } from "@/lib/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +20,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener todos los residentes activos
+    // Obtener todos los residentes activos con su información de usuario
     const residentes = await sql`
-      SELECT id, usuario_id FROM residentes WHERE activo = true
+      SELECT 
+        r.id, 
+        r.usuario_id,
+        u.correo,
+        u.nombre,
+        u.apellido
+      FROM residentes r
+      INNER JOIN usuarios u ON r.usuario_id = u.id
+      WHERE r.activo = true
     `;
 
     if (residentes.length === 0) {
@@ -62,10 +71,50 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Notificaciones enviadas a ${notificaciones.length} residentes`);
 
+    // Si es un anuncio, enviar también por email
+    let emailResultados = null;
+    let totalEmailsIntentados = 0;
+    
+    if (tipo === "anuncio") {
+      try {
+        // Filtrar residentes con correo válido
+        const residentesConEmail = residentes
+          .filter(r => r.correo)
+          .map(r => ({
+            email: r.correo,
+            nombre: `${r.nombre || ""} ${r.apellido || ""}`.trim() || "Residente"
+          }));
+
+        totalEmailsIntentados = residentesConEmail.length;
+
+        if (residentesConEmail.length > 0) {
+          console.log(`📧 Enviando anuncio por email a ${residentesConEmail.length} residentes`);
+          
+          emailResultados = await sendAnuncioEmailBulk(
+            residentesConEmail,
+            titulo,
+            mensaje
+          );
+
+          console.log(`✅ Emails enviados: ${emailResultados.exitosos} exitosos, ${emailResultados.fallidos} fallidos`);
+        } else {
+          console.warn("⚠️ No hay residentes con correo registrado");
+        }
+      } catch (emailError: any) {
+        // No fallar la creación de notificaciones si fallan los emails
+        console.error("❌ Error enviando emails masivos:", emailError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: `Notificaciones enviadas a ${notificaciones.length} residentes`,
       count: notificaciones.length,
+      emailResults: emailResultados ? {
+        sent: emailResultados.exitosos,
+        failed: emailResultados.fallidos,
+        total: totalEmailsIntentados
+      } : null
     });
 
   } catch (error) {

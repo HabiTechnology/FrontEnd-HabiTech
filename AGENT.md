@@ -71,6 +71,10 @@ FrontEnd-HabiTech/
 - **jsPDF** - Generación de facturas y reportes PDF
 - **html2canvas** - Conversión HTML a imagen
 
+### **Comunicaciones y Emails**
+- **Brevo (SendInBlue)** - Servicio transaccional de emails
+- **@getbrevo/brevo** - SDK oficial para Node.js
+
 ### **Visualización de Datos**
 - **Chart.js** - Gráficos interactivos
 - **React Chart.js 2** - Integración React para Chart.js
@@ -106,6 +110,16 @@ Usuario → Explora productos/servicios → Agrega al carrito → Pago con coins
 ```
 Admin → Visualiza métricas → Genera reportes → Exporta PDFs → Análisis de ingresos
 ```
+
+### **6. Sistema de Notificaciones y Emails**
+```
+Admin → Crea anuncio → Guarda en BD → Envía email a residentes (Brevo) → Notificación en app
+```
+- **Emails solo para anuncios**: El sistema envía correos electrónicos únicamente cuando el tipo es "anuncio"
+- **Envío individual**: Un residente específico recibe email y notificación in-app
+- **Envío masivo**: Todos los residentes activos reciben email y notificación in-app
+- **HTML responsive**: Emails con diseño corporativo usando paleta de colores HabiTech
+- **Manejo de errores graceful**: Si falla el email, la notificación se crea igualmente
 
 **Blockchain Integration:**
 - Red **Sepolia Testnet** para desarrollo
@@ -167,6 +181,7 @@ export const ComponentName = ({ title, isVisible = true }: ComponentProps) => {
 - **Columnas:** `snake_case` descriptivo (fecha_vencimiento, numero_documento)
 - **Relaciones:** Usar foreign keys explícitas (*_id)
 - **Índices:** Crear para columnas de búsqueda frecuente
+- **Documentación completa:** Ver `DATABASE_SCHEMA.md` para esquema completo de 30 tablas
 
 ### **Internacionalización**
 - **Idioma principal:** Español (UTF-8 completo)
@@ -230,10 +245,14 @@ Este documento es la **fuente de verdad** para cualquier IA trabajando en el pro
 - `NODE_ENV` → Entorno de ejecución (development/production)
 - `ALLOWED_ORIGINS` → URLs permitidas para CORS
 
+### **Comunicaciones (Brevo)**
+- `BREVO_API_KEY` → API Key de Brevo para envío transaccional de emails
+- `BREVO_FROM_EMAIL` → Email remitente verificado en Brevo
+
 ## 🚀 Próximas Extensiones o Plan de Crecimiento
 
 ### **Funcionalidades Planeadas**
-- **Sistema de notificaciones** push y email
+- **Sistema de notificaciones** push y email ✅ **IMPLEMENTADO** (emails vía Brevo para anuncios)
 - **Chat/mensajería** entre residentes y administración
 - **Reserva de espacios** comunes (salón de fiestas, gym, etc.)
 - **Mantenimiento predictivo** con IoT sensors

@@ -7,63 +7,104 @@ export async function GET() {
   try {
     console.log("🏢 Obteniendo estadísticas del edificio...");
 
-    // Total de departamentos y ocupación
-    const departamentos = await sql`
-      SELECT 
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE estado = 'ocupado') as ocupados,
-        COUNT(*) FILTER (WHERE estado = 'disponible') as disponibles,
-        COUNT(*) FILTER (WHERE estado = 'mantenimiento') as en_mantenimiento
-      FROM departamentos
-      WHERE activo = true
-    `;
+    // Verificar conexión a BD
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL no está configurada");
+    }
+
+    // Total de departamentos y ocupación (con manejo de error)
+    let departamentos;
+    try {
+      departamentos = await sql`
+        SELECT 
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE estado = 'ocupado') as ocupados,
+          COUNT(*) FILTER (WHERE estado = 'disponible') as disponibles,
+          COUNT(*) FILTER (WHERE estado = 'mantenimiento') as en_mantenimiento
+        FROM departamentos
+        WHERE activo = true
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'departamentos' no existe, usando valores por defecto");
+      departamentos = [{ total: 0, ocupados: 0, disponibles: 0, en_mantenimiento: 0 }];
+    }
 
     // Total de residentes activos
-    const residentes = await sql`
-      SELECT 
-        COUNT(*) as total_residentes,
-        COUNT(*) FILTER (WHERE tipo_relacion = 'propietario') as propietarios,
-        COUNT(*) FILTER (WHERE tipo_relacion = 'inquilino') as inquilinos
-      FROM residentes
-      WHERE activo = true
-    `;
+    let residentes;
+    try {
+      residentes = await sql`
+        SELECT 
+          COUNT(*) as total_residentes,
+          COUNT(*) FILTER (WHERE tipo_relacion = 'propietario') as propietarios,
+          COUNT(*) FILTER (WHERE tipo_relacion = 'inquilino') as inquilinos
+        FROM residentes
+        WHERE activo = true
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'residentes' no existe, usando valores por defecto");
+      residentes = [{ total_residentes: 0, propietarios: 0, inquilinos: 0 }];
+    }
 
     // Personal del edificio
-    const personal = await sql`
-      SELECT 
-        COUNT(*) as total_personal,
-        COUNT(*) FILTER (WHERE cargo = 'seguridad') as seguridad,
-        COUNT(*) FILTER (WHERE cargo = 'limpieza') as limpieza,
-        COUNT(*) FILTER (WHERE cargo = 'mantenimiento') as mantenimiento,
-        COUNT(*) FILTER (WHERE cargo = 'administracion') as administracion
-      FROM personal_edificio
-      WHERE activo = true
-    `;
+    let personal;
+    try {
+      personal = await sql`
+        SELECT 
+          COUNT(*) as total_personal,
+          COUNT(*) FILTER (WHERE cargo = 'seguridad') as seguridad,
+          COUNT(*) FILTER (WHERE cargo = 'limpieza') as limpieza,
+          COUNT(*) FILTER (WHERE cargo = 'mantenimiento') as mantenimiento,
+          COUNT(*) FILTER (WHERE cargo = 'administracion') as administracion
+        FROM personal_edificio
+        WHERE activo = true
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'personal_edificio' no existe, usando valores por defecto");
+      personal = [{ total_personal: 0, seguridad: 0, limpieza: 0, mantenimiento: 0, administracion: 0 }];
+    }
 
     // Solicitudes de mantenimiento pendientes
-    const mantenimiento = await sql`
-      SELECT 
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE estado = 'pendiente') as pendientes,
-        COUNT(*) FILTER (WHERE estado = 'en_proceso') as en_proceso
-      FROM solicitudes_mantenimiento
-    `;
+    let mantenimiento;
+    try {
+      mantenimiento = await sql`
+        SELECT 
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE estado = 'pendiente') as pendientes,
+          COUNT(*) FILTER (WHERE estado = 'en_proceso') as en_proceso
+        FROM solicitudes_mantenimiento
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'solicitudes_mantenimiento' no existe, usando valores por defecto");
+      mantenimiento = [{ total: 0, pendientes: 0, en_proceso: 0 }];
+    }
 
     // Áreas comunes
-    const areas = await sql`
-      SELECT 
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE estado = 'disponible') as disponibles,
-        COUNT(*) FILTER (WHERE estado = 'ocupado') as ocupadas
-      FROM areas_comunes
-    `;
+    let areas;
+    try {
+      areas = await sql`
+        SELECT 
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE estado = 'disponible') as disponibles,
+          COUNT(*) FILTER (WHERE estado = 'ocupado') as ocupadas
+        FROM areas_comunes
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'areas_comunes' no existe, usando valores por defecto");
+      areas = [{ total: 0, disponibles: 0, ocupadas: 0 }];
+    }
 
     // Actividad reciente de acceso
-    const accesos = await sql`
-      SELECT COUNT(*) as total_hoy
-      FROM registros_acceso
-      WHERE DATE(fecha_hora) = CURRENT_DATE
-    `;
+    let accesos;
+    try {
+      accesos = await sql`
+        SELECT COUNT(*) as total_hoy
+        FROM registros_acceso
+        WHERE DATE(fecha_hora) = CURRENT_DATE
+      `;
+    } catch (e) {
+      console.warn("⚠️ Tabla 'registros_acceso' no existe, usando valores por defecto");
+      accesos = [{ total_hoy: 0 }];
+    }
 
     const stats = {
       departamentos: {
