@@ -55,7 +55,6 @@ export async function sendEmail({ to, toName, subject, htmlContent }: EmailParam
  */
 export function generateAnuncioEmailHTML(titulo: string, mensaje: string): string {
   return `
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -123,19 +122,6 @@ export function generateAnuncioEmailHTML(titulo: string, mensaje: string): strin
       font-size: 13px;
       border-top: 1px solid #E5E7EB;
     }
-    .button {
-      display: inline-block;
-      padding: 12px 30px;
-      background-color: #007BFF;
-      color: #FFFFFF;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 500;
-      margin: 20px 0;
-    }
-    .button:hover {
-      background-color: #0056b3;
-    }
     .divider {
       height: 1px;
       background-color: #E5E7EB;
@@ -162,15 +148,9 @@ export function generateAnuncioEmailHTML(titulo: string, mensaje: string): strin
       
       <div class="divider"></div>
       
-      <p style="color: #A0AAB4; font-size: 14px; margin-top: 20px;">
+      <p style="color: #A0AAB4; font-size: 14px; margin-top: 20px; text-align: center;">
         Para más información, accede a tu panel de notificaciones en la plataforma HabiTech.
       </p>
-      
-      <center>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/notificaciones" class="button">
-          Ver en HabiTech
-        </a>
-      </center>
     </div>
     
     <div class="footer">
