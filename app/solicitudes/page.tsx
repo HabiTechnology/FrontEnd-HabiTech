@@ -4,7 +4,6 @@ import DashboardPageLayout from "@/components/dashboard/layout"
 import SolicitudesRentaTable from "@/components/solicitudes/solicitudes-renta-table"
 import ProcessorIcon from "@/components/icons/proccesor"
 import { PageTransition } from "@/components/animations/page-transition"
-import StaggerAnimation from "@/components/animations/stagger-animation"
 import FloatingElement from "@/components/animations/floating-element"
 
 export default function SolicitudesPage() {
@@ -17,31 +16,29 @@ export default function SolicitudesPage() {
           icon: ProcessorIcon,
         }}
       >
+        {/* Floating background elements */}
         <div className="fixed inset-0 pointer-events-none -z-10">
-          {[...Array(3)].map((_, i) => {
+          {[...Array(4)].map((_, i) => {
             const positions = [
-              { top: '20%', right: '12%' },
-              { top: '40%', left: '8%' },
-              { bottom: '25%', right: '5%' }
-            ];
+              { top: '10%', left: '12%' },
+              { top: '30%', right: '8%' },
+              { bottom: '35%', left: '5%' },
+              { bottom: '15%', right: '15%' }
+            ]
             
             return (
-              <FloatingElement key={i} intensity={6} duration={2800 + (i * 400)}>
+              <FloatingElement key={i} intensity={4} duration={3500 + (i * 300)}>
                 <div
-                  className="absolute w-18 h-18 bg-purple-500/10 dark:bg-purple-400/15 rounded-full backdrop-blur-sm"
+                  className="absolute w-12 h-12 bg-purple-500/10 dark:bg-purple-400/15 rounded-full backdrop-blur-sm"
                   style={positions[i]}
                 />
               </FloatingElement>
-            );
+            )
           })}
         </div>
 
         <div className="relative z-1">
-          <StaggerAnimation delay={200} staggerDelay={0}>
-            <div className="content-panel group hover:shadow-lg transition-all duration-300">
-              <SolicitudesRentaTable />
-            </div>
-          </StaggerAnimation>
+          <SolicitudesRentaTable />
         </div>
       </DashboardPageLayout>
     </PageTransition>

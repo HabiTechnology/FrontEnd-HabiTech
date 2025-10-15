@@ -11,6 +11,12 @@ export { generarPDFTablaResidentes } from './pdf-tabla-residentes';
 export { generarPDFDepartamento, type DepartamentoParaPDF } from './pdf-departamento';
 export { generarPDFTablaDepartamentos } from './pdf-tabla-departamentos';
 export { generarFacturaPDF, previewFacturaPDF, descargarFacturaPDF, type PagoParaFactura } from './pdf-factura';
+export { 
+  generarPDFTablaAccesos, 
+  generarPDFAccesosPreview, 
+  descargarPDFAccesos, 
+  type RegistroAccesoParaPDF 
+} from './pdf-tabla-accesos';
 
 // ===============================================
 // 🔧 FUNCIONES DE CONVENIENCIA

@@ -9,6 +9,7 @@ const protectedRoutes = [
   '/admin',
   '/departamentos',
   '/residentes',
+  '/accesos',
   '/solicitudes',
   '/solicitud-renta',
   '/tienda',
@@ -19,6 +20,7 @@ const protectedRoutes = [
 const protectedApiRoutes = [
   '/api/departamentos',
   '/api/residentes',
+  '/api/accesos',
   '/api/solicitudes-renta',
   '/api/usuarios'
 ]

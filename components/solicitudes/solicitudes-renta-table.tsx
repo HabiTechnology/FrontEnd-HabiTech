@@ -140,61 +140,109 @@ export default function SolicitudesRentaTable() {
 
   return (
     <div className="space-y-6">
-      {/* Header y filtros */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Solicitudes de Renta</h2>
-          <p className="text-gray-600">Gestiona las solicitudes de arriendo recibidas</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Select value={filterEstado} onValueChange={setFilterEstado}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="pendiente">Pendientes</SelectItem>
-              <SelectItem value="en_revision">En RevisiÃ³n</SelectItem>
-              <SelectItem value="aprobada">Aprobadas</SelectItem>
-              <SelectItem value="rechazada">Rechazadas</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button
-            variant="outline"
-            onClick={cargarSolicitudes}
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Actualizar'}
-          </Button>
-        </div>
-      </div>
+      {/* Filtros y Búsqueda - Estilo similar a Accesos */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Filtros de Búsqueda
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Filtra solicitudes por estado
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={cargarSolicitudes}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Clock className="h-4 w-4 mr-2" />
+              )}
+              Actualizar
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="space-y-2">
+              <Label htmlFor="estado">Estado de Solicitud</Label>
+              <Select value={filterEstado} onValueChange={setFilterEstado}>
+                <SelectTrigger id="estado">
+                  <SelectValue placeholder="Todos los estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="pendiente">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                      Pendientes
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="en_revision">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-blue-600" />
+                      En Revisión
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="aprobada">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      Aprobadas
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="rechazada">
+                    <div className="flex items-center gap-2">
+                      <XCircle className="h-4 w-4 text-red-600" />
+                      Rechazadas
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Alertas */}
       {error && (
-        <Alert className="border-red-200 bg-red-50">
+        <Alert className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-900">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-red-800">{error}</AlertDescription>
+          <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* EstadÃ­sticas rÃ¡pidas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Estadísticas rápidas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {Object.entries(estadoColors).map(([estado, colorClass]) => {
           const count = solicitudes.filter(s => s.estado === estado).length
           const Icon = estadoIcons[estado as keyof typeof estadoIcons]
           
+          const colorMap: Record<string, string> = {
+            pendiente: 'text-yellow-600',
+            en_revision: 'text-blue-600',
+            aprobada: 'text-green-600',
+            rechazada: 'text-red-600'
+          }
+          
           return (
-            <Card key={estado} className="text-center">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm font-medium capitalize">
-                    {estado.replace('_', ' ')}
-                  </span>
-                </div>
-                <div className="text-2xl font-bold">{count}</div>
+            <Card key={estado}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium capitalize">
+                  {estado.replace('_', ' ')}
+                </CardTitle>
+                <Icon className={`h-4 w-4 ${colorMap[estado]}`} />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${colorMap[estado]}`}>{count}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Solicitudes
+                </p>
               </CardContent>
             </Card>
           )
@@ -210,12 +258,23 @@ export default function SolicitudesRentaTable() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {solicitudes.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No hay solicitudes que mostrar</p>
+          {loading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+              <p className="text-muted-foreground">Cargando solicitudes...</p>
+            </div>
+          ) : solicitudes.length === 0 ? (
+            <div className="text-center py-12">
+              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No hay solicitudes que mostrar</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {filterEstado !== 'all' 
+                  ? 'Intenta ajustar los filtros' 
+                  : 'Las solicitudes aparecerán aquí'}
+              </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

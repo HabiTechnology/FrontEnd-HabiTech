@@ -39,6 +39,7 @@ import { useIsV0 } from "@/lib/v0-context"
 import { Button } from "@/components/ui/button"
 import { Moon, Sun, Shield, Wallet, TrendingUp } from "lucide-react"
 import UsersIcon from "@/components/icons/users"
+import ShieldCheckIcon from "@/components/icons/shield-check"
 
 // This is sample data for the sidebar
 const navItems = [
@@ -63,6 +64,12 @@ const navItems = [
     title: "RESIDENTES",
     url: "/residentes",
     icon: UsersIcon,
+  },
+  {
+    title: "ACCESOS",
+    url: "/accesos",
+    icon: ShieldCheckIcon,
+    description: "Registro de entradas y salidas"
   },
   {
     title: "SOLICITUDES",
