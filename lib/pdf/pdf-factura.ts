@@ -17,6 +17,7 @@ export interface PagoParaFactura {
   metodo_pago?: string | null;
   referencia?: string | null;
   notas?: string | null;
+  recargo?: number;
   residente?: {
     usuario?: {
       nombre?: string;
@@ -246,9 +247,19 @@ export const generarFacturaPDF = async (pago: PagoParaFactura): Promise<jsPDF> =
   doc.text('Subtotal:', pageWidth - 60, yPos);
   doc.text(`$${pago.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, pageWidth - 20, yPos, { align: 'right' });
   
+  // Recargo (si existe)
+  if (pago.recargo && pago.recargo > 0) {
+    yPos += 6;
+    doc.setTextColor(COLORES_CORPORATIVOS.errorRed[0], COLORES_CORPORATIVOS.errorRed[1], COLORES_CORPORATIVOS.errorRed[2]);
+    doc.text('Recargo por atraso:', pageWidth - 60, yPos);
+    doc.text(`$${pago.recargo.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, pageWidth - 20, yPos, { align: 'right' });
+    doc.setTextColor(COLORES_CORPORATIVOS.darkGray[0], COLORES_CORPORATIVOS.darkGray[1], COLORES_CORPORATIVOS.darkGray[2]);
+  }
+  
   yPos += 6;
   doc.text('IVA (16%):', pageWidth - 60, yPos);
-  const iva = pago.monto * 0.16;
+  const montoConRecargo = pago.monto + (pago.recargo || 0);
+  const iva = montoConRecargo * 0.16;
   doc.text(`$${iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, pageWidth - 20, yPos, { align: 'right' });
   
   yPos += 8;
@@ -261,7 +272,7 @@ export const generarFacturaPDF = async (pago: PagoParaFactura): Promise<jsPDF> =
   doc.setFontSize(14);
   doc.setTextColor(255, 255, 255);
   doc.text('TOTAL:', pageWidth - 85, yPos + 3);
-  const total = pago.monto + iva;
+  const total = montoConRecargo + iva;
   doc.text(`$${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} $`, pageWidth - 20, yPos + 3, { align: 'right' });
 
   yPos += 20;

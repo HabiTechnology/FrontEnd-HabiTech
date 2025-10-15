@@ -4,54 +4,90 @@ import { sql } from "@/lib/db"
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const estado = searchParams.get('estado')
     
-    console.log(`💸 Fetching all payments, limit: ${limit}`)
+    console.log(`💸 Fetching all payments, limit: ${limit}, estado: ${estado || 'all'}`)
 
-    const pagos = await sql`
-      SELECT 
-        p.id,
-        p.monto,
-        p.tipo_pago,
-        p.estado,
-        p.fecha_pago,
-        p.fecha_vencimiento,
-        p.metodo_pago,
-        p.descripcion,
-        u.nombre || ' ' || u.apellido as residente,
-        u.correo as residente_correo,
-        d.numero as numero_departamento,
-        d.piso
-      FROM pagos p
-      LEFT JOIN residentes r ON p.residente_id = r.id
-      LEFT JOIN usuarios u ON r.usuario_id = u.id
-      LEFT JOIN departamentos d ON r.departamento_id = d.id
-      ORDER BY 
-        CASE 
-          WHEN p.estado = 'pendiente' AND p.fecha_vencimiento < CURRENT_DATE THEN 1
-          WHEN p.estado = 'pendiente' THEN 2
-          ELSE 3
-        END,
-        p.fecha_vencimiento DESC NULLS LAST,
-        p.fecha_pago DESC NULLS LAST
-      LIMIT ${limit}
-    `
+    let query
+    
+    if (estado) {
+      query = sql`
+        SELECT 
+          p.id,
+          p.monto,
+          p.tipo_pago,
+          p.estado,
+          p.fecha_pago,
+          p.fecha_vencimiento,
+          p.metodo_pago,
+          p.id_transaccion,
+          p.recargo,
+          p.descripcion,
+          p.url_recibo,
+          p.creado_en,
+          json_build_object(
+            'nombre', u.nombre,
+            'apellido', u.apellido,
+            'correo', u.correo
+          ) as residente,
+          json_build_object(
+            'numero', d.numero,
+            'piso', d.piso
+          ) as departamento
+        FROM pagos p
+        JOIN residentes r ON p.residente_id = r.id
+        JOIN usuarios u ON r.usuario_id = u.id
+        JOIN departamentos d ON p.departamento_id = d.id
+        WHERE p.estado = ${estado}::estado_pago
+        ORDER BY p.creado_en DESC
+        LIMIT ${limit}
+      `
+    } else {
+      query = sql`
+        SELECT 
+          p.id,
+          p.monto,
+          p.tipo_pago,
+          p.estado,
+          p.fecha_pago,
+          p.fecha_vencimiento,
+          p.metodo_pago,
+          p.id_transaccion,
+          p.recargo,
+          p.descripcion,
+          p.url_recibo,
+          p.creado_en,
+          json_build_object(
+            'nombre', u.nombre,
+            'apellido', u.apellido,
+            'correo', u.correo
+          ) as residente,
+          json_build_object(
+            'numero', d.numero,
+            'piso', d.piso
+          ) as departamento
+        FROM pagos p
+        JOIN residentes r ON p.residente_id = r.id
+        JOIN usuarios u ON r.usuario_id = u.id
+        JOIN departamentos d ON p.departamento_id = d.id
+        ORDER BY p.creado_en DESC
+        LIMIT ${limit}
+      `
+    }
+
+    const pagos = await query
 
     console.log(`💸 Payments result: ${pagos.length} records`)
 
-    return NextResponse.json({
-      success: true,
-      data: pagos,
-      total: pagos.length
-    })
+    return NextResponse.json(pagos)
 
   } catch (error) {
     console.error("❌ Error in all payments API:", error)
     return NextResponse.json(
       { 
-        success: false,
         error: "Error al obtener pagos",
-        data: []
+        details: error instanceof Error ? error.message : 'Error desconocido'
       },
       { status: 500 }
     )
