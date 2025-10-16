@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import FacturaModal from "@/components/financiero/factura-modal"
+import ModalPagoStripe from "@/components/financiero/modal-pago-stripe"
 
 interface Pago {
   id: number
@@ -56,6 +57,9 @@ export default function TablaPagosMejorada() {
   // Modal de factura
   const [pagoSeleccionado, setPagoSeleccionado] = useState<Pago | null>(null)
   const [modalFactura, setModalFactura] = useState(false)
+  
+  // Modal de pago Stripe
+  const [modalPagoStripe, setModalPagoStripe] = useState(false)
 
   useEffect(() => {
     fetchPagos()
@@ -88,6 +92,16 @@ export default function TablaPagosMejorada() {
   const handleVerFactura = (pago: Pago) => {
     setPagoSeleccionado(pago)
     setModalFactura(true)
+  }
+
+  const handlePagarConStripe = (pago: Pago) => {
+    setPagoSeleccionado(pago)
+    setModalPagoStripe(true)
+  }
+
+  const handleSuccessStripe = () => {
+    // Refrescar la lista de pagos después de un pago exitoso
+    fetchPagos(true)
   }
 
   const getBadgeEstado = (estado: string) => {
@@ -197,9 +211,6 @@ export default function TablaPagosMejorada() {
               <FileText className="h-5 w-5" />
               Gestión de Pagos
             </CardTitle>
-            <CardDescription>
-              Últimos {pagos.length} pagos registrados en el sistema
-            </CardDescription>
           </div>
           <Button
             variant="outline"
@@ -226,7 +237,7 @@ export default function TablaPagosMejorada() {
                     <TableHead className="min-w-[110px]">Fecha Pago</TableHead>
                     <TableHead className="min-w-[120px]">Estado</TableHead>
                     <TableHead className="min-w-[110px]">Método</TableHead>
-                    <TableHead className="min-w-[180px] text-center">Acciones</TableHead>
+                    <TableHead className="min-w-[220px] text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -297,14 +308,27 @@ export default function TablaPagosMejorada() {
                         </TableCell>
                         
                         <TableCell>
-                          <div className="flex gap-1 justify-center">
+                          <div className="flex gap-2 justify-end items-center">
+                            {/* Botón de Pagar con Stripe (solo para pagos pendientes/atrasados) */}
+                            {(pago.estado === 'pendiente' || pago.estado === 'atrasado') && (
+                              <Button
+                                size="sm"
+                                className="h-8 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+                                onClick={() => handlePagarConStripe(pago)}
+                              >
+                                <CreditCard className="h-3 w-3 mr-1.5" />
+                                Pagar
+                              </Button>
+                            )}
+                            
+                            {/* Botón de Ver Factura */}
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-8 text-xs"
+                              className="h-8 px-3 text-xs whitespace-nowrap"
                               onClick={() => handleVerFactura(pago)}
                             >
-                              <Eye className="h-3 w-3 mr-1" />
+                              <Eye className="h-3 w-3 mr-1.5" />
                               Ver Factura
                             </Button>
                           </div>
@@ -328,6 +352,27 @@ export default function TablaPagosMejorada() {
           setPagoSeleccionado(null)
         }}
       />
+
+      {/* Modal de Pago con Stripe */}
+      {pagoSeleccionado && (
+        <ModalPagoStripe
+          open={modalPagoStripe}
+          onClose={() => {
+            setModalPagoStripe(false)
+            setPagoSeleccionado(null)
+          }}
+          pagoData={{
+            id: pagoSeleccionado.id,
+            monto: Number(pagoSeleccionado.monto) + Number(pagoSeleccionado.recargo || 0),
+            descripcion: `${pagoSeleccionado.tipo_pago.toUpperCase()} - Depto ${pagoSeleccionado.departamento.numero}`,
+            residenteId: pagoSeleccionado.id,
+            departamentoId: pagoSeleccionado.id,
+            correo: `${pagoSeleccionado.residente.nombre}@habitech.com`,
+            nombre: `${pagoSeleccionado.residente.nombre} ${pagoSeleccionado.residente.apellido}`,
+          }}
+          onSuccess={handleSuccessStripe}
+        />
+      )}
     </>
   )
 }

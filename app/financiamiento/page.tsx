@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, TrendingUp, Calendar, Users } from "lucide-react"
 import CrearPagoMejorado from "@/components/financiero/crear-pago-mejorado"
 import TablaPagosMejorada from "@/components/financiero/tabla-pagos-mejorada"
+import TablaMorosos from "@/components/financiero/tabla-morosos"
+import StripeInfoCard from "@/components/financiero/stripe-info-card"
 
 export default function FinanciamientoPage() {
   const [stats, setStats] = useState({
@@ -96,8 +98,16 @@ export default function FinanciamientoPage() {
         </Card>
       </div>
 
+      {/* Información de Stripe */}
+      <StripeInfoCard />
+
       <CrearPagoMejorado onPagoCreado={fetchStats} />
+      
+      {/* Sección de Todos los Pagos */}
       <TablaPagosMejorada />
+      
+      {/* Sección de Morosos */}
+      <TablaMorosos />
     </div>
   )
 }

@@ -182,14 +182,11 @@ export default function CrearPagoMejorado({ onPagoCreado }: CrearPagoMejoradoPro
 
   return (
     <Card className="w-full">
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <CardHeader className="bg-gradient-to-r text-white">
         <div className="flex items-center gap-2">
           <Plus className="h-6 w-6" />
           <div>
             <CardTitle>Generar Nuevo Pago</CardTitle>
-            <CardDescription className="text-blue-100">
-              Crear un pago pendiente para un residente
-            </CardDescription>
           </div>
         </div>
       </CardHeader>

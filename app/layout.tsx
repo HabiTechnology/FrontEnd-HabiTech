@@ -5,7 +5,6 @@ import type { Metadata } from "next"
 import { V0Provider } from "@/lib/v0-context"
 import { AuthProvider } from "@/lib/auth-context-simple-fixed"
 import { PrivyWrapper } from "@/components/privy-wrapper"
-import { RoleDebugInfo } from "@/components/role-guard"
 import localFont from "next/font/local"
 import LayoutWrapper from "@/components/layout-wrapper"
 
@@ -61,7 +60,6 @@ export default function RootLayout({
               <LayoutWrapper>
                 {children}
               </LayoutWrapper>
-              <RoleDebugInfo />
             </V0Provider>
           </AuthProvider>
         </PrivyWrapper>

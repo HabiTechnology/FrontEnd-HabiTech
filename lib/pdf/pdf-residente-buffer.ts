@@ -1,5 +1,5 @@
-﻿// ===================================================
-// 🏆 PDF RESIDENTE INDIVIDUAL - TIPO FACTURA ELEGANTE
+// ===================================================
+// 🏆 PDF RESIDENTE - VERSIÓN BUFFER PARA NFT
 // ===================================================
 
 import { 
@@ -14,7 +14,11 @@ import {
   generarCodigoUnico
 } from './pdf-base';
 
-export const generarPDFResidenteIndividual = async (residente: ResidenteParaPDF) => {
+/**
+ * Genera PDF de residente y retorna Buffer (sin QR)
+ * Esta versión es para generar el PDF después de que el QR ya fue escaneado
+ */
+export const generarPDFResidenteBuffer = async (residente: ResidenteParaPDF): Promise<Buffer> => {
   try {
     // Dynamic import para jsPDF
     const jsPDF = (await import('jspdf')).default;
@@ -226,10 +230,10 @@ export const generarPDFResidenteIndividual = async (residente: ResidenteParaPDF)
     }
     
     // ========= CERTIFICACIÓN OFICIAL COMPACTA =========
-    currentY += 20; // Espacio desde el último contenido
+    currentY += 20;
     
     // Verificar que no nos salgamos de la página
-    if (currentY > pageHeight - 80) { // Más espacio para QR
+    if (currentY > pageHeight - 50) {
       doc.addPage();
       currentY = 20;
     }
@@ -262,106 +266,23 @@ export const generarPDFResidenteIndividual = async (residente: ResidenteParaPDF)
     
     currentY += 28;
 
-    // ========= GENERAR TOKEN Y QR PARA NFT =========
-    try {
-      // Llamar al API para generar token único
-      const tokenResponse = await fetch('/api/nft/generate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          residenteId: residente.id,
-          pdfHash: numeroCertificado // Usamos el número de certificado como hash único
-        })
-      });
-
-      if (tokenResponse.ok) {
-        const { token, qrUrl } = await tokenResponse.json();
-
-        // Generar QR code
-        const QRCode = (await import('qrcode')).default;
-        const qrDataUrl = await QRCode.toDataURL(qrUrl, {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: '#1e40af', // azul corporativo
-            light: '#ffffff'
-          }
-        });
-
-        // Verificar espacio para QR
-        if (currentY > pageHeight - 65) {
-          doc.addPage();
-          currentY = 20;
-        }
-
-        // ===== SECCIÓN QR ELEGANTE =====
-        
-        // Título QR
-        doc.setTextColor(...primaryBlue);
-        doc.setFont(FUENTES.seccion.family, 'bold');
-        doc.setFontSize(12);
-        const qrTitleText = 'CONVIERTA ESTE DOCUMENTO EN NFT';
-        const titleWidth = doc.getTextWidth(qrTitleText);
-        doc.text(qrTitleText, (pageWidth - titleWidth) / 2, currentY);
-        
-        // Línea decorativa bajo título
-        doc.setDrawColor(...accentGold);
-        doc.setLineWidth(1);
-        const lineMargin = 30;
-        doc.line(lineMargin, currentY + 2, pageWidth - lineMargin, currentY + 2);
-        
-        currentY += 10;
-
-        // Caja elegante para QR
-        const qrBoxHeight = 50;
-        doc.setFillColor(250, 250, 252); // Fondo muy claro
-        doc.setDrawColor(...primaryBlue);
-        doc.setLineWidth(0.8);
-        doc.roundedRect(20, currentY, pageWidth - 40, qrBoxHeight, 3, 3, 'FD');
-        
-        // Agregar QR centrado
-        const qrSize = 35;
-        const qrX = (pageWidth - qrSize) / 2;
-        const qrY = currentY + 7.5;
-        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
-        
-        // Textos instructivos debajo del QR
-        currentY += qrBoxHeight + 8;
-        
-        doc.setTextColor(...darkGray);
-        doc.setFont(FUENTES.pequeno.family, 'normal');
-        doc.setFontSize(8);
-        
-        const instrucciones = [
-          '1. Escanea este código QR con tu dispositivo móvil',
-          '2. Conecta tu wallet usando Privy',
-          '3. Reclama este documento como NFT en blockchain',
-        ];
-        
-        instrucciones.forEach((texto, idx) => {
-          const textWidth = doc.getTextWidth(texto);
-          doc.text(texto, (pageWidth - textWidth) / 2, currentY + (idx * 5));
-        });
-      }
-    } catch (error) {
-      console.error('Error generando QR para NFT:', error);
-      // Si falla, continuar sin QR (no bloquear la generación del PDF)
-    }
+    // ========= MARCA DE AGUA NFT =========
+    doc.setTextColor(30, 64, 175); // Azul corporativo con transparencia
+    doc.setFont(FUENTES.etiqueta.family, 'bold');
+    doc.setFontSize(10);
+    const nftText = '🔒 DOCUMENTO VERIFICADO EN BLOCKCHAIN';
+    const nftTextWidth = doc.getTextWidth(nftText);
+    doc.text(nftText, (pageWidth - nftTextWidth) / 2, currentY);
     
     // ========= FOOTER CORPORATIVO =========
     crearFooterCorporativo(doc, numeroCertificado);
     
-    // ========= RETORNO DEL PDF =========
-    const nombreArchivo = `certificado-${nombreCompleto.replace(/\s+/g, '-').toLowerCase()}-${numeroCertificado}.pdf`;
-    
-    return {
-      pdfBlob: doc.output('blob'),
-      nombreArchivo: nombreArchivo,
-      doc: doc // Para vista previa si se necesita
-    };
+    // ========= RETORNO COMO BUFFER =========
+    const pdfArrayBuffer = doc.output('arraybuffer');
+    return Buffer.from(pdfArrayBuffer);
     
   } catch (error) {
-    console.error('Error generando PDF individual:', error);
+    console.error('Error generando PDF Buffer:', error);
     throw new Error('No se pudo generar el PDF del residente');
   }
 };
